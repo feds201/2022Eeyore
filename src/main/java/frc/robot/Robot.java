@@ -4,15 +4,90 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PersistentException;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.SPI.Port;
+import frc.robot.swerve.FourCornerSwerveDrive;
+import frc.robot.swerve.ISwerveDrive;
+import frc.robot.swerve.ISwerveModule;
+import frc.robot.swerve.PIDConfig;
+import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	@Override
-	public void robotInit() {}
+	public static final double SWERVE_MAX_RAMP = 1.0;
+	public static final double SWERVE_GYRO_FACTOR = 1.0;
+
+	public static final int SWERVE_FRONT_LEFT_STEER = 21;
+	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;
+	public static final int SWERVE_FRONT_LEFT_ENCODER = 1;
+
+	public static final int SWERVE_FRONT_RIGHT_STEER = 11;
+	public static final int SWERVE_FRONT_RIGHT_DRIVE = 12;
+	public static final int SWERVE_FRONT_RIGHT_ENCODER = 4;
+
+	public static final int SWERVE_BACK_LEFT_STEER = 31;
+	public static final int SWERVE_BACK_LEFT_DRIVE = 32;
+	public static final int SWERVE_BACK_LEFT_ENCODER = 3;
+
+	public static final int SWERVE_BACK_RIGHT_STEER = 41;
+	public static final int SWERVE_BACK_RIGHT_DRIVE = 42;
+	public static final int SWERVE_BACK_RIGHT_ENCODER = 2;
+
+	private ISwerveDrive swerveDrive;
+	private PIDConfig swervePID;
+
+	public Robot() {
+		super(0.05);
+	}
 
 	@Override
-	public void robotPeriodic() {}
+	public void robotInit() {
+		try
+		{
+			NetworkTableInstance.getDefault().getTable("swervealignment")
+				.loadEntries(Filesystem.getOperatingDirectory() + "/swerve.ini");
+			System.out.println("Successfully loaded swerve drive alignment");
+		}
+		catch (PersistentException e)
+		{
+			System.err.println("Error loading swerve drive alignment");
+			System.err.println(e);
+		}
+
+		TalonSRX talon1 = new TalonSRX(SWERVE_FRONT_LEFT_ENCODER);
+		TalonSRX talon2 = new TalonSRX(SWERVE_FRONT_RIGHT_ENCODER);
+		TalonSRX talon3 = new TalonSRX(SWERVE_BACK_LEFT_ENCODER);
+		TalonSRX talon4 = new TalonSRX(SWERVE_BACK_RIGHT_ENCODER);
+		talon1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon2.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon3.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon4.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+
+		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
+		swervePID = new PIDConfig(1.0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
+									0.6, -0.05, 0.05,
+									0.4, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE, SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0), swervePID, SWERVE_MAX_RAMP);
+		ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE, SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0), swervePID, SWERVE_MAX_RAMP);
+		ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE, SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0), swervePID, SWERVE_MAX_RAMP);
+		ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE, SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0), swervePID, SWERVE_MAX_RAMP);
+
+		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
+												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
+	}
+
+	@Override
+	public void robotPeriodic() {
+		swerveDrive.tick();
+	}
 
 	@Override
 	public void autonomousInit() {}
