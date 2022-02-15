@@ -96,6 +96,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		if (Math.abs(targetError) > REVERSE_THRESHOLD)
 		{
 			reversed = !reversed;
+			drive.setInverted(!reversed);
 			// Quick way to recalculate the offset of the new angle from the target.
 			targetError = -Math.signum(targetError) * (0.5 - Math.abs(targetError));
 		}
@@ -170,12 +171,12 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	@Override
 	public double getCurrentAngle() {
-		return ((1 - steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS - angleOffset) % 1 + 1) % 1;
+		return ((steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS + angleOffset) % 1 + 1) % 1;
 	}
 
 	@Override
 	public double getCurrentSpeed() {
-		return -drive.getSelectedSensorVelocity() / DRIVE_GEAR_ENCODER_COUNTS * 10;
+		return drive.getSelectedSensorVelocity() / DRIVE_GEAR_ENCODER_COUNTS * 10;
 	}
 
 	@Override

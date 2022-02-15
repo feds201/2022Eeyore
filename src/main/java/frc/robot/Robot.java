@@ -84,6 +84,14 @@ public class Robot extends TimedRobot {
 		talon2.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		talon3.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		talon4.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon1.setSensorPhase(false);
+		talon2.setSensorPhase(false);
+		talon3.setSensorPhase(false);
+		talon4.setSensorPhase(false);
+		talon1.setInverted(false);
+		talon2.setInverted(false);
+		talon3.setInverted(false);
+		talon4.setInverted(false);
 
 		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
 		swervePID = new PIDConfig(1.0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
