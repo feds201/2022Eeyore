@@ -115,7 +115,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 			double outputClamped = clamp(outputRaw, -1, 1);
 
 			double steerTarget = outputClamped;
-			double driveTarget = targetSpeed * (reversed ? -1 : 1);
+			double driveTarget = targetSpeed;
 
 			steer.set(ControlMode.PercentOutput, steerTarget);
 			drive.set(ControlMode.PercentOutput, driveTarget);
