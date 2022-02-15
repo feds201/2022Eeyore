@@ -1,18 +1,18 @@
 package frc.robot.swerve;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.FilterConfiguration;
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-
 public class SDSMk4FXModule implements ISwerveModule {
 
+	// The threshold to reverse is 0.3 vs what you might expect (0.25) to prevent the wheels from losing control.
 	public static final double REVERSE_THRESHOLD = 0.3;
 
 	public static final double STEER_CURRENT_LIMIT = 30;
@@ -31,24 +31,23 @@ public class SDSMk4FXModule implements ISwerveModule {
 	private double targetSpeed = 0;
 	private boolean reversed = false;
 
-	private PIDConfig pidConfig;
-	private double iValue = 0;
-	private double dLast = 0;
-	private boolean debug = false;
-
 	public SDSMk4FXModule(int steerChannel, int driveChannel, int encoderChannel, double angleOffset,
-						PIDConfig pidConfig, double maxRamp) {
+							SlotConfiguration pid, double maxRamp) {
 		steer = new TalonFX(steerChannel);
 		TalonFXConfiguration steerConfig = new TalonFXConfiguration();
 		steerConfig.neutralDeadband = 0.001;
 		steerConfig.remoteFilter0 = new FilterConfiguration();
 		steerConfig.remoteFilter0.remoteSensorDeviceID = encoderChannel;
 		steerConfig.remoteFilter0.remoteSensorSource = RemoteSensorSource.TalonSRX_SelectedSensor;
+		steerConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.RemoteSensor0;
+		steerConfig.feedbackNotContinuous = false;
+		steerConfig.slot0 = pid;
 		steerConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		steerConfig.supplyCurrLimit.enable = true;
 		steerConfig.supplyCurrLimit.currentLimit = STEER_CURRENT_LIMIT;
 		steerConfig.supplyCurrLimit.triggerThresholdTime = STEER_CURRENT_LIMIT_TIME;
 		steer.configAllSettings(steerConfig);
+		steer.selectProfileSlot(0, 0);
 		steer.setInverted(true);
 		steer.setNeutralMode(NeutralMode.Brake);
 
@@ -56,6 +55,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		TalonFXConfiguration driveConfig = new TalonFXConfiguration();
 		driveConfig.neutralDeadband = 0.001;
 		driveConfig.openloopRamp = maxRamp;
+		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = true;
 		driveConfig.supplyCurrLimit.currentLimit = DRIVE_CURRENT_LIMIT;
@@ -65,7 +65,6 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setNeutralMode(NeutralMode.Coast);
 
 		this.angleOffset = angleOffset;
-		this.pidConfig = pidConfig;
 	}
 
 	@Override
@@ -78,7 +77,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 	@Override
 	public void tick() {
 		// Whether the wheel is reversed or not plays a big role in what we should do.
-		double effectiveCurrentAngle = (getCurrentAngle() + (reversed ? 0.5 : 0)) % 1;
+		double currentAngle = steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS + angleOffset;
+		double effectiveCurrentAngle = (currentAngle % 1 + (reversed ? 0.5 : 0) + 1) % 1;
 
 		// The loop error is just the negative opposite of the continous error.
 		double errorContinous = -(effectiveCurrentAngle - targetAngle);
@@ -92,7 +92,6 @@ public class SDSMk4FXModule implements ISwerveModule {
 			targetError = errorLoop;
 
 		// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
-		// The threshold to reverse is 0.3 vs what you might expect (0.25) to prevent the wheels from losing control.
 		if (Math.abs(targetError) > REVERSE_THRESHOLD)
 		{
 			reversed = !reversed;
@@ -104,52 +103,14 @@ public class SDSMk4FXModule implements ISwerveModule {
 		// We don't want to move the wheels if we don't have to.
 		if (targetSpeed != 0)
 		{
-			// Run PID
-			double pValue = targetError * pidConfig.pGain;
-			pValue = clamp(pValue, pidConfig.pMin, pidConfig.pMax);
-			iValue += targetError * pidConfig.iGain;
-			iValue = clamp(iValue, pidConfig.iMin, pidConfig.iMax);
-			double dValue = clamp((targetError - dLast) * pidConfig.dGain, pidConfig.dMin, pidConfig.dMax);
-			dLast = targetError;
-			double outputRaw = pValue + iValue + dValue;
-			double outputClamped = clamp(outputRaw, -1, 1);
-
-			double steerTarget = outputClamped;
-			double driveTarget = targetSpeed;
-
-			steer.set(ControlMode.PercentOutput, steerTarget);
-			drive.set(ControlMode.PercentOutput, driveTarget);
-
-			if (debug)
-			{
-				NetworkTable table = NetworkTableInstance.getDefault().getTable("swervedebug");
-				table.getEntry("pGain").setDouble(pidConfig.pGain);
-				table.getEntry("iGain").setDouble(pidConfig.iGain);
-				table.getEntry("dGain").setDouble(pidConfig.dGain);
-				table.getEntry("pValue").setDouble(pValue);
-				table.getEntry("iValue").setDouble(iValue);
-				table.getEntry("dValue").setDouble(dValue);
-				table.getEntry("error").setDouble(targetError);
-				table.getEntry("outputRaw").setDouble(outputRaw);
-				table.getEntry("outputClamped").setDouble(outputClamped);
-			}
+			steer.set(ControlMode.Position, (currentAngle + targetError) * STEER_GEAR_ENCODER_COUNTS);
+			drive.set(ControlMode.PercentOutput, targetSpeed);
 		}
 		else
 		{
 			steer.set(ControlMode.PercentOutput, 0);
 			drive.set(ControlMode.PercentOutput, 0);
-			iValue = 0;
-			dLast = 0;
 		}
-	}
-
-	private static double clamp(double value, double min, double max)
-	{
-		if (value > max)
-			return max;
-		if (value < min)
-			return min;
-		return value;
 	}
 
 	// BOILERPLATE CODE
@@ -187,17 +148,5 @@ public class SDSMk4FXModule implements ISwerveModule {
 	@Override
 	public double getTargetSpeed() {
 		return targetSpeed;
-	}
-
-	public PIDConfig getPIDConfig() {
-		return pidConfig;
-	}
-
-	public void setPIDConfig(PIDConfig config) {
-		pidConfig = config;
-	}
-
-	public void setDebug(boolean debug) {
-		this.debug = debug;
 	}
 }
