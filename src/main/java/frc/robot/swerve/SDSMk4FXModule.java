@@ -35,6 +35,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	private double targetAngle = 0;
 	private double targetSpeed = 0;
+	private double realCurrentAngle = 0;
 	private double effectiveCurrentAngle = 0;
 	private double currentSpeed = 0;
 	private boolean reversed = false;
@@ -93,7 +94,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 			initialized = true;
 		}
 		if (initialized) {
-			double realCurrentAngle = steer.getSelectedSensorPosition() / STEER_MOTOR_ENCODER_COUNTS;
+			realCurrentAngle = steer.getSelectedSensorPosition() / STEER_MOTOR_ENCODER_COUNTS;
 			effectiveCurrentAngle = ((realCurrentAngle - angleOffset) % 1 + (reversed ? 0.5 : 0) + 1) % 1;
 			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10;
 
@@ -139,11 +140,19 @@ public class SDSMk4FXModule implements ISwerveModule {
 	@Override
 	public void setAngleOffsetAbsolute(double offset) {
 		angleOffset = offset;
+		angleOffset = (angleOffset % 1 + 1) % 1;
 	}
 
 	@Override
 	public void setAngleOffsetRelative(double offset) {
 		angleOffset += offset;
+		angleOffset = (angleOffset % 1 + 1) % 1;
+	}
+
+	@Override
+	public void align() {
+		angleOffset += realCurrentAngle;
+		angleOffset = (angleOffset % 1 + 1) % 1;
 	}
 
 	@Override
