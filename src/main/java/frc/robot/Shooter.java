@@ -24,13 +24,18 @@ public class Shooter implements Subsystem {
 
 	private final double fireThresholdLower;
 	private final double fireThresholdUpper;
+	private final double feederSpeed;
 
 	private double topSpeed;
 	private double bottomSpeed;
 	private boolean fire = false;
 
 	public Shooter(int topChannel, int bottomChannel, int feederChannel,
-					double fireThresholdLower, double fireThresholdUpper, SlotConfiguration pid) {
+					double fireThresholdLower, double fireThresholdUpper, double feederSpeed,
+					SlotConfiguration pid) {
+		if (feederSpeed < 0 || feederSpeed > 1)
+			throw new IllegalArgumentException("feeder speed out of bounds");
+
 		topMotor = new TalonFX(topChannel);
 		bottomMotor = new TalonFX(bottomChannel);
 		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
@@ -62,6 +67,7 @@ public class Shooter implements Subsystem {
 
 		this.fireThresholdLower = fireThresholdLower;
 		this.fireThresholdUpper = fireThresholdUpper;
+		this.feederSpeed = feederSpeed;
 	}
 
 	public void setSpeed(double topSpeedPercentage, double bottomSpeedPercentage) {
@@ -86,7 +92,7 @@ public class Shooter implements Subsystem {
 			getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 			getCurrentSpeedBottomPercentage() > fireThresholdLower &&
 			getCurrentSpeedBottomPercentage() < fireThresholdUpper)
-			feederMotor.set(ControlMode.PercentOutput, 1);
+			feederMotor.set(ControlMode.PercentOutput, feederSpeed);
 		else
 			feederMotor.set(ControlMode.PercentOutput, 0);
 	}
