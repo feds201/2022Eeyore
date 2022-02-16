@@ -22,13 +22,15 @@ public class Shooter implements Subsystem {
 	private final TalonFX bottomMotor;
 	private final TalonSRX feederMotor;
 
-	private final double fireThreshold;
+	private final double fireThresholdLower;
+	private final double fireThresholdUpper;
 
 	private double topSpeed;
 	private double bottomSpeed;
 	private boolean fire = false;
 
-	public Shooter(int topChannel, int bottomChannel, int feederChannel, double fireThreshold, SlotConfiguration pid) {
+	public Shooter(int topChannel, int bottomChannel, int feederChannel,
+					double fireThresholdLower, double fireThresholdUpper, SlotConfiguration pid) {
 		topMotor = new TalonFX(topChannel);
 		bottomMotor = new TalonFX(bottomChannel);
 		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
@@ -58,10 +60,14 @@ public class Shooter implements Subsystem {
 		feederMotor.setNeutralMode(NeutralMode.Brake);
 		feederMotor.setInverted(true);
 
-		this.fireThreshold = fireThreshold;
+		this.fireThresholdLower = fireThresholdLower;
+		this.fireThresholdUpper = fireThresholdUpper;
 	}
 
 	public void setSpeed(double topSpeedPercentage, double bottomSpeedPercentage) {
+		if (topSpeedPercentage < 0 || topSpeedPercentage > 1 ||
+			bottomSpeedPercentage < 0 || bottomSpeedPercentage > 1)
+			throw new IllegalArgumentException("shooter speed out of bounds");
 		topSpeed = topSpeedPercentage * FALCON_MAX_SPEED;
 		bottomSpeed = bottomSpeedPercentage * FALCON_MAX_SPEED;
 	}
@@ -76,8 +82,10 @@ public class Shooter implements Subsystem {
 		bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 
 		if (fire && topSpeed > 0 && bottomSpeed > 0 &&
-			getCurrentSpeedTopPercentage() > fireThreshold &&
-			getCurrentSpeedBottomPercentage() > fireThreshold)
+			getCurrentSpeedTopPercentage() > fireThresholdLower &&
+			getCurrentSpeedTopPercentage() < fireThresholdUpper &&
+			getCurrentSpeedBottomPercentage() > fireThresholdLower &&
+			getCurrentSpeedBottomPercentage() < fireThresholdUpper)
 			feederMotor.set(ControlMode.PercentOutput, 1);
 		else
 			feederMotor.set(ControlMode.PercentOutput, 0);
