@@ -34,18 +34,17 @@ public class Shooter implements Subsystem {
 		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
 		shooterMotorConfig.neutralDeadband = 0.001;
 		shooterMotorConfig.openloopRamp = 0;
+		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 		shooterMotorConfig.slot0 = pid;
 		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		shooterMotorConfig.supplyCurrLimit.enable = true;
 		shooterMotorConfig.supplyCurrLimit.currentLimit = SHOOTER_CURRENT_LIMIT;
 		shooterMotorConfig.supplyCurrLimit.triggerThresholdTime = SHOOTER_CURRENT_LIMIT_TIME;
 		topMotor.configAllSettings(shooterMotorConfig);
-		topMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		topMotor.selectProfileSlot(0, 0);
 		topMotor.setNeutralMode(NeutralMode.Coast);
 		topMotor.setInverted(false);
 		bottomMotor.configAllSettings(shooterMotorConfig);
-		bottomMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		bottomMotor.selectProfileSlot(0, 0);
 		bottomMotor.setNeutralMode(NeutralMode.Coast);
 		bottomMotor.setInverted(true);
@@ -73,15 +72,12 @@ public class Shooter implements Subsystem {
 
 	@Override
 	public void tick() {
-		if (getCurrentSpeedPercentage() < 1.1) {
-			topMotor.set(ControlMode.Velocity, topSpeed);
-			bottomMotor.set(ControlMode.Velocity, bottomSpeed);
-		} else {
-			topMotor.set(ControlMode.PercentOutput, 0);
-			bottomMotor.set(ControlMode.PercentOutput, 0);
-		}
+		topMotor.set(ControlMode.Velocity, topSpeed);
+		bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 
-		if (fire && topSpeed > 0 && bottomSpeed > 0 && getCurrentSpeedPercentage() > fireThreshold)
+		if (fire && topSpeed > 0 && bottomSpeed > 0 &&
+			getCurrentSpeedTopPercentage() > fireThreshold &&
+			getCurrentSpeedBottomPercentage() > fireThreshold)
 			feederMotor.set(ControlMode.PercentOutput, 1);
 		else
 			feederMotor.set(ControlMode.PercentOutput, 0);
@@ -95,7 +91,11 @@ public class Shooter implements Subsystem {
 		return bottomMotor.getSelectedSensorVelocity() / 2048 * 10;
 	}
 
-	public double getCurrentSpeedPercentage() {
-		return (getCurrentSpeedTop() / topSpeed + getCurrentSpeedBottom() / bottomSpeed) / 2;
+	public double getCurrentSpeedTopPercentage() {
+		return getCurrentSpeedTop() / topSpeed;
+	}
+
+	public double getCurrentSpeedBottomPercentage() {
+		return getCurrentSpeedBottom() / topSpeed;
 	}
 }
