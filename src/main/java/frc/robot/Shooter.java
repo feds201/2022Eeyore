@@ -14,9 +14,9 @@ public class Shooter implements Subsystem {
 
 	public static final double FALCON_MAX_SPEED = 6000 * 2048 / 10;
 	public static final double SHOOTER_CURRENT_LIMIT = 20;
-	public static final double SHOOTER_CURRENT_LIMIT_TIME = 0.5;
+	public static final double SHOOTER_CURRENT_LIMIT_TIME = 1.5;
 	public static final int FEEDER_CURRENT_LIMIT = 20;
-	public static final double FEEDER_CURRENT_LIMIT_TIME = 0.5;
+	public static final double FEEDER_CURRENT_LIMIT_TIME = 0.75;
 
 	private final TalonFX topMotor;
 	private final TalonFX bottomMotor;
