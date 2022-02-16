@@ -29,6 +29,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	private double targetAngle = 0;
 	private double targetSpeed = 0;
+	private double effectiveCurrentAngle = 0;
+	private double currentSpeed = 0;
 	private boolean reversed = false;
 
 	public SDSMk4FXModule(int steerChannel, int driveChannel, int encoderChannel, double angleOffset,
@@ -76,13 +78,13 @@ public class SDSMk4FXModule implements ISwerveModule {
 	// Written by Michael Kaatz (2022)
 	@Override
 	public void tick() {
+		double realCurrentAngle = steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS;
+		effectiveCurrentAngle = ((realCurrentAngle - angleOffset) % 1 + (reversed ? 0.5 : 0) + 1) % 1;
+		currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_GEAR_ENCODER_COUNTS * 10;
+
 		// We don't want to move the wheels if we don't have to.
 		if (targetSpeed != 0)
 		{
-			// Whether the wheel is reversed or not plays a big role in what we should do.
-			double currentAngle = steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS - angleOffset;
-			double effectiveCurrentAngle = (currentAngle % 1 + (reversed ? 0.5 : 0) + 1) % 1;
-
 			// The loop error is just the negative opposite of the continous error.
 			double errorContinous = -(effectiveCurrentAngle - targetAngle);
 			double errorLoop = -(1 - Math.abs(errorContinous)) * Math.signum(errorContinous);
@@ -103,7 +105,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 				targetError = -Math.signum(targetError) * (0.5 - Math.abs(targetError));
 			}
 
-			steer.set(ControlMode.Position, (currentAngle + targetError + angleOffset) * STEER_GEAR_ENCODER_COUNTS);
+			steer.set(ControlMode.Position, (realCurrentAngle + targetError) * STEER_GEAR_ENCODER_COUNTS);
 			drive.set(ControlMode.PercentOutput, targetSpeed);
 		}
 		else
@@ -112,8 +114,6 @@ public class SDSMk4FXModule implements ISwerveModule {
 			drive.set(ControlMode.PercentOutput, 0);
 		}
 	}
-
-	// BOILERPLATE CODE
 
 	@Override
 	public double getAngleOffset() {
@@ -132,12 +132,12 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	@Override
 	public double getCurrentAngle() {
-		return ((steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS - angleOffset) % 1 + 1) % 1;
+		return effectiveCurrentAngle;
 	}
 
 	@Override
 	public double getCurrentSpeed() {
-		return drive.getSelectedSensorVelocity() / DRIVE_GEAR_ENCODER_COUNTS * 10;
+		return currentSpeed;
 	}
 
 	@Override
