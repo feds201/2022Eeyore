@@ -76,34 +76,34 @@ public class SDSMk4FXModule implements ISwerveModule {
 	// Written by Michael Kaatz (2022)
 	@Override
 	public void tick() {
-		// Whether the wheel is reversed or not plays a big role in what we should do.
-		double currentAngle = steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS + angleOffset;
-		double effectiveCurrentAngle = (currentAngle % 1 + (reversed ? 0.5 : 0) + 1) % 1;
-
-		// The loop error is just the negative opposite of the continous error.
-		double errorContinous = -(effectiveCurrentAngle - targetAngle);
-		double errorLoop = -(1 - Math.abs(errorContinous)) * Math.signum(errorContinous);
-
-		// Sign is preserved since it is used to determine which way we need to turn the wheel.
-		double targetError;
-		if (Math.abs(errorContinous) < Math.abs(errorLoop))
-			targetError = errorContinous;
-		else
-			targetError = errorLoop;
-
-		// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
-		if (Math.abs(targetError) > REVERSE_THRESHOLD)
-		{
-			reversed = !reversed;
-			drive.setInverted(!reversed);
-			// Quick way to recalculate the offset of the new angle from the target.
-			targetError = -Math.signum(targetError) * (0.5 - Math.abs(targetError));
-		}
-
 		// We don't want to move the wheels if we don't have to.
 		if (targetSpeed != 0)
 		{
-			steer.set(ControlMode.Position, (currentAngle + targetError) * STEER_GEAR_ENCODER_COUNTS);
+			// Whether the wheel is reversed or not plays a big role in what we should do.
+			double currentAngle = steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS - angleOffset;
+			double effectiveCurrentAngle = (currentAngle % 1 + (reversed ? 0.5 : 0) + 1) % 1;
+
+			// The loop error is just the negative opposite of the continous error.
+			double errorContinous = -(effectiveCurrentAngle - targetAngle);
+			double errorLoop = -(1 - Math.abs(errorContinous)) * Math.signum(errorContinous);
+
+			// Sign is preserved since it is used to determine which way we need to turn the wheel.
+			double targetError;
+			if (Math.abs(errorContinous) < Math.abs(errorLoop))
+				targetError = errorContinous;
+			else
+				targetError = errorLoop;
+
+			// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
+			if (Math.abs(targetError) > REVERSE_THRESHOLD)
+			{
+				reversed = !reversed;
+				drive.setInverted(!reversed);
+				// Quick way to recalculate the offset of the new angle from the target.
+				targetError = -Math.signum(targetError) * (0.5 - Math.abs(targetError));
+			}
+
+			steer.set(ControlMode.Position, (currentAngle + targetError + angleOffset) * STEER_GEAR_ENCODER_COUNTS);
 			drive.set(ControlMode.PercentOutput, targetSpeed);
 		}
 		else
@@ -132,7 +132,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	@Override
 	public double getCurrentAngle() {
-		return ((steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS + angleOffset) % 1 + 1) % 1;
+		return ((steer.getSelectedSensorPosition() / STEER_GEAR_ENCODER_COUNTS - angleOffset) % 1 + 1) % 1;
 	}
 
 	@Override

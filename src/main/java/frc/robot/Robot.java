@@ -96,9 +96,9 @@ public class Robot extends TimedRobot {
 		SlotConfiguration swervePID = new SlotConfiguration();
 		swervePID.closedLoopPeriod = 1;
 		swervePID.kP = 0.25;
-		swervePID.kI = 0.003;
+		swervePID.kI = 0.000;
 		swervePID.maxIntegralAccumulator = 0.001;
-		swervePID.kD = 0.002;
+		swervePID.kD = 0.000;
 		swervePID.kF = 0;
 		ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
 														SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
