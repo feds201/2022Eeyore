@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -29,6 +30,12 @@ public class Robot extends TimedRobot {
 	public static final double SWERVE_MAX_RAMP = 1.0;
 	public static final double SWERVE_GYRO_FACTOR = 1.0;
 
+	public static final double SHOOTER_TOP_SPEED = 0.75;
+	public static final double SHOOTER_BOTTOM_SPEED = 0.4;
+	public static final double SHOOTER_FEEDER_SPEED = 0.25;
+	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
+	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
+
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
 	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;
 	public static final int SWERVE_FRONT_LEFT_ENCODER = 1;
@@ -47,6 +54,10 @@ public class Robot extends TimedRobot {
 
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
 
+	public static final int SHOOTER_TOP_ID = 60;
+	public static final int SHOOTER_BOTTOM_ID = 61;
+	public static final int SHOOTER_FEEDER_ID = 62;
+
 	private final DriverProfile[] profiles = {
 		new DefaultDriverProfile()
 	};
@@ -56,6 +67,7 @@ public class Robot extends TimedRobot {
 	private XboxController operatorController;
 
 	private ISwerveDrive swerveDrive;
+	private Shooter shooter;
 	private PIDConfig swervePID;
 
 	public Robot() {
@@ -105,6 +117,17 @@ public class Robot extends TimedRobot {
 		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
+		SlotConfiguration shooterPID = new SlotConfiguration();
+		shooterPID.closedLoopPeriod = 1;
+		shooterPID.kP = 0.0;
+		shooterPID.kI = 0.000;
+		shooterPID.maxIntegralAccumulator = 0.000;
+		shooterPID.kD = 0.000;
+		shooterPID.kF = 0;
+		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
+								SHOOTER_LOWER_THRESHOLD, SHOOTER_UPPER_THRESHOLD,
+								SHOOTER_FEEDER_SPEED, shooterPID);
+
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
 	}
@@ -112,6 +135,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		swerveDrive.tick();
+		shooter.tick();
 	}
 
 	@Override
@@ -130,6 +154,12 @@ public class Robot extends TimedRobot {
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
 										activeProfile.getSwerveRotate());
+
+		if (activeProfile.getShooterRev())
+			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+		else
+			shooter.setSpeed(0, 0);
+		shooter.setFire(activeProfile.getShooterFire());
 	}
 
 	@Override
@@ -148,6 +178,12 @@ public class Robot extends TimedRobot {
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
 										activeProfile.getSwerveRotate());
+
+		if (activeProfile.getShooterRev())
+			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+		else
+			shooter.setSpeed(0, 0);
+		shooter.setFire(activeProfile.getShooterFire());
 
 		if (activeProfile.getSwerveAlignSet()) {
 			swerveDrive.align();
