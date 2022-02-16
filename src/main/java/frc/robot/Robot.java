@@ -95,7 +95,7 @@ public class Robot extends TimedRobot {
 		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
 		SlotConfiguration swervePID = new SlotConfiguration();
 		swervePID.closedLoopPeriod = 1;
-		swervePID.kP = 0.25;
+		swervePID.kP = 0.04;
 		swervePID.kI = 0.000;
 		swervePID.maxIntegralAccumulator = 0.001;
 		swervePID.kD = 0.000;
