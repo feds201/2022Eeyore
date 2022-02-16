@@ -15,10 +15,10 @@ public class SDSMk4FXModule implements ISwerveModule {
 	// The threshold to reverse is 0.3 vs what you might expect (0.25) to prevent the wheels from losing control.
 	public static final double REVERSE_THRESHOLD = 0.3;
 
-	public static final double STEER_CURRENT_LIMIT = 30;
-	public static final double STEER_CURRENT_LIMIT_TIME = 0.1;
-	public static final double DRIVE_CURRENT_LIMIT = 30;
-	public static final double DRIVE_CURRENT_LIMIT_TIME = 0.2;
+	public static final double STEER_CURRENT_LIMIT = 25;
+	public static final double STEER_CURRENT_LIMIT_TIME = 0.5;
+	public static final double DRIVE_CURRENT_LIMIT = 25;
+	public static final double DRIVE_CURRENT_LIMIT_TIME = 1.0;
 
 	public static final double DRIVE_GEAR_ENCODER_COUNTS = 8.41 * 2048;
 	public static final double STEER_GEAR_ENCODER_COUNTS = 4096;
