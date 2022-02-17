@@ -123,7 +123,7 @@ public class Robot extends TimedRobot {
 		shooterPID.kI = 0.000;
 		shooterPID.maxIntegralAccumulator = 0.000;
 		shooterPID.kD = 0.000;
-		shooterPID.kF = 0;
+		shooterPID.kF = 1023 / Shooter.FALCON_MAX_SPEED;
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								SHOOTER_LOWER_THRESHOLD, SHOOTER_UPPER_THRESHOLD,
 								SHOOTER_FEEDER_SPEED, shooterPID);
