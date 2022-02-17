@@ -84,8 +84,14 @@ public class Shooter implements Subsystem {
 
 	@Override
 	public void tick() {
-		topMotor.set(ControlMode.Velocity, topSpeed);
-		bottomMotor.set(ControlMode.Velocity, bottomSpeed);
+		if (topSpeed > 0)
+			topMotor.set(ControlMode.Velocity, topSpeed);
+		else
+			topMotor.set(ControlMode.PercentOutput, 0);
+		if (bottomSpeed > 0)
+			bottomMotor.set(ControlMode.Velocity, bottomSpeed);
+		else
+			bottomMotor.set(ControlMode.PercentOutput, 0);
 
 		if (fire && topSpeed > 0 && bottomSpeed > 0 &&
 			getCurrentSpeedTopPercentage() > fireThresholdLower &&
