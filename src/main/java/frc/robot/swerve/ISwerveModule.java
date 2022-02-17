@@ -7,6 +7,7 @@ public interface ISwerveModule {
 	public double getAngleOffset();
 	public void setAngleOffsetAbsolute(double offset);
 	public void setAngleOffsetRelative(double offset);
+	public void align();
 
 	public double getTargetAngle();
 	public double getTargetSpeed();
