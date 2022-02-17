@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
 
 	private ISwerveDrive swerveDrive;
 	private PIDConfig swervePID;
+	private MusicPlayer musicPlayer;
 
 	public Robot() {
 		super(0.05);
@@ -113,6 +114,9 @@ public class Robot extends TimedRobot {
 		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
+		musicPlayer = new MusicPlayer();
+		musicPlayer.addSection((Section) swerveDrive);
+
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
 	}
@@ -120,6 +124,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		swerveDrive.tick();
+		musicPlayer.tick();
 	}
 
 	@Override

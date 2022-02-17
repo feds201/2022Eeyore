@@ -1,8 +1,14 @@
 package frc.robot.swerve;
 
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import java.util.ArrayList;
+import java.util.List;
 
-public class FourCornerSwerveDrive implements ISwerveDrive {
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import frc.robot.Section;
+
+public class FourCornerSwerveDrive implements ISwerveDrive, Section {
 
 	private final ISwerveModule frontLeft;
 	private final ISwerveModule frontRight;
@@ -131,6 +137,20 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	@Override
 	public double getTargetRotate() {
 		return targetRotate;
+	}
+
+	@Override
+	public List<TalonFX> getInstruments() {
+		List<TalonFX> list = new ArrayList<>(8);
+		if (frontLeft instanceof Section)
+			list.addAll(((Section) frontLeft).getInstruments());
+		if (frontRight instanceof Section)
+			list.addAll(((Section) frontRight).getInstruments());
+		if (backLeft instanceof Section)
+			list.addAll(((Section) backLeft).getInstruments());
+		if (backRight instanceof Section)
+			list.addAll(((Section) backRight).getInstruments());
+		return list;
 	}
 
 	@Override

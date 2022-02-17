@@ -1,5 +1,8 @@
 package frc.robot.swerve;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
@@ -10,8 +13,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.Section;
 
-public class SDSMk4FXModule implements ISwerveModule {
+public class SDSMk4FXModule implements ISwerveModule, Section {
 
 	public static final double REVERSE_THRESHOLD = 0.3;
 
@@ -199,5 +203,13 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
+	}
+
+	@Override
+	public List<TalonFX> getInstruments() {
+		List<TalonFX> list = new ArrayList<>(2);
+		list.add(steer);
+		list.add(drive);
+		return list;
 	}
 }
