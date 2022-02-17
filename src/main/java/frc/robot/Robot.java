@@ -116,6 +116,7 @@ public class Robot extends TimedRobot {
 
 		musicPlayer = new MusicPlayer();
 		musicPlayer.addSection((Section) swerveDrive);
+		musicPlayer.queue("serenade.chrp");
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
@@ -143,6 +144,11 @@ public class Robot extends TimedRobot {
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
 										activeProfile.getSwerveRotate());
+
+		if (activeProfile.getClimberUp())
+			musicPlayer.setPlay(true);
+		else if (activeProfile.getClimberDown())
+			musicPlayer.setPlay(false);
 	}
 
 	@Override
