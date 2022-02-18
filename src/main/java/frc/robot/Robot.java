@@ -67,6 +67,7 @@ public class Robot extends TimedRobot {
 	private XboxController operatorController;
 
 	private ISwerveDrive swerveDrive;
+	private ShooterVision shooterVision;
 	private Shooter shooter;
 	private PIDConfig swervePID;
 
@@ -117,9 +118,16 @@ public class Robot extends TimedRobot {
 		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
+		SlotConfiguration shooterVisionPID = new SlotConfiguration();
+		shooterVisionPID.kP = 0.0;
+		shooterVisionPID.kI = 0.000;
+		shooterVisionPID.maxIntegralAccumulator = 0.000;
+		shooterVisionPID.kD = 0.000;
+		shooterVision = new ShooterVision(shooterVisionPID);
+
 		SlotConfiguration shooterPID = new SlotConfiguration();
 		shooterPID.closedLoopPeriod = 1;
-		shooterPID.kP = 0.0;
+		shooterPID.kP = 0.01;
 		shooterPID.kI = 0.000;
 		shooterPID.maxIntegralAccumulator = 0.000;
 		shooterPID.kD = 0.000;
@@ -135,6 +143,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		swerveDrive.tick();
+		shooterVision.tick();
 		shooter.tick();
 	}
 
@@ -151,15 +160,21 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		activeProfile.update(driverController, operatorController);
 
+		double swerveRotate = activeProfile.getSwerveRotate();
+		if (activeProfile.getShooterRev()) {
+			shooterVision.setActive(true);
+			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+			if (shooterVision.hasTarget())
+				swerveRotate = shooterVision.getCorrection();
+		} else {
+			shooterVision.setActive(false);
+			shooter.setSpeed(0, 0);
+		}
+		shooter.setFire(activeProfile.getShooterFire());
+
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
-										activeProfile.getSwerveRotate());
-
-		if (activeProfile.getShooterRev())
-			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
-		else
-			shooter.setSpeed(0, 0);
-		shooter.setFire(activeProfile.getShooterFire());
+										swerveRotate);
 	}
 
 	@Override
