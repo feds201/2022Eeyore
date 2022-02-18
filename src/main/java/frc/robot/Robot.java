@@ -30,8 +30,8 @@ public class Robot extends TimedRobot {
 	public static final double SWERVE_MAX_RAMP = 1.0;
 	public static final double SWERVE_GYRO_FACTOR = 1.0;
 
-	public static final double SHOOTER_TOP_SPEED = 0.75;
-	public static final double SHOOTER_BOTTOM_SPEED = 0.4;
+	public static final double SHOOTER_TOP_SPEED = 0.8;
+	public static final double SHOOTER_BOTTOM_SPEED = 0.2;
 	public static final double SHOOTER_FEEDER_SPEED = 0.25;
 	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
 	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
@@ -119,9 +119,10 @@ public class Robot extends TimedRobot {
 
 		SlotConfiguration shooterPID = new SlotConfiguration();
 		shooterPID.closedLoopPeriod = 1;
-		shooterPID.kP = 0.0;
-		shooterPID.kI = 0.000;
-		shooterPID.maxIntegralAccumulator = 0.000;
+		shooterPID.kP = 0.001;
+		shooterPID.kI = 0.001;
+		shooterPID.maxIntegralAccumulator = 4096;
+		shooterPID.integralZone = 4096;
 		shooterPID.kD = 0.000;
 		shooterPID.kF = 1023 / Shooter.FALCON_MAX_SPEED;
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
