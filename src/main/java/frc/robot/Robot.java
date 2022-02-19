@@ -22,7 +22,6 @@ import frc.robot.profiles.DriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
-import frc.robot.swerve.PIDConfig;
 import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
@@ -69,7 +68,6 @@ public class Robot extends TimedRobot {
 	private ISwerveDrive swerveDrive;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
-	private PIDConfig swervePID;
 
 	public Robot() {
 		super(0.05);
@@ -97,11 +95,23 @@ public class Robot extends TimedRobot {
 		talon2.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		talon3.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		talon4.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon1.setSensorPhase(false);
+		talon2.setSensorPhase(false);
+		talon3.setSensorPhase(false);
+		talon4.setSensorPhase(false);
+		talon1.setInverted(false);
+		talon2.setInverted(false);
+		talon3.setInverted(false);
+		talon4.setInverted(false);
 
 		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
-		swervePID = new PIDConfig(1.0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
-									0.6, -0.05, 0.05,
-									0.4, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		SlotConfiguration swervePID = new SlotConfiguration();
+		swervePID.closedLoopPeriod = 1;
+		swervePID.kP = 0.1;
+		swervePID.kI = 0.000;
+		swervePID.maxIntegralAccumulator = 0.000;
+		swervePID.kD = 0.000;
+		swervePID.kF = 0;
 		ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
 														SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
 														swervePID, SWERVE_MAX_RAMP);
@@ -114,7 +124,6 @@ public class Robot extends TimedRobot {
 		ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
 														SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 														swervePID, SWERVE_MAX_RAMP);
-
 		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
