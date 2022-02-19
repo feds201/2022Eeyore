@@ -7,20 +7,18 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 
 public class Shooter implements Subsystem {
 
 	public static final double FALCON_MAX_SPEED = 21900;
 	public static final double SHOOTER_CURRENT_LIMIT = 20;
 	public static final double SHOOTER_CURRENT_LIMIT_TIME = 1.5;
-	public static final int FEEDER_CURRENT_LIMIT = 20;
+	public static final double FEEDER_CURRENT_LIMIT = 20;
 	public static final double FEEDER_CURRENT_LIMIT_TIME = 0.75;
 
 	private final TalonFX topMotor;
 	private final TalonFX bottomMotor;
-	private final TalonSRX feederMotor;
+	private final TalonFX feederMotor;
 
 	private final double fireThresholdLower;
 	private final double fireThresholdUpper;
@@ -59,11 +57,13 @@ public class Shooter implements Subsystem {
 		bottomMotor.setNeutralMode(NeutralMode.Coast);
 		bottomMotor.setInverted(true);
 
-		feederMotor = new TalonSRX(feederChannel);
-		TalonSRXConfiguration feederMotorConfig = new TalonSRXConfiguration();
+		feederMotor = new TalonFX(feederChannel);
+		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
 		feederMotorConfig.neutralDeadband = 0.001;
-		feederMotorConfig.continuousCurrentLimit = FEEDER_CURRENT_LIMIT;
-		feederMotorConfig.peakCurrentDuration = (int) (FEEDER_CURRENT_LIMIT_TIME * 1000);
+		feederMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		feederMotorConfig.supplyCurrLimit.enable = true;
+		feederMotorConfig.supplyCurrLimit.currentLimit = FEEDER_CURRENT_LIMIT;
+		feederMotorConfig.supplyCurrLimit.triggerThresholdTime = FEEDER_CURRENT_LIMIT_TIME;
 		feederMotor.configAllSettings(feederMotorConfig);
 		feederMotor.setNeutralMode(NeutralMode.Brake);
 		feederMotor.setInverted(true);
