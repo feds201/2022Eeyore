@@ -30,8 +30,8 @@ public class Robot extends TimedRobot {
 	public static final double SWERVE_MAX_RAMP = 1.0;
 	public static final double SWERVE_GYRO_FACTOR = 1.0;
 
-	public static final double SHOOTER_TOP_SPEED = 0.8;
-	public static final double SHOOTER_BOTTOM_SPEED = 0.2;
+	public static final double SHOOTER_TOP_SPEED = 0.75;
+	public static final double SHOOTER_BOTTOM_SPEED = 0.45;
 	public static final double SHOOTER_FEEDER_SPEED = 0.25;
 	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
 	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
 		SlotConfiguration shooterVisionPID = new SlotConfiguration();
-		shooterVisionPID.kP = 0.0;
+		shooterVisionPID.kP = 0.005;
 		shooterVisionPID.kI = 0.000;
 		shooterVisionPID.maxIntegralAccumulator = 0.000;
 		shooterVisionPID.kD = 0.000;

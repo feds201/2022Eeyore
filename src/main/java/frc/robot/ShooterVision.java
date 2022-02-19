@@ -26,6 +26,6 @@ public class ShooterVision implements Subsystem {
 	}
 
 	public double getCorrection() {
-		return table.getEntry("tx").getDouble(0) * -pid.kP;
+		return table.getEntry("tx").getDouble(0) * pid.kP;
 	}
 }
