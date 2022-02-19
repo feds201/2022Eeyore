@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 public class Climber implements Subsystem {
 
@@ -29,6 +30,7 @@ public class Climber implements Subsystem {
 		leftConfig.neutralDeadband = 0.001;
 		leftConfig.openloopRamp = ramp;
 		leftConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		leftConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
 		leftConfig.feedbackNotContinuous = false;
 		leftConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		leftConfig.supplyCurrLimit.enable = true;
@@ -39,7 +41,7 @@ public class Climber implements Subsystem {
 		leftConfig.reverseSoftLimitEnable = true;
 		leftConfig.reverseSoftLimitThreshold = 0;
 		leftMotor.configAllSettings(leftConfig, 1000);
-		leftMotor.setInverted(false);
+		leftMotor.setInverted(true);
 		leftMotor.setNeutralMode(NeutralMode.Brake);
 
 		rightMotor = new TalonFX(rightChannel);
@@ -53,8 +55,6 @@ public class Climber implements Subsystem {
 		rightMotor.setInverted(TalonFXInvertType.OpposeMaster);
 		rightMotor.setNeutralMode(NeutralMode.Brake);
 		rightMotor.follow(leftMotor);
-
-		leftMotor.setSelectedSensorPosition(0);
 
 		this.speed = speed;
 	}
