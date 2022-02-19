@@ -30,8 +30,8 @@ public class Robot extends TimedRobot {
 	public static final double SWERVE_MAX_RAMP = 1.0;
 	public static final double SWERVE_GYRO_FACTOR = 1.0;
 
-	public static final double SHOOTER_TOP_SPEED = 0.8;
-	public static final double SHOOTER_BOTTOM_SPEED = 0.2;
+	public static final double SHOOTER_TOP_SPEED = 0.75;
+	public static final double SHOOTER_BOTTOM_SPEED = 0.45;
 	public static final double SHOOTER_FEEDER_SPEED = 0.25;
 	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
 	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
@@ -67,6 +67,7 @@ public class Robot extends TimedRobot {
 	private XboxController operatorController;
 
 	private ISwerveDrive swerveDrive;
+	private ShooterVision shooterVision;
 	private Shooter shooter;
 	private PIDConfig swervePID;
 
@@ -117,6 +118,13 @@ public class Robot extends TimedRobot {
 		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
 												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
 
+		SlotConfiguration shooterVisionPID = new SlotConfiguration();
+		shooterVisionPID.kP = 0.005;
+		shooterVisionPID.kI = 0.000;
+		shooterVisionPID.maxIntegralAccumulator = 0.000;
+		shooterVisionPID.kD = 0.000;
+		shooterVision = new ShooterVision(shooterVisionPID);
+
 		SlotConfiguration shooterPID = new SlotConfiguration();
 		shooterPID.closedLoopPeriod = 1;
 		shooterPID.kP = 0.001;
@@ -136,6 +144,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		swerveDrive.tick();
+		shooterVision.tick();
 		shooter.tick();
 	}
 
@@ -152,15 +161,21 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		activeProfile.update(driverController, operatorController);
 
+		double swerveRotate = activeProfile.getSwerveRotate();
+		if (activeProfile.getShooterRev()) {
+			shooterVision.setActive(true);
+			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+			if (shooterVision.hasTarget())
+				swerveRotate = shooterVision.getCorrection();
+		} else {
+			shooterVision.setActive(false);
+			shooter.setSpeed(0, 0);
+		}
+		shooter.setFire(activeProfile.getShooterFire());
+
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
-										activeProfile.getSwerveRotate());
-
-		if (activeProfile.getShooterRev())
-			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
-		else
-			shooter.setSpeed(0, 0);
-		shooter.setFire(activeProfile.getShooterFire());
+										swerveRotate);
 	}
 
 	@Override
