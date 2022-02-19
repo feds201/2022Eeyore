@@ -36,9 +36,9 @@ public class Climber implements Subsystem {
 		leftConfig.supplyCurrLimit.enable = true;
 		leftConfig.supplyCurrLimit.currentLimit = CURRENT_LIMIT;
 		leftConfig.supplyCurrLimit.triggerThresholdTime = CURRENT_LIMIT_TIME;
-		leftConfig.forwardSoftLimitEnable = true;
+		leftConfig.forwardSoftLimitEnable = false;
 		leftConfig.forwardSoftLimitThreshold = encoderCounts;
-		leftConfig.reverseSoftLimitEnable = true;
+		leftConfig.reverseSoftLimitEnable = false;
 		leftConfig.reverseSoftLimitThreshold = 0;
 		leftMotor.configAllSettings(leftConfig, 1000);
 		leftMotor.setInverted(true);
