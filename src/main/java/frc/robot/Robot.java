@@ -68,6 +68,9 @@ public class Robot extends TimedRobot {
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
 
+	public static final int CLIMBER_LEFT_ID = 51;
+	public static final int CLIMBER_RIGHT_ID = 52;
+
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
@@ -85,6 +88,7 @@ public class Robot extends TimedRobot {
 	private BallPickup intake;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
+	private Climber climber;
 	private IndicatorLights indicatorLights;
 	private UsbCamera driverCamera;
 
@@ -148,6 +152,8 @@ public class Robot extends TimedRobot {
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
+		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, CLIMBER_ENCODER_COUNTS, CLIMBER_SPEED, CLIMBER_MAX_RAMP);
+
 		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
 
 		driverCamera = CameraServer.startAutomaticCapture();
@@ -178,6 +184,7 @@ public class Robot extends TimedRobot {
 		intake.tick();
 		shooterVision.tick();
 		shooter.tick();
+		climber.tick();
 		indicatorLights.tick();
 	}
 
@@ -218,6 +225,11 @@ public class Robot extends TimedRobot {
 
 		intake.setDeployed(activeProfile.getIntakeDeploy());
 		intake.setActive(activeProfile.getIntakeActive());
+
+		if (activeProfile.getClimberUp())
+			climber.setTargetPosition(true);
+		else if (activeProfile.getClimberDown())
+			climber.setTargetPosition(false);
 	}
 
 	@Override
