@@ -50,11 +50,11 @@ public class Shooter implements Subsystem {
 		shooterMotorConfig.supplyCurrLimit.triggerThresholdTime = SHOOTER_CURRENT_LIMIT_TIME;
 		topMotor.configAllSettings(shooterMotorConfig);
 		topMotor.selectProfileSlot(0, 0);
-		topMotor.setNeutralMode(NeutralMode.Coast);
+		topMotor.setNeutralMode(NeutralMode.Brake);
 		topMotor.setInverted(false);
 		bottomMotor.configAllSettings(shooterMotorConfig);
 		bottomMotor.selectProfileSlot(0, 0);
-		bottomMotor.setNeutralMode(NeutralMode.Coast);
+		bottomMotor.setNeutralMode(NeutralMode.Brake);
 		bottomMotor.setInverted(true);
 
 		feederMotor = new TalonFX(feederChannel);
