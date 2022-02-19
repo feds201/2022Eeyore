@@ -227,9 +227,11 @@ public class Robot extends TimedRobot {
 		intake.setActive(activeProfile.getIntakeActive());
 
 		if (activeProfile.getClimberUp())
-			climber.setTargetPosition(true);
+			climber.setTargetPosition(1);
 		else if (activeProfile.getClimberDown())
-			climber.setTargetPosition(false);
+			climber.setTargetPosition(-1);
+		else
+			climber.setTargetPosition(0);
 	}
 
 	@Override

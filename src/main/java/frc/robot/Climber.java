@@ -19,7 +19,7 @@ public class Climber implements Subsystem {
 	private final double speed;
 
 	private boolean update = true;
-	private boolean position = false;
+	private int position = 0;
 
 	public Climber(int leftChannel, int rightChannel, int encoderCounts, double speed, double ramp) {
 		if (speed < 0 || speed > 1)
@@ -59,7 +59,7 @@ public class Climber implements Subsystem {
 		this.speed = speed;
 	}
 
-	public void setTargetPosition(boolean position) {
+	public void setTargetPosition(int position) {
 		if (this.position != position) {
 			this.position = position;
 			update = true;
@@ -69,10 +69,12 @@ public class Climber implements Subsystem {
 	@Override
 	public void tick() {
 		if (update) {
-			if (position)
+			if (position == 1)
 				leftMotor.set(ControlMode.PercentOutput, speed);
-			else
+			else if (position == -1)
 				leftMotor.set(ControlMode.PercentOutput, -speed);
+			else
+				leftMotor.set(ControlMode.PercentOutput, 0);
 		}
 	}
 }
