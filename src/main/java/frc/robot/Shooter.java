@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
@@ -51,11 +52,11 @@ public class Shooter implements Subsystem {
 		topMotor.configAllSettings(shooterMotorConfig);
 		topMotor.selectProfileSlot(0, 0);
 		topMotor.setNeutralMode(NeutralMode.Brake);
-		topMotor.setInverted(false);
+		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
 		bottomMotor.configAllSettings(shooterMotorConfig);
 		bottomMotor.selectProfileSlot(0, 0);
 		bottomMotor.setNeutralMode(NeutralMode.Brake);
-		bottomMotor.setInverted(true);
+		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
 
 		feederMotor = new TalonFX(feederChannel);
 		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
@@ -66,7 +67,7 @@ public class Shooter implements Subsystem {
 		feederMotorConfig.supplyCurrLimit.triggerThresholdTime = FEEDER_CURRENT_LIMIT_TIME;
 		feederMotor.configAllSettings(feederMotorConfig);
 		feederMotor.setNeutralMode(NeutralMode.Brake);
-		feederMotor.setInverted(true);
+		feederMotor.setInverted(TalonFXInvertType.Clockwise);
 
 		this.fireThresholdLower = fireThresholdLower;
 		this.fireThresholdUpper = fireThresholdUpper;
