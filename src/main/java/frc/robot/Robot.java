@@ -198,17 +198,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-		activeProfile.update(driverController, operatorController);
-
-		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
-										activeProfile.getSwerveLinearSpeed(),
-										activeProfile.getSwerveRotate());
-
-		if (activeProfile.getShooterRev())
-			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
-		else
-			shooter.setSpeed(0, 0);
-		shooter.setFire(activeProfile.getShooterFire());
+		teleopPeriodic();
 
 		if (activeProfile.getSwerveAlignSet()) {
 			swerveDrive.align();
