@@ -6,19 +6,15 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.FilterConfiguration;
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+
+import frc.robot.config.SwerveModuleConfig;
 
 public class SDSMk4FXModule implements ISwerveModule {
 
 	// The threshold to reverse is 0.3 vs what you might expect (0.25) to prevent the wheels from losing control.
 	public static final double REVERSE_THRESHOLD = 0.3;
-
-	public static final double STEER_CURRENT_LIMIT = 25;
-	public static final double STEER_CURRENT_LIMIT_TIME = 0.5;
-	public static final double DRIVE_CURRENT_LIMIT = 25;
-	public static final double DRIVE_CURRENT_LIMIT_TIME = 1.0;
 
 	public static final double DRIVE_ENCODER_COUNTS = 8.41 * 2048;
 	public static final double STEER_CENTRAL_ENCODER_COUNTS = 4096;
@@ -28,9 +24,10 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	private final TalonFX steer;
 	private final TalonFX drive;
+	private final int encoderChannel;
 	private double angleOffset;
 
-	private final long initTime;
+	private long initTime;
 	private boolean initialized = false;
 
 	private double targetAngle = 0;
@@ -40,43 +37,14 @@ public class SDSMk4FXModule implements ISwerveModule {
 	private double currentSpeed = 0;
 	private boolean reversed = false;
 
-	public SDSMk4FXModule(int steerChannel, int driveChannel, int encoderChannel, double angleOffset,
-							SlotConfiguration pid, double maxRamp) {
+	public SDSMk4FXModule(int steerChannel, int driveChannel, int encoderChannel,
+							double angleOffset, SwerveModuleConfig config) {
 		steer = new TalonFX(steerChannel);
-		TalonFXConfiguration steerConfig = new TalonFXConfiguration();
-		steerConfig.neutralDeadband = 0.001;
-		steerConfig.remoteFilter0 = new FilterConfiguration();
-		steerConfig.remoteFilter0.remoteSensorDeviceID = encoderChannel;
-		steerConfig.remoteFilter0.remoteSensorSource = RemoteSensorSource.TalonSRX_SelectedSensor;
-		steerConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		steerConfig.auxiliaryPID.selectedFeedbackSensor = FeedbackDevice.RemoteSensor0;
-		steerConfig.feedbackNotContinuous = false;
-		steerConfig.slot0 = pid;
-		steerConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
-		steerConfig.supplyCurrLimit.enable = true;
-		steerConfig.supplyCurrLimit.currentLimit = STEER_CURRENT_LIMIT;
-		steerConfig.supplyCurrLimit.triggerThresholdTime = STEER_CURRENT_LIMIT_TIME;
-		steer.configAllSettings(steerConfig);
-		steer.selectProfileSlot(0, 0);
-		steer.setInverted(true);
-		steer.setNeutralMode(NeutralMode.Brake);
-
 		drive = new TalonFX(driveChannel);
-		TalonFXConfiguration driveConfig = new TalonFXConfiguration();
-		driveConfig.neutralDeadband = 0.001;
-		driveConfig.openloopRamp = maxRamp;
-		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
-		driveConfig.supplyCurrLimit.enable = true;
-		driveConfig.supplyCurrLimit.currentLimit = DRIVE_CURRENT_LIMIT;
-		driveConfig.supplyCurrLimit.triggerThresholdTime = DRIVE_CURRENT_LIMIT_TIME;
-		drive.configAllSettings(driveConfig);
-		drive.setInverted(true);
-		drive.setNeutralMode(NeutralMode.Coast);
-
+		this.encoderChannel = encoderChannel;
 		this.angleOffset = angleOffset;
 
-		initTime = System.currentTimeMillis();
+		configure(config);
 	}
 
 	@Override
@@ -130,6 +98,42 @@ public class SDSMk4FXModule implements ISwerveModule {
 				drive.set(ControlMode.PercentOutput, 0);
 			}
 		}
+	}
+
+	@Override
+	public void configure(SwerveModuleConfig config) {
+		TalonFXConfiguration steerConfig = new TalonFXConfiguration();
+		steerConfig.neutralDeadband = 0.001;
+		steerConfig.remoteFilter0 = new FilterConfiguration();
+		steerConfig.remoteFilter0.remoteSensorDeviceID = encoderChannel;
+		steerConfig.remoteFilter0.remoteSensorSource = RemoteSensorSource.TalonSRX_SelectedSensor;
+		steerConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		steerConfig.auxiliaryPID.selectedFeedbackSensor = FeedbackDevice.RemoteSensor0;
+		steerConfig.feedbackNotContinuous = false;
+		steerConfig.slot0 = config.pid;
+		steerConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		steerConfig.supplyCurrLimit.enable = config.steerCurrentLimitEnabled;
+		steerConfig.supplyCurrLimit.currentLimit = config.steerCurrentLimit;
+		steerConfig.supplyCurrLimit.triggerThresholdTime = config.steerCurrentLimitTime;
+		steer.configAllSettings(steerConfig);
+		steer.selectProfileSlot(0, 0);
+		steer.setInverted(true);
+		steer.setNeutralMode(config.steerBrake ? NeutralMode.Brake : NeutralMode.Coast);
+
+		TalonFXConfiguration driveConfig = new TalonFXConfiguration();
+		driveConfig.neutralDeadband = 0.001;
+		driveConfig.openloopRamp = config.maxRamp;
+		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
+		driveConfig.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
+		driveConfig.supplyCurrLimit.triggerThresholdTime = config.driveCurrentLimitTime;
+		drive.configAllSettings(driveConfig);
+		drive.setInverted(true);
+		drive.setNeutralMode(NeutralMode.Coast);
+
+		initialized = false;
+		initTime = System.currentTimeMillis();
 	}
 
 	@Override

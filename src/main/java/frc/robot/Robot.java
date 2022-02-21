@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
+import frc.robot.config.SwerveDriveConfig;
+import frc.robot.config.SwerveModuleConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
@@ -104,28 +106,42 @@ public class Robot extends TimedRobot {
 		talon3.setInverted(false);
 		talon4.setInverted(false);
 
-		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
-		SlotConfiguration swervePID = new SlotConfiguration();
-		swervePID.closedLoopPeriod = 1;
-		swervePID.kP = 0.1;
-		swervePID.kI = 0.000;
-		swervePID.maxIntegralAccumulator = 0.000;
-		swervePID.kD = 0.000;
-		swervePID.kF = 0;
-		ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
-														SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE,
-														SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE,
-														SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
-														SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
+			SlotConfiguration swervePID = new SlotConfiguration();
+			swervePID.closedLoopPeriod = 1;
+			swervePID.kP = 0.1;
+			swervePID.kI = 0.000;
+			swervePID.maxIntegralAccumulator = 0.000;
+			swervePID.kD = 0.000;
+			swervePID.kF = 0;
+			SwerveDriveConfig driveConfig = new SwerveDriveConfig();
+			driveConfig.moduleConfig = new SwerveModuleConfig();
+			driveConfig.moduleConfig.pid = swervePID;
+			driveConfig.moduleConfig.maxRamp = 1.0;
+			driveConfig.moduleConfig.steerBrake = true;
+			driveConfig.moduleConfig.steerCurrentLimitEnabled = true;
+			driveConfig.moduleConfig.steerCurrentLimit = 25;
+			driveConfig.moduleConfig.steerCurrentLimitTime = 0.5;
+			driveConfig.moduleConfig.driveCurrentLimitEnabled = true;
+			driveConfig.moduleConfig.driveCurrentLimit = 25;
+			driveConfig.moduleConfig.driveCurrentLimitTime = 1.0;
+			driveConfig.gyroFactor = 0.000;
+			ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
+															SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
+															driveConfig.moduleConfig);
+			ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE,
+															SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0),
+															driveConfig.moduleConfig);
+			ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE,
+															SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0),
+															driveConfig.moduleConfig);
+			ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
+															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
+															driveConfig.moduleConfig);
+			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
+													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, driveConfig);
+		}
 
 		SlotConfiguration shooterVisionPID = new SlotConfiguration();
 		shooterVisionPID.kP = 0.005;
