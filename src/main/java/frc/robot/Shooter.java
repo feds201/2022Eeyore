@@ -12,8 +12,6 @@ import frc.robot.config.ShooterConfig;
 
 public class Shooter implements Subsystem {
 
-	public static final double FALCON_MAX_SPEED = 21900;
-
 	private final TalonFX topMotor;
 	private final TalonFX bottomMotor;
 	private final TalonFX feederMotor;

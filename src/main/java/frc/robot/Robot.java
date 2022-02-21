@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
+import frc.robot.config.GeneralConfig;
+import frc.robot.config.ShooterConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
@@ -27,11 +29,10 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
+	public static final String GENERAL_CONFIG_FILE = "generalconfig.ini";
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
-
-	public static final double SHOOTER_TOP_SPEED = 16425;
-	public static final double SHOOTER_BOTTOM_SPEED = 9855;
+	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
 	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;
@@ -65,7 +66,9 @@ public class Robot extends TimedRobot {
 	private ShooterVision shooterVision;
 	private Shooter shooter;
 
+	private GeneralConfig generalConfig;
 	private SwerveDriveConfig swerveDriveConfig;
+	private ShooterConfig shooterConfig;
 
 	public Robot() {
 		super(0.05);
@@ -130,17 +133,8 @@ public class Robot extends TimedRobot {
 		shooterVisionPID.kD = 0.000;
 		shooterVision = new ShooterVision(shooterVisionPID);
 
-		SlotConfiguration shooterPID = new SlotConfiguration();
-		shooterPID.closedLoopPeriod = 1;
-		shooterPID.kP = 0.001;
-		shooterPID.kI = 0.001;
-		shooterPID.maxIntegralAccumulator = 4096;
-		shooterPID.integralZone = 4096;
-		shooterPID.kD = 0.000;
-		shooterPID.kF = 1023 / Shooter.FALCON_MAX_SPEED;
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
-								SHOOTER_LOWER_THRESHOLD, SHOOTER_UPPER_THRESHOLD,
-								SHOOTER_FEEDER_SPEED, shooterPID);
+								shooterConfig);
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
@@ -169,7 +163,7 @@ public class Robot extends TimedRobot {
 		double swerveRotate = activeProfile.getSwerveRotate();
 		if (activeProfile.getShooterRev()) {
 			shooterVision.setActive(true);
-			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+			shooter.setSpeed(generalConfig.shooterTopSpeed, generalConfig.shooterBottomSpeed);
 			if (shooterVision.hasTarget())
 				swerveRotate = shooterVision.getCorrection();
 		} else {
@@ -227,10 +221,13 @@ public class Robot extends TimedRobot {
 	}
 
 	private void loadConfigs() throws PersistentException {
+		generalConfig = GeneralConfig.load(Filesystem.getDeployDirectory() + "/" + GENERAL_CONFIG_FILE);
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
 	}
 
 	private void applyConfigs() {
 		swerveDrive.configure(swerveDriveConfig);
+		shooter.configure(shooterConfig);
 	}
 }
