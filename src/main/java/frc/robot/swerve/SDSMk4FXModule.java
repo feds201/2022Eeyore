@@ -56,7 +56,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		steerConfig.supplyCurrLimit.enable = true;
 		steerConfig.supplyCurrLimit.currentLimit = STEER_CURRENT_LIMIT;
 		steerConfig.supplyCurrLimit.triggerThresholdTime = STEER_CURRENT_LIMIT_TIME;
-		steer.configAllSettings(steerConfig, 1000);
+		steer.configAllSettings(steerConfig);
 		steer.selectProfileSlot(0, 0);
 		steer.setInverted(true);
 		steer.setNeutralMode(NeutralMode.Brake);
@@ -70,7 +70,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.supplyCurrLimit.enable = true;
 		driveConfig.supplyCurrLimit.currentLimit = DRIVE_CURRENT_LIMIT;
 		driveConfig.supplyCurrLimit.triggerThresholdTime = DRIVE_CURRENT_LIMIT_TIME;
-		drive.configAllSettings(driveConfig, 1000);
+		drive.configAllSettings(driveConfig);
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Coast);
 
