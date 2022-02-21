@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
 import frc.robot.config.SwerveDriveConfig;
-import frc.robot.config.SwerveModuleConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
@@ -28,8 +27,8 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	public static final double SWERVE_MAX_RAMP = 1.0;
-	public static final double SWERVE_GYRO_FACTOR = 1.0;
+	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
+	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
 
 	public static final double SHOOTER_TOP_SPEED = 16425;
 	public static final double SHOOTER_BOTTOM_SPEED = 9855;
@@ -53,8 +52,6 @@ public class Robot extends TimedRobot {
 	public static final int SWERVE_BACK_RIGHT_DRIVE = 42;
 	public static final int SWERVE_BACK_RIGHT_ENCODER = 2;
 
-	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
-
 	public static final int SHOOTER_TOP_ID = 60;
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
@@ -71,21 +68,26 @@ public class Robot extends TimedRobot {
 	private ShooterVision shooterVision;
 	private Shooter shooter;
 
+	private SwerveDriveConfig swerveDriveConfig;
+
 	public Robot() {
 		super(0.05);
 	}
 
 	@Override
 	public void robotInit() {
-		try
-		{
+		try {
 			NetworkTableInstance.getDefault().getTable("swervealignment")
 				.loadEntries(Filesystem.getOperatingDirectory() + "/" + SWERVE_ALIGNMENT_FILE);
 			System.out.println("Successfully loaded swerve drive alignment");
-		}
-		catch (PersistentException e)
-		{
+		} catch (PersistentException e) {
 			System.err.println("Error loading swerve drive alignment");
+			System.err.println(e);
+		}
+		try {
+			loadConfigs();
+		} catch (PersistentException e) {
+			System.err.println("Error loading subsystem configuration files");
 			System.err.println(e);
 		}
 
@@ -108,39 +110,20 @@ public class Robot extends TimedRobot {
 
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
-			SlotConfiguration swervePID = new SlotConfiguration();
-			swervePID.closedLoopPeriod = 1;
-			swervePID.kP = 0.1;
-			swervePID.kI = 0.000;
-			swervePID.maxIntegralAccumulator = 0.000;
-			swervePID.kD = 0.000;
-			swervePID.kF = 0;
-			SwerveDriveConfig driveConfig = new SwerveDriveConfig();
-			driveConfig.moduleConfig = new SwerveModuleConfig();
-			driveConfig.moduleConfig.pid = swervePID;
-			driveConfig.moduleConfig.maxRamp = 1.0;
-			driveConfig.moduleConfig.steerBrake = true;
-			driveConfig.moduleConfig.steerCurrentLimitEnabled = true;
-			driveConfig.moduleConfig.steerCurrentLimit = 25;
-			driveConfig.moduleConfig.steerCurrentLimitTime = 0.5;
-			driveConfig.moduleConfig.driveCurrentLimitEnabled = true;
-			driveConfig.moduleConfig.driveCurrentLimit = 25;
-			driveConfig.moduleConfig.driveCurrentLimitTime = 1.0;
-			driveConfig.gyroFactor = 0.000;
 			ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
 															SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
-															driveConfig.moduleConfig);
+															swerveDriveConfig.moduleConfig);
 			ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE,
 															SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0),
-															driveConfig.moduleConfig);
+															swerveDriveConfig.moduleConfig);
 			ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE,
 															SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0),
-															driveConfig.moduleConfig);
+															swerveDriveConfig.moduleConfig);
 			ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
-															driveConfig.moduleConfig);
+															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, driveConfig);
+													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, swerveDriveConfig);
 		}
 
 		SlotConfiguration shooterVisionPID = new SlotConfiguration();
@@ -233,5 +216,13 @@ public class Robot extends TimedRobot {
 			}
 		}
 		driverController.setRumble(RumbleType.kLeftRumble, activeProfile.getSwerveAlignRumble() ? 1 : 0);
+	}
+
+	private void loadConfigs() throws PersistentException {
+		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+	}
+
+	private void applyConfigs() {
+		swerveDrive.configure(swerveDriveConfig);
 	}
 }
