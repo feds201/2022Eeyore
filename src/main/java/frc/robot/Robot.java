@@ -32,9 +32,6 @@ public class Robot extends TimedRobot {
 
 	public static final double SHOOTER_TOP_SPEED = 16425;
 	public static final double SHOOTER_BOTTOM_SPEED = 9855;
-	public static final double SHOOTER_FEEDER_SPEED = 0.25;
-	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
-	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
 	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;

@@ -5,26 +5,22 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+
+import frc.robot.config.ShooterConfig;
 
 public class Shooter implements Subsystem {
 
 	public static final double FALCON_MAX_SPEED = 21900;
 
-	public static final double SHOOTER_CURRENT_LIMIT = 20;
-	public static final double SHOOTER_CURRENT_LIMIT_TIME = 1.5;
-	public static final double FEEDER_CURRENT_LIMIT = 20;
-	public static final double FEEDER_CURRENT_LIMIT_TIME = 0.75;
-
 	private final TalonFX topMotor;
 	private final TalonFX bottomMotor;
 	private final TalonFX feederMotor;
 
-	private final double fireThresholdLower;
-	private final double fireThresholdUpper;
-	private final double feederSpeed;
+	private double fireThresholdLower;
+	private double fireThresholdUpper;
+	private double feederSpeed;
 
 	private double topSpeed;
 	private double bottomSpeed;
@@ -34,45 +30,15 @@ public class Shooter implements Subsystem {
 	private boolean currentlyFiring = false;
 
 	public Shooter(int topChannel, int bottomChannel, int feederChannel,
-					double fireThresholdLower, double fireThresholdUpper, double feederSpeed,
-					SlotConfiguration pid) {
+					ShooterConfig config) {
 		if (feederSpeed < 0 || feederSpeed > 1)
 			throw new IllegalArgumentException("feeder speed out of bounds");
 
 		topMotor = new TalonFX(topChannel);
 		bottomMotor = new TalonFX(bottomChannel);
-		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
-		shooterMotorConfig.neutralDeadband = 0.001;
-		shooterMotorConfig.openloopRamp = 0;
-		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		shooterMotorConfig.slot0 = pid;
-		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
-		shooterMotorConfig.supplyCurrLimit.enable = true;
-		shooterMotorConfig.supplyCurrLimit.currentLimit = SHOOTER_CURRENT_LIMIT;
-		shooterMotorConfig.supplyCurrLimit.triggerThresholdTime = SHOOTER_CURRENT_LIMIT_TIME;
-		topMotor.configAllSettings(shooterMotorConfig);
-		topMotor.selectProfileSlot(0, 0);
-		topMotor.setNeutralMode(NeutralMode.Brake);
-		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
-		bottomMotor.configAllSettings(shooterMotorConfig);
-		bottomMotor.selectProfileSlot(0, 0);
-		bottomMotor.setNeutralMode(NeutralMode.Brake);
-		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
-
 		feederMotor = new TalonFX(feederChannel);
-		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
-		feederMotorConfig.neutralDeadband = 0.001;
-		feederMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
-		feederMotorConfig.supplyCurrLimit.enable = true;
-		feederMotorConfig.supplyCurrLimit.currentLimit = FEEDER_CURRENT_LIMIT;
-		feederMotorConfig.supplyCurrLimit.triggerThresholdTime = FEEDER_CURRENT_LIMIT_TIME;
-		feederMotor.configAllSettings(feederMotorConfig);
-		feederMotor.setNeutralMode(NeutralMode.Brake);
-		feederMotor.setInverted(TalonFXInvertType.Clockwise);
 
-		this.fireThresholdLower = fireThresholdLower;
-		this.fireThresholdUpper = fireThresholdUpper;
-		this.feederSpeed = feederSpeed;
+		configure(config);
 	}
 
 	public void setSpeed(double topSpeed, double bottomSpeed) {
@@ -112,6 +78,40 @@ public class Shooter implements Subsystem {
 			feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
 			currentlyFiring = shouldFire;
 		}
+	}
+
+	public void configure(ShooterConfig config) {
+		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
+		shooterMotorConfig.neutralDeadband = 0.001;
+		shooterMotorConfig.openloopRamp = 0;
+		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		shooterMotorConfig.slot0 = config.pid;
+		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		shooterMotorConfig.supplyCurrLimit.enable = config.shooterCurrentLimitEnabled;
+		shooterMotorConfig.supplyCurrLimit.currentLimit = config.shooterCurrentLimit;
+		shooterMotorConfig.supplyCurrLimit.triggerThresholdTime = config.shooterCurrentLimitTime;
+		topMotor.configAllSettings(shooterMotorConfig);
+		topMotor.selectProfileSlot(0, 0);
+		topMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
+		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
+		bottomMotor.configAllSettings(shooterMotorConfig);
+		bottomMotor.selectProfileSlot(0, 0);
+		bottomMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
+		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
+
+		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
+		feederMotorConfig.neutralDeadband = 0.001;
+		feederMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		feederMotorConfig.supplyCurrLimit.enable = config.feederCurrentLimitEnabled;
+		feederMotorConfig.supplyCurrLimit.currentLimit = config.feederCurrentLimit;
+		feederMotorConfig.supplyCurrLimit.triggerThresholdTime = config.feederCurrentLimitTime;
+		feederMotor.configAllSettings(feederMotorConfig);
+		feederMotor.setNeutralMode(NeutralMode.Brake);
+		feederMotor.setInverted(TalonFXInvertType.Clockwise);
+
+		fireThresholdLower = config.fireThresholdLower;
+		fireThresholdUpper = config.fireThresholdUpper;
+		feederSpeed = config.feederSpeed;
 	}
 
 	public double getCurrentSpeedTopPercentage() {
