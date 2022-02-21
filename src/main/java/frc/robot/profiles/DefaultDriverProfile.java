@@ -50,8 +50,12 @@ public class DefaultDriverProfile extends DriverProfile {
 			}
 		}
 
-		swerveAlignSet = (driver.getBackButton() && driver.getStartButton()) &&
-							(driver.getBackButtonPressed() || driver.getStartButtonPressed());
+		swerveAlign = (driver.getBackButton() && driver.getStartButton()) &&
+						(driver.getBackButtonPressed() || driver.getStartButtonPressed());
 		swerveAlignRumble = driver.getBackButton() && driver.getStartButton();
+
+		configReload = ((driver.getLeftStickButton() && driver.getRightStickButton()) &&
+						(driver.getLeftStickButtonPressed() || driver.getRightStickButtonPressed()));
+		configReloadRumble = driver.getLeftStickButton() || driver.getRightStickButton();
 	}
 }

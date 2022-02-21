@@ -7,7 +7,7 @@ public abstract class DriverProfile {
 	protected double swerveLinearAngle = 0;
 	protected double swerveLinearSpeed = 0;
 	protected double swerveRotate = 0;
-	protected boolean swerveAlignSet = false;
+	protected boolean swerveAlign = false;
 	protected boolean swerveAlignRumble = false;
 
 	protected boolean intakeDeploy = false;
@@ -18,6 +18,9 @@ public abstract class DriverProfile {
 
 	protected boolean climberUp = false;
 	protected boolean climberDown = false;
+
+	protected boolean configReload = false;
+	protected boolean configReloadRumble = false;
 
 	protected final double deadzone(double input, double threshold) {
 		if (Math.abs(input) < threshold)
@@ -39,8 +42,8 @@ public abstract class DriverProfile {
 		return swerveRotate;
 	}
 
-	public boolean getSwerveAlignSet() {
-		return swerveAlignSet;
+	public boolean getSwerveAlign() {
+		return swerveAlign;
 	}
 
 	public boolean getSwerveAlignRumble() {
@@ -69,5 +72,13 @@ public abstract class DriverProfile {
 
 	public boolean getClimberDown() {
 		return climberDown;
+	}
+
+	public boolean getConfigReload() {
+		return configReload;
+	}
+
+	public boolean getConfigReloadRumble() {
+		return configReloadRumble;
 	}
 }

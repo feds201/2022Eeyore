@@ -199,7 +199,7 @@ public class Robot extends TimedRobot {
 	public void testPeriodic() {
 		teleopPeriodic();
 
-		if (activeProfile.getSwerveAlignSet()) {
+		if (activeProfile.getSwerveAlign()) {
 			swerveDrive.align();
 			double[] alignments = swerveDrive.getAlignments();
 			try {
@@ -216,6 +216,17 @@ public class Robot extends TimedRobot {
 			}
 		}
 		driverController.setRumble(RumbleType.kLeftRumble, activeProfile.getSwerveAlignRumble() ? 1 : 0);
+
+		if (activeProfile.getConfigReload()) {
+			try {
+				loadConfigs();
+				applyConfigs();
+			} catch (PersistentException e) {
+				System.err.println("Error loading subsystem configuration files");
+				System.err.println(e);
+			}
+		}
+		driverController.setRumble(RumbleType.kRightRumble, activeProfile.getConfigReloadRumble() ? 1 : 0);
 	}
 
 	private void loadConfigs() throws PersistentException {
