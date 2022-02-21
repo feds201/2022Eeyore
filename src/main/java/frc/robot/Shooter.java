@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 public class Shooter implements Subsystem {
 
 	public static final double FALCON_MAX_SPEED = 21900;
+
 	public static final double SHOOTER_CURRENT_LIMIT = 20;
 	public static final double SHOOTER_CURRENT_LIMIT_TIME = 1.5;
 	public static final double FEEDER_CURRENT_LIMIT = 20;
@@ -25,8 +26,8 @@ public class Shooter implements Subsystem {
 	private final double fireThresholdUpper;
 	private final double feederSpeed;
 
-	private double topSpeedPercentage;
-	private double bottomSpeedPercentage;
+	private double topSpeed;
+	private double bottomSpeed;
 	private boolean fire = false;
 
 	private boolean updateSpeed = true;
@@ -74,14 +75,13 @@ public class Shooter implements Subsystem {
 		this.feederSpeed = feederSpeed;
 	}
 
-	public void setSpeed(double topSpeedPercentage, double bottomSpeedPercentage) {
-		if (topSpeedPercentage < 0 || topSpeedPercentage > 1 ||
-			bottomSpeedPercentage < 0 || bottomSpeedPercentage > 1)
+	public void setSpeed(double topSpeed, double bottomSpeed) {
+		if (topSpeed < 0 || bottomSpeed < 0)
 			throw new IllegalArgumentException("shooter speed out of bounds");
-		if (this.topSpeedPercentage != topSpeedPercentage ||
-			this.bottomSpeedPercentage != bottomSpeedPercentage) {
-			this.topSpeedPercentage = topSpeedPercentage;
-			this.bottomSpeedPercentage = bottomSpeedPercentage;
+		if (this.topSpeed != topSpeed ||
+			this.bottomSpeed != bottomSpeed) {
+			this.topSpeed = topSpeed;
+			this.bottomSpeed = bottomSpeed;
 			updateSpeed = true;
 		}
 	}
@@ -93,17 +93,17 @@ public class Shooter implements Subsystem {
 	@Override
 	public void tick() {
 		if (updateSpeed) {
-			if (topSpeedPercentage > 0)
-				topMotor.set(ControlMode.Velocity, topSpeedPercentage * FALCON_MAX_SPEED);
+			if (topSpeed > 0)
+				topMotor.set(ControlMode.Velocity, topSpeed);
 			else
 				topMotor.set(ControlMode.PercentOutput, 0);
-			if (bottomSpeedPercentage > 0)
-				bottomMotor.set(ControlMode.Velocity, bottomSpeedPercentage * FALCON_MAX_SPEED);
+			if (bottomSpeed > 0)
+				bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 			else
 				bottomMotor.set(ControlMode.PercentOutput, 0);
 		}
 
-		boolean shouldFire = fire && topSpeedPercentage > 0 && bottomSpeedPercentage > 0 &&
+		boolean shouldFire = fire && topSpeed > 0 && bottomSpeed > 0 &&
 								getCurrentSpeedTopPercentage() > fireThresholdLower &&
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
@@ -115,10 +115,10 @@ public class Shooter implements Subsystem {
 	}
 
 	public double getCurrentSpeedTopPercentage() {
-		return topMotor.getSelectedSensorVelocity() / (topSpeedPercentage * FALCON_MAX_SPEED);
+		return topMotor.getSelectedSensorVelocity() / topSpeed;
 	}
 
 	public double getCurrentSpeedBottomPercentage() {
-		return bottomMotor.getSelectedSensorVelocity() / (bottomSpeedPercentage * FALCON_MAX_SPEED);
+		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 }
