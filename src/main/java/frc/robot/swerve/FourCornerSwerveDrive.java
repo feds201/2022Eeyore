@@ -15,6 +15,9 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double width;
 	private double length;
 
+	private double maxLinearAccel;
+	private double maxRotateAccel;
+
 	private double targetLinearAngle = 0;
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
@@ -115,6 +118,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	private void configureDrive(SwerveDriveConfig config) {
 		gyroFactor = config.gyroFactor;
+		maxLinearAccel = config.maxLinearAccel;
+		maxRotateAccel = config.maxRotateAccel;
 	}
 
 	@Override

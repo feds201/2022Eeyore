@@ -11,6 +11,9 @@ public class SwerveDriveConfig {
 	public SwerveModuleConfig moduleConfig;
 	public double gyroFactor;
 
+	public double maxLinearAccel;
+	public double maxRotateAccel;
+
 	public static SwerveDriveConfig load(String file) throws PersistentException {
 		NetworkTable table = NetworkTableInstance.getDefault().getTable("/config/swerve");
 		SwerveDriveConfig config = new SwerveDriveConfig();
@@ -38,6 +41,9 @@ public class SwerveDriveConfig {
 		config.moduleConfig.driveCurrentLimitTime = table.getEntry("module.drivecurrentlimittime").getDouble(0);
 
 		config.gyroFactor = table.getEntry("gyrofactor").getDouble(0);
+
+		config.maxLinearAccel = table.getEntry("maxlinearaccel").getDouble(0);
+		config.maxRotateAccel = table.getEntry("maxrotateaccel").getDouble(0);
 
 		return config;
 	}
