@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -98,18 +99,10 @@ public class Robot extends TimedRobot {
 		TalonSRX talon2 = new TalonSRX(SWERVE_FRONT_RIGHT_ENCODER);
 		TalonSRX talon3 = new TalonSRX(SWERVE_BACK_LEFT_ENCODER);
 		TalonSRX talon4 = new TalonSRX(SWERVE_BACK_RIGHT_ENCODER);
-		talon1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		talon2.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		talon3.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		talon4.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		talon1.setSensorPhase(false);
-		talon2.setSensorPhase(false);
-		talon3.setSensorPhase(false);
-		talon4.setSensorPhase(false);
-		talon1.setInverted(false);
-		talon2.setInverted(false);
-		talon3.setInverted(false);
-		talon4.setInverted(false);
+		configEncoderTalon(talon1);
+		configEncoderTalon(talon2);
+		configEncoderTalon(talon3);
+		configEncoderTalon(talon4);
 
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
@@ -135,6 +128,21 @@ public class Robot extends TimedRobot {
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
+	}
+
+	private static void configEncoderTalon(TalonSRX talon) {
+		talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		talon.setSensorPhase(false);
+		talon.setInverted(false);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 	}
 
 	@Override
