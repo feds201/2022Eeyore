@@ -40,8 +40,6 @@ public class Shooter implements Subsystem {
 	}
 
 	public void setSpeed(double topSpeed, double bottomSpeed) {
-		if (topSpeed < 0 || bottomSpeed < 0)
-			throw new IllegalArgumentException("shooter speed out of bounds");
 		if (this.topSpeed != topSpeed ||
 			this.bottomSpeed != bottomSpeed) {
 			this.topSpeed = topSpeed;
@@ -57,17 +55,17 @@ public class Shooter implements Subsystem {
 	@Override
 	public void tick() {
 		if (updateSpeed) {
-			if (topSpeed > 0)
+			if (topSpeed != 0)
 				topMotor.set(ControlMode.Velocity, topSpeed);
 			else
 				topMotor.set(ControlMode.PercentOutput, 0);
-			if (bottomSpeed > 0)
+			if (bottomSpeed != 0)
 				bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 			else
 				bottomMotor.set(ControlMode.PercentOutput, 0);
 		}
 
-		boolean shouldFire = fire && topSpeed > 0 && bottomSpeed > 0 &&
+		boolean shouldFire = fire && topSpeed != 0 && bottomSpeed != 0 &&
 								getCurrentSpeedTopPercentage() > fireThresholdLower &&
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
@@ -84,6 +82,7 @@ public class Shooter implements Subsystem {
 		shooterMotorConfig.openloopRamp = 0;
 		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 		shooterMotorConfig.slot0 = config.pid;
+		shooterMotorConfig.voltageCompSaturation = 12;
 		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		shooterMotorConfig.supplyCurrLimit.enable = config.shooterCurrentLimitEnabled;
 		shooterMotorConfig.supplyCurrLimit.currentLimit = config.shooterCurrentLimit;
@@ -92,10 +91,12 @@ public class Shooter implements Subsystem {
 		topMotor.selectProfileSlot(0, 0);
 		topMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
+		topMotor.enableVoltageCompensation(true);
 		bottomMotor.configAllSettings(shooterMotorConfig);
 		bottomMotor.selectProfileSlot(0, 0);
 		bottomMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
+		bottomMotor.enableVoltageCompensation(true);
 
 		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
 		feederMotorConfig.neutralDeadband = 0.001;
