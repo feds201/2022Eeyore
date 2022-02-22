@@ -56,6 +56,6 @@ public class DefaultDriverProfile extends DriverProfile {
 
 		configReload = ((driver.getLeftStickButton() && driver.getRightStickButton()) &&
 						(driver.getLeftStickButtonPressed() || driver.getRightStickButtonPressed()));
-		configReloadRumble = driver.getLeftStickButton() || driver.getRightStickButton();
+		configReloadRumble = driver.getLeftStickButton() && driver.getRightStickButton();
 	}
 }
