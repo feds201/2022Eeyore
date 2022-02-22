@@ -55,6 +55,9 @@ public class Robot extends TimedRobot {
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
 
+	public static final int INDICATOR_LIGHTS_PORT = 0;
+	public static final int INDICATOR_LIGHTS_COUNT = 100;
+
 	private final DriverProfile[] profiles = {
 		new DefaultDriverProfile()
 	};
@@ -71,6 +74,7 @@ public class Robot extends TimedRobot {
 	private SwerveDriveConfig swerveDriveConfig;
 	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
+	private IndicatorLights indicatorLights;
 
 	public Robot() {
 		super(0.05);
@@ -133,6 +137,8 @@ public class Robot extends TimedRobot {
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
+		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
+
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
 	}
@@ -142,6 +148,7 @@ public class Robot extends TimedRobot {
 		swerveDrive.tick();
 		shooterVision.tick();
 		shooter.tick();
+		indicatorLights.tick();
 	}
 
 	@Override
