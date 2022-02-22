@@ -76,8 +76,6 @@ public class Shooter implements Subsystem {
 	}
 
 	public void setSpeed(double topSpeed, double bottomSpeed) {
-		if (topSpeed < 0 || bottomSpeed < 0)
-			throw new IllegalArgumentException("shooter speed out of bounds");
 		if (this.topSpeed != topSpeed ||
 			this.bottomSpeed != bottomSpeed) {
 			this.topSpeed = topSpeed;
@@ -93,17 +91,17 @@ public class Shooter implements Subsystem {
 	@Override
 	public void tick() {
 		if (updateSpeed) {
-			if (topSpeed > 0)
+			if (topSpeed != 0)
 				topMotor.set(ControlMode.Velocity, topSpeed);
 			else
 				topMotor.set(ControlMode.PercentOutput, 0);
-			if (bottomSpeed > 0)
+			if (bottomSpeed != 0)
 				bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 			else
 				bottomMotor.set(ControlMode.PercentOutput, 0);
 		}
 
-		boolean shouldFire = fire && topSpeed > 0 && bottomSpeed > 0 &&
+		boolean shouldFire = fire && topSpeed != 0 && bottomSpeed != 0 &&
 								getCurrentSpeedTopPercentage() > fireThresholdLower &&
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
