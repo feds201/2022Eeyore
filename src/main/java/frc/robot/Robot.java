@@ -86,6 +86,7 @@ public class Robot extends TimedRobot {
 		}
 		try {
 			loadConfigs();
+			System.out.println("Successfully loaded subsystem configuration files");
 		} catch (PersistentException e) {
 			System.err.println("Error loading subsystem configuration files");
 			System.err.println(e);
@@ -212,6 +213,7 @@ public class Robot extends TimedRobot {
 			try {
 				loadConfigs();
 				applyConfigs();
+				System.err.println("Successfully reloaded subsystem configuration files");
 			} catch (PersistentException e) {
 				System.err.println("Error loading subsystem configuration files");
 				System.err.println(e);
