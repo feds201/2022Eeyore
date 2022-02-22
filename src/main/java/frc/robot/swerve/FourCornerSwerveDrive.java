@@ -19,6 +19,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
 
+	private double currentTargetLinearAngle = 0;
+	private double currentTargetLinearSpeed = 0;
+	private double currentTargetRotate = 0;
+
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
 									Gyro gyro, double width, double length, SwerveDriveConfig config) {
@@ -57,34 +61,13 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		if (rotate == 0 && linearSpeed != 0)
 			rotate = -gyro.getRate() * gyroFactor;
 
-		double[] frontLeftVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, -width, length);
-		double[] frontRightVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, width, length);
-		double[] backLeftVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, -width, -length);
-		double[] backRightVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, width, -length);
+		targetLinearAngle = linearAngle;
+		targetLinearSpeed = linearSpeed;
+		targetRotate = rotate;
 
-		// A motor can only go at 100% speed so we have to reduce them if one goes
-		// faster.
-		double maxSpeed = 0;
-		if (Math.abs(frontLeftVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(frontLeftVelocity[1]);
-		if (Math.abs(frontRightVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(frontRightVelocity[1]);
-		if (Math.abs(backLeftVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(backLeftVelocity[1]);
-		if (Math.abs(backRightVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(backRightVelocity[1]);
-
-		if (maxSpeed > 1) {
-			frontLeftVelocity[1] /= maxSpeed;
-			frontRightVelocity[1] /= maxSpeed;
-			backLeftVelocity[1] /= maxSpeed;
-			backRightVelocity[1] /= maxSpeed;
-		}
-
-		frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
-		frontRight.setTargetVelocity(frontRightVelocity[0], frontRightVelocity[1]);
-		backLeft.setTargetVelocity(backLeftVelocity[0], backLeftVelocity[1]);
-		backRight.setTargetVelocity(backRightVelocity[0], backRightVelocity[1]);
+		currentTargetLinearAngle = targetLinearAngle;
+		currentTargetLinearSpeed = targetLinearSpeed;
+		currentTargetRotate = targetRotate;
 	}
 
 	@Override
@@ -151,6 +134,34 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	@Override
 	public void tick() {
+		double[] frontLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, length);
+		double[] frontRightVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, width, length);
+		double[] backLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, -length);
+		double[] backRightVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, width, -length);
+
+		// A motor can only go at 100% speed so we have to reduce them if one goes faster.
+		double maxSpeed = 0;
+		if (Math.abs(frontLeftVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(frontLeftVelocity[1]);
+		if (Math.abs(frontRightVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(frontRightVelocity[1]);
+		if (Math.abs(backLeftVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(backLeftVelocity[1]);
+		if (Math.abs(backRightVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(backRightVelocity[1]);
+
+		if (maxSpeed > 1) {
+			frontLeftVelocity[1] /= maxSpeed;
+			frontRightVelocity[1] /= maxSpeed;
+			backLeftVelocity[1] /= maxSpeed;
+			backRightVelocity[1] /= maxSpeed;
+		}
+
+		frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
+		frontRight.setTargetVelocity(frontRightVelocity[0], frontRightVelocity[1]);
+		backLeft.setTargetVelocity(backLeftVelocity[0], backLeftVelocity[1]);
+		backRight.setTargetVelocity(backRightVelocity[0], backRightVelocity[1]);
+
 		frontLeft.tick();
 		frontRight.tick();
 		backLeft.tick();
