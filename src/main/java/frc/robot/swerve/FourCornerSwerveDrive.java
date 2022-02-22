@@ -64,13 +64,9 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		if (rotate == 0 && linearSpeed != 0)
 			rotate = -gyro.getRate() * gyroFactor;
 
-		targetLinearAngle = linearAngle;
+		targetLinearAngle = (linearAngle % 1 + 1) % 1;
 		targetLinearSpeed = linearSpeed;
 		targetRotate = rotate;
-
-		currentTargetLinearAngle = targetLinearAngle;
-		currentTargetLinearSpeed = targetLinearSpeed;
-		currentTargetRotate = targetRotate;
 	}
 
 	@Override
@@ -139,6 +135,28 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	@Override
 	public void tick() {
+		{
+			double targetX = Math.sin(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
+			double targetY = Math.cos(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
+			double currentX = Math.sin(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
+			double currentY = Math.cos(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
+			double translatedTargetX = targetX - currentX;
+			double translatedTargetY = targetY - currentY;
+
+			double accelAngleRadians = Math.atan2(translatedTargetY, translatedTargetX);
+			double deltaX = Math.cos(accelAngleRadians) * maxLinearAccel;
+			double deltaY = Math.sin(accelAngleRadians) * maxLinearAccel;
+
+			currentX += Math.min(deltaX, targetX - currentX);
+			currentY += Math.min(deltaY, targetY - currentY);
+			currentTargetLinearAngle = -Math.atan2(currentY, currentX) / Math.PI / 2 + 0.25;
+			currentTargetLinearSpeed = Math.sqrt(currentX * currentX + currentY * currentY);
+		}
+		{
+			double deltaRotate = targetRotate - currentTargetRotate;
+			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel, Math.abs(deltaRotate));
+		}
+
 		double[] frontLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, length);
 		double[] frontRightVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, width, length);
 		double[] backLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, -length);
