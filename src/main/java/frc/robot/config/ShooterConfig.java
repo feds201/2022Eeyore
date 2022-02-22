@@ -23,7 +23,7 @@ public class ShooterConfig {
 	public double feederCurrentLimitTime;
 
 	public static ShooterConfig load(String file) throws PersistentException {
-		NetworkTable table = NetworkTableInstance.getDefault().getTable("config/shooter");
+		NetworkTable table = NetworkTableInstance.getDefault().getTable("/config/shooter");
 		ShooterConfig config = new ShooterConfig();
 		table.loadEntries(file);
 

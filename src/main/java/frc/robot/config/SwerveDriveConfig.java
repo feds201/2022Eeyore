@@ -12,7 +12,7 @@ public class SwerveDriveConfig {
 	public double gyroFactor;
 
 	public static SwerveDriveConfig load(String file) throws PersistentException {
-		NetworkTable table = NetworkTableInstance.getDefault().getTable("config/swerve");
+		NetworkTable table = NetworkTableInstance.getDefault().getTable("/config/swerve");
 		SwerveDriveConfig config = new SwerveDriveConfig();
 		table.loadEntries(file);
 

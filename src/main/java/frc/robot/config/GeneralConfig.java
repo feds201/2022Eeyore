@@ -10,7 +10,7 @@ public class GeneralConfig {
 	public double shooterBottomSpeed;
 
 	public static GeneralConfig load(String file) throws PersistentException {
-		NetworkTable table = NetworkTableInstance.getDefault().getTable("config/general");
+		NetworkTable table = NetworkTableInstance.getDefault().getTable("/config/general");
 		GeneralConfig config = new GeneralConfig();
 		table.loadEntries(file);
 
