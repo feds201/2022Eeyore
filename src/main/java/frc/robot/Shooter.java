@@ -46,6 +46,7 @@ public class Shooter implements Subsystem {
 		shooterMotorConfig.openloopRamp = 0;
 		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 		shooterMotorConfig.slot0 = pid;
+		shooterMotorConfig.voltageCompSaturation = 12;
 		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		shooterMotorConfig.supplyCurrLimit.enable = true;
 		shooterMotorConfig.supplyCurrLimit.currentLimit = SHOOTER_CURRENT_LIMIT;
@@ -54,10 +55,12 @@ public class Shooter implements Subsystem {
 		topMotor.selectProfileSlot(0, 0);
 		topMotor.setNeutralMode(NeutralMode.Brake);
 		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
+		topMotor.enableVoltageCompensation(true);
 		bottomMotor.configAllSettings(shooterMotorConfig);
 		bottomMotor.selectProfileSlot(0, 0);
 		bottomMotor.setNeutralMode(NeutralMode.Brake);
 		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
+		bottomMotor.enableVoltageCompensation(true);
 
 		feederMotor = new TalonFX(feederChannel);
 		TalonFXConfiguration feederMotorConfig = new TalonFXConfiguration();
