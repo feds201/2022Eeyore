@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.FilterConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -119,6 +120,16 @@ public class SDSMk4FXModule implements ISwerveModule {
 		steer.selectProfileSlot(0, 0);
 		steer.setInverted(true);
 		steer.setNeutralMode(config.steerBrake ? NeutralMode.Brake : NeutralMode.Coast);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
 		TalonFXConfiguration driveConfig = new TalonFXConfiguration();
 		driveConfig.neutralDeadband = 0.001;
@@ -131,6 +142,16 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.configAllSettings(driveConfig);
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Coast);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
 		initialized = false;
 		initTime = System.currentTimeMillis();
