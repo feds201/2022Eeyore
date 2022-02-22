@@ -4,20 +4,22 @@ import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.config.ShooterVisionConfig;
 
 public class ShooterVision implements Subsystem {
 
-	private final SlotConfiguration pid;
 	private final NetworkTable table;
 
+	private SlotConfiguration pid;
 	private double iacc = 0;
 	private double lastErr = 0;
 	private double lastTime;
 
-	public ShooterVision(SlotConfiguration pid) {
-		this.pid = pid;
+	public ShooterVision(ShooterVisionConfig config) {
 		table = NetworkTableInstance.getDefault().getTable("limelight");
 		lastTime = System.currentTimeMillis();
+
+		configure(config);
 		setActive(false);
 	}
 
@@ -46,5 +48,11 @@ public class ShooterVision implements Subsystem {
 		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / delta * pid.kD;
 		lastErr = error;
 		return output;
+	}
+
+	public void configure(ShooterVisionConfig config) {
+		pid = config.pid;
+		iacc = 0;
+		lastErr = 0;
 	}
 }

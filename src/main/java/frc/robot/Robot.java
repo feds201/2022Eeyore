@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -19,6 +18,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
 import frc.robot.config.GeneralConfig;
 import frc.robot.config.ShooterConfig;
+import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
@@ -32,6 +32,7 @@ public class Robot extends TimedRobot {
 	public static final String GENERAL_CONFIG_FILE = "generalconfig.ini";
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
+	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
@@ -68,6 +69,7 @@ public class Robot extends TimedRobot {
 
 	private GeneralConfig generalConfig;
 	private SwerveDriveConfig swerveDriveConfig;
+	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
 
 	public Robot() {
@@ -127,13 +129,7 @@ public class Robot extends TimedRobot {
 													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, swerveDriveConfig);
 		}
 
-		SlotConfiguration shooterVisionPID = new SlotConfiguration();
-		shooterVisionPID.kP = 0.005;
-		shooterVisionPID.kI = 0.000;
-		shooterVisionPID.maxIntegralAccumulator = 0.000;
-		shooterVisionPID.kD = 0.000;
-		shooterVision = new ShooterVision(shooterVisionPID);
-
+		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
@@ -225,11 +221,13 @@ public class Robot extends TimedRobot {
 	private void loadConfigs() throws PersistentException {
 		generalConfig = GeneralConfig.load(Filesystem.getDeployDirectory() + "/" + GENERAL_CONFIG_FILE);
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
 	}
 
 	private void applyConfigs() {
 		swerveDrive.configure(swerveDriveConfig);
+		shooterVision.configure(shooterVisionConfig);
 		shooter.configure(shooterConfig);
 	}
 }
