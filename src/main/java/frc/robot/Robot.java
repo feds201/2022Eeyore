@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -17,6 +16,10 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
+import frc.robot.config.GeneralConfig;
+import frc.robot.config.ShooterConfig;
+import frc.robot.config.ShooterVisionConfig;
+import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
@@ -26,14 +29,11 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	public static final double SWERVE_MAX_RAMP = 1.0;
-	public static final double SWERVE_GYRO_FACTOR = 1.0;
-
-	public static final double SHOOTER_TOP_SPEED = 16425;
-	public static final double SHOOTER_BOTTOM_SPEED = 9855;
-	public static final double SHOOTER_FEEDER_SPEED = 0.25;
-	public static final double SHOOTER_LOWER_THRESHOLD = 0.95;
-	public static final double SHOOTER_UPPER_THRESHOLD = 1.05;
+	public static final String GENERAL_CONFIG_FILE = "generalconfig.ini";
+	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
+	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
+	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
+	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
 	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;
@@ -51,8 +51,6 @@ public class Robot extends TimedRobot {
 	public static final int SWERVE_BACK_RIGHT_DRIVE = 42;
 	public static final int SWERVE_BACK_RIGHT_ENCODER = 2;
 
-	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
-
 	public static final int SHOOTER_TOP_ID = 60;
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
@@ -69,21 +67,30 @@ public class Robot extends TimedRobot {
 	private ShooterVision shooterVision;
 	private Shooter shooter;
 
+	private GeneralConfig generalConfig;
+	private SwerveDriveConfig swerveDriveConfig;
+	private ShooterVisionConfig shooterVisionConfig;
+	private ShooterConfig shooterConfig;
+
 	public Robot() {
 		super(0.05);
 	}
 
 	@Override
 	public void robotInit() {
-		try
-		{
+		try {
 			NetworkTableInstance.getDefault().getTable("swervealignment")
 				.loadEntries(Filesystem.getOperatingDirectory() + "/" + SWERVE_ALIGNMENT_FILE);
 			System.out.println("Successfully loaded swerve drive alignment");
-		}
-		catch (PersistentException e)
-		{
+		} catch (PersistentException e) {
 			System.err.println("Error loading swerve drive alignment");
+			System.err.println(e);
+		}
+		try {
+			loadConfigs();
+			System.out.println("Successfully loaded subsystem configuration files");
+		} catch (PersistentException e) {
+			System.err.println("Error loading subsystem configuration files");
 			System.err.println(e);
 		}
 
@@ -104,47 +111,27 @@ public class Robot extends TimedRobot {
 		talon3.setInverted(false);
 		talon4.setInverted(false);
 
-		NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
-		SlotConfiguration swervePID = new SlotConfiguration();
-		swervePID.closedLoopPeriod = 1;
-		swervePID.kP = 0.1;
-		swervePID.kI = 0.000;
-		swervePID.maxIntegralAccumulator = 0.000;
-		swervePID.kD = 0.000;
-		swervePID.kF = 0;
-		ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
-														SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE,
-														SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE,
-														SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
-														SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
-														swervePID, SWERVE_MAX_RAMP);
-		swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-												new ADXRS450_Gyro(Port.kOnboardCS0), SWERVE_GYRO_FACTOR, 30, 30);
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
+			ISwerveModule frontLeft = new SDSMk4FXModule(SWERVE_FRONT_LEFT_STEER, SWERVE_FRONT_LEFT_DRIVE,
+															SWERVE_FRONT_LEFT_ENCODER, table.getEntry("index0").getDouble(0),
+															swerveDriveConfig.moduleConfig);
+			ISwerveModule frontRight = new SDSMk4FXModule(SWERVE_FRONT_RIGHT_STEER, SWERVE_FRONT_RIGHT_DRIVE,
+															SWERVE_FRONT_RIGHT_ENCODER, table.getEntry("index1").getDouble(0),
+															swerveDriveConfig.moduleConfig);
+			ISwerveModule backLeft = new SDSMk4FXModule(SWERVE_BACK_LEFT_STEER, SWERVE_BACK_LEFT_DRIVE,
+															SWERVE_BACK_LEFT_ENCODER, table.getEntry("index2").getDouble(0),
+															swerveDriveConfig.moduleConfig);
+			ISwerveModule backRight = new SDSMk4FXModule(SWERVE_BACK_RIGHT_STEER, SWERVE_BACK_RIGHT_DRIVE,
+															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
+															swerveDriveConfig.moduleConfig);
+			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
+													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, swerveDriveConfig);
+		}
 
-		SlotConfiguration shooterVisionPID = new SlotConfiguration();
-		shooterVisionPID.kP = 0.005;
-		shooterVisionPID.kI = 0.000;
-		shooterVisionPID.maxIntegralAccumulator = 0.000;
-		shooterVisionPID.kD = 0.000;
-		shooterVision = new ShooterVision(shooterVisionPID);
-
-		SlotConfiguration shooterPID = new SlotConfiguration();
-		shooterPID.closedLoopPeriod = 1;
-		shooterPID.kP = 0.001;
-		shooterPID.kI = 0.001;
-		shooterPID.maxIntegralAccumulator = 4096;
-		shooterPID.integralZone = 4096;
-		shooterPID.kD = 0.000;
-		shooterPID.kF = 1023 / Shooter.FALCON_MAX_SPEED;
+		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
-								SHOOTER_LOWER_THRESHOLD, SHOOTER_UPPER_THRESHOLD,
-								SHOOTER_FEEDER_SPEED, shooterPID);
+								shooterConfig);
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
@@ -173,7 +160,7 @@ public class Robot extends TimedRobot {
 		double swerveRotate = activeProfile.getSwerveRotate();
 		if (activeProfile.getShooterRev()) {
 			shooterVision.setActive(true);
-			shooter.setSpeed(SHOOTER_TOP_SPEED, SHOOTER_BOTTOM_SPEED);
+			shooter.setSpeed(generalConfig.shooterTopSpeed, generalConfig.shooterBottomSpeed);
 			if (shooterVision.hasTarget())
 				swerveRotate = shooterVision.getCorrection();
 		} else {
@@ -200,7 +187,7 @@ public class Robot extends TimedRobot {
 	public void testPeriodic() {
 		teleopPeriodic();
 
-		if (activeProfile.getSwerveAlignSet()) {
+		if (activeProfile.getSwerveAlign()) {
 			swerveDrive.align();
 			double[] alignments = swerveDrive.getAlignments();
 			try {
@@ -217,5 +204,30 @@ public class Robot extends TimedRobot {
 			}
 		}
 		driverController.setRumble(RumbleType.kLeftRumble, activeProfile.getSwerveAlignRumble() ? 1 : 0);
+
+		if (activeProfile.getConfigReload()) {
+			try {
+				loadConfigs();
+				applyConfigs();
+				System.err.println("Successfully reloaded subsystem configuration files");
+			} catch (PersistentException e) {
+				System.err.println("Error loading subsystem configuration files");
+				System.err.println(e);
+			}
+		}
+		driverController.setRumble(RumbleType.kRightRumble, activeProfile.getConfigReloadRumble() ? 1 : 0);
+	}
+
+	private void loadConfigs() throws PersistentException {
+		generalConfig = GeneralConfig.load(Filesystem.getDeployDirectory() + "/" + GENERAL_CONFIG_FILE);
+		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE);
+		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
+	}
+
+	private void applyConfigs() {
+		swerveDrive.configure(swerveDriveConfig);
+		shooterVision.configure(shooterVisionConfig);
+		shooter.configure(shooterConfig);
 	}
 }

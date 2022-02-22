@@ -1,6 +1,7 @@
 package frc.robot.swerve;
 
 import edu.wpi.first.wpilibj.interfaces.Gyro;
+import frc.robot.config.SwerveDriveConfig;
 
 public class FourCornerSwerveDrive implements ISwerveDrive {
 
@@ -10,16 +11,17 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private final ISwerveModule backRight;
 	private final Gyro gyro;
 
-	private final double gyroFactor;
-	private final double width;
-	private final double length;
+	private double gyroFactor;
+	private double width;
+	private double length;
 
 	private double targetLinearAngle = 0;
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
 
-	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight, ISwerveModule backLeft,
-									ISwerveModule backRight, Gyro gyro, double gyroFactor, double width, double length) {
+	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
+									ISwerveModule backLeft, ISwerveModule backRight,
+									Gyro gyro, double width, double length, SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -40,12 +42,13 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.backRight = backRight;
 		this.gyro = gyro;
 
-		this.gyroFactor = gyroFactor;
 		width /= 2;
 		length /= 2;
 		double divisor = Math.sqrt(width * width + length * length);
 		this.width = width / divisor;
 		this.length = length / divisor;
+
+		configureDrive(config);
 	}
 
 	// Written by Michael Kaatz (2022)
@@ -116,6 +119,19 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		frontRight.setAngleOffsetRelative(frontRight.getCurrentAngle());
 		backLeft.setAngleOffsetRelative(backLeft.getCurrentAngle());
 		backRight.setAngleOffsetRelative(backRight.getCurrentAngle());
+	}
+
+	@Override
+	public void configure(SwerveDriveConfig config) {
+		frontLeft.configure(config.moduleConfig);
+		frontRight.configure(config.moduleConfig);
+		backLeft.configure(config.moduleConfig);
+		backRight.configure(config.moduleConfig);
+		configureDrive(config);
+	}
+
+	private void configureDrive(SwerveDriveConfig config) {
+		gyroFactor = config.gyroFactor;
 	}
 
 	@Override
