@@ -147,10 +147,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			double deltaX = Math.cos(accelAngleRadians) * maxLinearAccel;
 			double deltaY = Math.sin(accelAngleRadians) * maxLinearAccel;
 
-			double diffX = targetX - currentX;
-			double diffY = targetY - currentY;
-			currentX += Math.signum(diffX) * Math.min(deltaX, Math.abs(diffX));
-			currentY += Math.signum(diffY) * Math.min(deltaY, Math.abs(diffY));
+			currentX += Math.signum(translatedTargetX) * Math.min(Math.abs(deltaX), Math.abs(translatedTargetX));
+			currentY += Math.signum(translatedTargetY) * Math.min(Math.abs(deltaY), Math.abs(translatedTargetY));
 			currentTargetLinearAngle = -Math.atan2(currentY, currentX) / Math.PI / 2 + 0.25;
 			currentTargetLinearSpeed = Math.sqrt(currentX * currentX + currentY * currentY);
 		}
