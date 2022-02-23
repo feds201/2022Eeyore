@@ -8,6 +8,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
@@ -67,6 +70,7 @@ public class Robot extends TimedRobot {
 	private ISwerveDrive swerveDrive;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
+	private UsbCamera driverCamera;
 
 	private GeneralConfig generalConfig;
 	private SwerveDriveConfig swerveDriveConfig;
@@ -125,6 +129,8 @@ public class Robot extends TimedRobot {
 		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
+		driverCamera = CameraServer.startAutomaticCapture();
+		driverCamera.setVideoMode(PixelFormat.kMJPEG, 320, 240, 15);
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
