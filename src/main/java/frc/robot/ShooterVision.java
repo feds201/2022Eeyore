@@ -36,8 +36,7 @@ public class ShooterVision implements Subsystem {
 	}
 
 	public void setActive(boolean active) {
-		table.getEntry("ledMode").setDouble(active ? 3 : 1);
-		table.getEntry("camMode").setDouble(active ? 0 : 1);
+		table.getEntry("ledMode").setDouble(active ? 3 : 0);
 	}
 
 	public boolean hasTarget() {
