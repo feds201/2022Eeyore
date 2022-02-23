@@ -157,10 +157,19 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel, Math.abs(deltaRotate));
 		}
 
-		double[] frontLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, length);
-		double[] frontRightVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, width, length);
-		double[] backLeftVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, -width, -length);
-		double[] backRightVelocity = calculateModuleVelocity(currentTargetLinearAngle, currentTargetLinearSpeed, currentTargetRotate, width, -length);
+		double effectiveLinearAngle = currentTargetLinearAngle;
+		double effectiveLinearSpeed = currentTargetLinearSpeed;
+		double effectiveRotate = currentTargetRotate;
+		if (targetLinearSpeed == 0 && targetRotate == 0) {
+			effectiveLinearAngle = 0;
+			effectiveLinearSpeed = 0;
+			effectiveRotate = 0;
+		}
+
+		double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, length);
+		double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, length);
+		double[] backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, -length);
+		double[] backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, -length);
 
 		// A motor can only go at 100% speed so we have to reduce them if one goes faster.
 		double maxSpeed = 0;
