@@ -11,7 +11,7 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 public class Climber implements Subsystem {
 
-	public static final double CURRENT_LIMIT = 40;
+	public static final double CURRENT_LIMIT = 35;
 	public static final double CURRENT_LIMIT_TIME = 0.75;
 
 	private final TalonFX leftMotor;
