@@ -143,7 +143,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Coast);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
