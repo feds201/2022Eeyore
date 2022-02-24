@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
 	public static final int SHOOTER_FEEDER_ID = 62;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
-	public static final int INDICATOR_LIGHTS_COUNT = 100;
+	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
 	private final DriverProfile[] profiles = {
 		new DefaultDriverProfile()
@@ -69,12 +69,12 @@ public class Robot extends TimedRobot {
 	private ISwerveDrive swerveDrive;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
+	private IndicatorLights indicatorLights;
 
 	private GeneralConfig generalConfig;
 	private SwerveDriveConfig swerveDriveConfig;
 	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
-	private IndicatorLights indicatorLights;
 
 	public Robot() {
 		super(0.05);
