@@ -59,6 +59,9 @@ public class Robot extends TimedRobot {
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
 
+	public static final int INDICATOR_LIGHTS_PORT = 0;
+	public static final int INDICATOR_LIGHTS_COUNT = 104;
+
 	private final DriverProfile[] profiles = {
 		new DefaultDriverProfile()
 	};
@@ -70,6 +73,7 @@ public class Robot extends TimedRobot {
 	private ISwerveDrive swerveDrive;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
+	private IndicatorLights indicatorLights;
 	private UsbCamera driverCamera;
 
 	private GeneralConfig generalConfig;
@@ -129,6 +133,9 @@ public class Robot extends TimedRobot {
 		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
+
+		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
+
 		driverCamera = CameraServer.startAutomaticCapture();
 		driverCamera.setVideoMode(PixelFormat.kMJPEG, 320, 240, 15);
 
@@ -156,6 +163,7 @@ public class Robot extends TimedRobot {
 		swerveDrive.tick();
 		shooterVision.tick();
 		shooter.tick();
+		indicatorLights.tick();
 	}
 
 	@Override
