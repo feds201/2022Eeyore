@@ -1,0 +1,29 @@
+{
+	"speeds": [
+		{
+			"distance": 4,
+			"topspeed": 5500,
+			"bottomspeed": 7600
+		},
+		{
+			"distance": 7,
+			"topspeed": 7500,
+			"bottomspeed": 7000
+		},
+		{
+			"distance": 10,
+			"topspeed": 15000,
+			"bottomspeed": 9000
+		},
+		{
+			"distance": 13,
+			"topspeed": 16000,
+			"bottomspeed": 10000
+		},
+		{
+			"distance": 16,
+			"topspeed": 20000,
+			"bottomspeed": 11000
+		}
+	]
+}

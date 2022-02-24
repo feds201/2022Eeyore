@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
-import frc.robot.config.GeneralConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
@@ -33,10 +32,10 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	public static final String GENERAL_CONFIG_FILE = "generalconfig.ini";
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
 	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
+	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
@@ -76,7 +75,6 @@ public class Robot extends TimedRobot {
 	private IndicatorLights indicatorLights;
 	private UsbCamera driverCamera;
 
-	private GeneralConfig generalConfig;
 	private SwerveDriveConfig swerveDriveConfig;
 	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
@@ -182,9 +180,10 @@ public class Robot extends TimedRobot {
 		double swerveRotate = activeProfile.getSwerveRotate();
 		if (activeProfile.getShooterRev()) {
 			shooterVision.setActive(true);
-			shooter.setSpeed(generalConfig.shooterTopSpeed, generalConfig.shooterBottomSpeed);
+			double[] shooterSpeeds = shooterVision.getShooterSpeeds();
+			shooter.setSpeed(shooterSpeeds[0], shooterSpeeds[1]);
 			if (shooterVision.hasTarget())
-				swerveRotate = shooterVision.getCorrection();
+				swerveRotate = shooterVision.getYawCorrection();
 		} else {
 			shooterVision.setActive(false);
 			shooter.setSpeed(0, 0);
@@ -241,9 +240,9 @@ public class Robot extends TimedRobot {
 	}
 
 	private void loadConfigs() throws PersistentException {
-		generalConfig = GeneralConfig.load(Filesystem.getDeployDirectory() + "/" + GENERAL_CONFIG_FILE);
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
-		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE);
+		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE,
+														Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
 	}
 
