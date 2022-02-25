@@ -15,9 +15,16 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double width;
 	private double length;
 
+	private double maxLinearAccel;
+	private double maxRotateAccel;
+
 	private double targetLinearAngle = 0;
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
+
+	private double currentTargetLinearAngle = 0;
+	private double currentTargetLinearSpeed = 0;
+	private double currentTargetRotate = 0;
 
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
@@ -57,34 +64,9 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		if (rotate == 0 && linearSpeed != 0)
 			rotate = -gyro.getRate() * gyroFactor;
 
-		double[] frontLeftVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, -width, length);
-		double[] frontRightVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, width, length);
-		double[] backLeftVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, -width, -length);
-		double[] backRightVelocity = calculateModuleVelocity(linearAngle, linearSpeed, rotate, width, -length);
-
-		// A motor can only go at 100% speed so we have to reduce them if one goes
-		// faster.
-		double maxSpeed = 0;
-		if (Math.abs(frontLeftVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(frontLeftVelocity[1]);
-		if (Math.abs(frontRightVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(frontRightVelocity[1]);
-		if (Math.abs(backLeftVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(backLeftVelocity[1]);
-		if (Math.abs(backRightVelocity[1]) > maxSpeed)
-			maxSpeed = Math.abs(backRightVelocity[1]);
-
-		if (maxSpeed > 1) {
-			frontLeftVelocity[1] /= maxSpeed;
-			frontRightVelocity[1] /= maxSpeed;
-			backLeftVelocity[1] /= maxSpeed;
-			backRightVelocity[1] /= maxSpeed;
-		}
-
-		frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
-		frontRight.setTargetVelocity(frontRightVelocity[0], frontRightVelocity[1]);
-		backLeft.setTargetVelocity(backLeftVelocity[0], backLeftVelocity[1]);
-		backRight.setTargetVelocity(backRightVelocity[0], backRightVelocity[1]);
+		targetLinearAngle = (linearAngle % 1 + 1) % 1;
+		targetLinearSpeed = linearSpeed;
+		targetRotate = rotate;
 	}
 
 	@Override
@@ -132,6 +114,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	private void configureDrive(SwerveDriveConfig config) {
 		gyroFactor = config.gyroFactor;
+		maxLinearAccel = config.maxLinearAccel;
+		maxRotateAccel = config.maxRotateAccel;
 	}
 
 	@Override
@@ -151,6 +135,65 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	@Override
 	public void tick() {
+		{
+			double targetX = Math.sin(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
+			double targetY = Math.cos(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
+			double currentX = Math.sin(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
+			double currentY = Math.cos(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
+			double translatedTargetX = targetX - currentX;
+			double translatedTargetY = targetY - currentY;
+
+			double accelAngleRadians = Math.atan2(translatedTargetY, translatedTargetX);
+			double deltaX = Math.cos(accelAngleRadians) * maxLinearAccel;
+			double deltaY = Math.sin(accelAngleRadians) * maxLinearAccel;
+
+			currentX += Math.signum(translatedTargetX) * Math.min(Math.abs(deltaX), Math.abs(translatedTargetX));
+			currentY += Math.signum(translatedTargetY) * Math.min(Math.abs(deltaY), Math.abs(translatedTargetY));
+			currentTargetLinearAngle = -Math.atan2(currentY, currentX) / Math.PI / 2 + 0.25;
+			currentTargetLinearSpeed = Math.sqrt(currentX * currentX + currentY * currentY);
+		}
+		{
+			double deltaRotate = targetRotate - currentTargetRotate;
+			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel, Math.abs(deltaRotate));
+		}
+
+		double effectiveLinearAngle = currentTargetLinearAngle;
+		double effectiveLinearSpeed = currentTargetLinearSpeed;
+		double effectiveRotate = currentTargetRotate;
+		if (targetLinearSpeed == 0 && targetRotate == 0) {
+			effectiveLinearAngle = 0;
+			effectiveLinearSpeed = 0;
+			effectiveRotate = 0;
+		}
+
+		double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, length);
+		double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, length);
+		double[] backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, -length);
+		double[] backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, -length);
+
+		// A motor can only go at 100% speed so we have to reduce them if one goes faster.
+		double maxSpeed = 0;
+		if (Math.abs(frontLeftVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(frontLeftVelocity[1]);
+		if (Math.abs(frontRightVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(frontRightVelocity[1]);
+		if (Math.abs(backLeftVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(backLeftVelocity[1]);
+		if (Math.abs(backRightVelocity[1]) > maxSpeed)
+			maxSpeed = Math.abs(backRightVelocity[1]);
+
+		if (maxSpeed > 1) {
+			frontLeftVelocity[1] /= maxSpeed;
+			frontRightVelocity[1] /= maxSpeed;
+			backLeftVelocity[1] /= maxSpeed;
+			backRightVelocity[1] /= maxSpeed;
+		}
+
+		frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
+		frontRight.setTargetVelocity(frontRightVelocity[0], frontRightVelocity[1]);
+		backLeft.setTargetVelocity(backLeftVelocity[0], backLeftVelocity[1]);
+		backRight.setTargetVelocity(backRightVelocity[0], backRightVelocity[1]);
+
 		frontLeft.tick();
 		frontRight.tick();
 		backLeft.tick();
