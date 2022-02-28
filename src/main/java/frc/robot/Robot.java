@@ -25,6 +25,7 @@ import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
+import frc.robot.profiles.MichaelsDriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
@@ -62,7 +63,8 @@ public class Robot extends TimedRobot {
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
 	private final DriverProfile[] profiles = {
-		new DefaultDriverProfile()
+		new DefaultDriverProfile(),
+		new MichaelsDriverProfile()
 	};
 	private DriverProfile activeProfile = profiles[0];
 
