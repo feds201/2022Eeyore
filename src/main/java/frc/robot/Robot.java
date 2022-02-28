@@ -177,6 +177,11 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		activeProfile.update(driverController, operatorController);
 
+		if (activeProfile.getDecreaseShooterDistance())
+			shooterVision.adjustDistance(-1);
+		else if (activeProfile.getIncreaseShooterDistance())
+			shooterVision.adjustDistance(+1);
+
 		double swerveRotate = activeProfile.getSwerveRotate();
 		if (activeProfile.getShooterRev()) {
 			shooterVision.setActive(true);

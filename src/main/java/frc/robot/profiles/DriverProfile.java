@@ -15,6 +15,8 @@ public abstract class DriverProfile {
 
 	protected boolean shooterRev = false;
 	protected boolean shooterFire = false;
+	protected boolean decreaseShooterDistance = false;
+	protected boolean increaseShooterDistance = false;
 
 	protected boolean climberUp = false;
 	protected boolean climberDown = false;
@@ -64,6 +66,14 @@ public abstract class DriverProfile {
 
 	public boolean getShooterFire() {
 		return shooterFire;
+	}
+
+	public boolean getDecreaseShooterDistance() {
+		return decreaseShooterDistance;
+	}
+
+	public boolean getIncreaseShooterDistance() {
+		return increaseShooterDistance;
 	}
 
 	public boolean getClimberUp() {

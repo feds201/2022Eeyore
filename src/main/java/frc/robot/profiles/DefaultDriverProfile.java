@@ -50,6 +50,9 @@ public class DefaultDriverProfile extends DriverProfile {
 			}
 		}
 
+		decreaseShooterDistance = operator.getLeftBumperPressed();
+		increaseShooterDistance = operator.getRightBumperPressed();
+
 		swerveAlign = (driver.getBackButton() && driver.getStartButton()) &&
 						(driver.getBackButtonPressed() || driver.getStartButtonPressed());
 		swerveAlignRumble = driver.getBackButton() && driver.getStartButton();

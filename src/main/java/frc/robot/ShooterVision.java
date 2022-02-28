@@ -39,6 +39,10 @@ public class ShooterVision implements Subsystem {
 		table.getEntry("ledMode").setDouble(active ? 3 : 0);
 	}
 
+	public void adjustDistance(int offsetDelta) {
+		distanceOffset += offsetDelta;
+	}
+
 	public boolean hasTarget() {
 		return table.getEntry("tv").getDouble(0) == 1;
 	}
