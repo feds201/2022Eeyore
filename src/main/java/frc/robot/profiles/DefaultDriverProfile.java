@@ -19,8 +19,8 @@ public class DefaultDriverProfile extends DriverProfile {
 		linearAngle = (linearAngle % 1 + 1) % 1;
 		double linearSpeed = Math.sqrt(forward * forward + strafe * strafe);
 		swerveLinearAngle = linearAngle;
-		swerveLinearSpeed = Math.pow(deadzone(linearSpeed, THRESHOLD), 2);
-		swerveRotate = deadzone(rotate, THRESHOLD);
+		swerveLinearSpeed = deadzone(linearSpeed, THRESHOLD);
+		swerveRotate = deadzone(rotate, THRESHOLD) / 2;
 
 		if (driver.getRightBumperPressed())
 			intakeActive = !intakeActive;
