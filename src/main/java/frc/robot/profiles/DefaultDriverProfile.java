@@ -22,10 +22,9 @@ public class DefaultDriverProfile extends DriverProfile {
 		swerveLinearSpeed = Math.pow(deadzone(linearSpeed, THRESHOLD), 2);
 		swerveRotate = deadzone(rotate, THRESHOLD);
 
-		if (driver.getRightBumperPressed()) {
-			intakeDeploy = !intakeDeploy;
-			intakeActive = intakeDeploy;
-		}
+		if (driver.getRightBumperPressed())
+			intakeActive = !intakeActive;
+		intakeDeploy = intakeActive || driver.getLeftBumper();
 
 		if (!driver.getYButton() && !driver.getAButton()) {
 			if (!shooterToggleTripped && driver.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
