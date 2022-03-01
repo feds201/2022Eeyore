@@ -1,11 +1,14 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.robot.config.IntakeConfig;
 
 public class BallPickup implements Subsystem {
 
@@ -13,15 +16,13 @@ public class BallPickup implements Subsystem {
 	private boolean active = false;
 	private DoubleSolenoid piston;
 	private TalonSRX motor;
-	private final double intakeSpeed;
+	private double intakeSpeed;
 	private boolean updateOutput = true;
 
-	public BallPickup(int pcmChannel, int deploySolenoidId, int standbySolenoidId, int motorChannel, double intakeSpeed) {
-		if (intakeSpeed < 0 || intakeSpeed > 1)
-			throw new IllegalArgumentException("intake speed out of bounds");
+	public BallPickup(int pcmChannel, int deploySolenoidId, int standbySolenoidId, int motorChannel, IntakeConfig config) {
 		piston = new DoubleSolenoid(pcmChannel, PneumaticsModuleType.CTREPCM, deploySolenoidId, standbySolenoidId);
-		this.intakeSpeed = intakeSpeed;
 		motor = new TalonSRX(motorChannel);
+		configure(config);
 	}
 
 	public void setDeployed(boolean deployed) {
@@ -51,5 +52,20 @@ public class BallPickup implements Subsystem {
 				piston.set(Value.kReverse);
 			updateOutput = false;
 		}
+	}
+
+	public void configure(IntakeConfig config) {
+		TalonSRXConfiguration motorConfig = new TalonSRXConfiguration();
+		motorConfig.neutralDeadband = 0.001;
+		if (config.currentLimitEnabled) {
+			motorConfig.peakCurrentLimit = (int)config.currentLimit;
+			motorConfig.peakCurrentDuration = (int)(config.currentLimitTime * 1000);
+			motorConfig.continuousCurrentLimit = (int)config.currentLimit;
+		}
+		motor.configAllSettings(motorConfig);
+		motor.setNeutralMode(config.brake ? NeutralMode.Brake : NeutralMode.Coast);
+		motor.setInverted(true);
+
+		intakeSpeed = config.speed;
 	}
 }
