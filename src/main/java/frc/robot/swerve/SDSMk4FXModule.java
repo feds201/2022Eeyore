@@ -68,8 +68,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10;
 
 			// We don't want to move the wheels if we don't have to.
-			if (targetSpeed != 0)
-			{
+			if (targetSpeed != 0) {
 				// The loop error is just the negative opposite of the continous error.
 				double errorContinous = -(effectiveCurrentAngle - targetAngle);
 				double errorLoop = -(1 - Math.abs(errorContinous)) * Math.signum(errorContinous);
@@ -82,8 +81,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 					targetError = errorLoop;
 
 				// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
-				if (Math.abs(targetError) > REVERSE_THRESHOLD)
-				{
+				if (Math.abs(targetError) > REVERSE_THRESHOLD) {
 					reversed = !reversed;
 					drive.setInverted(!reversed);
 					// Quick way to recalculate the offset of the new angle from the target.
@@ -92,9 +90,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 				steer.set(ControlMode.Position, (realCurrentAngle + targetError) * STEER_MOTOR_ENCODER_COUNTS);
 				drive.set(ControlMode.PercentOutput, targetSpeed);
-			}
-			else
-			{
+			} else {
 				steer.set(ControlMode.PercentOutput, 0);
 				drive.set(ControlMode.PercentOutput, 0);
 			}

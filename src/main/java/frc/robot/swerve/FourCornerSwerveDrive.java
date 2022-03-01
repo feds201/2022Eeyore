@@ -201,8 +201,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	}
 
 	// Written by Michael Kaatz (2022)
-	private static double[] calculateModuleVelocity(double linearAngle, double linearSpeed, double rotate, double x,
-			double y) {
+	private static double[] calculateModuleVelocity(double linearAngle, double linearSpeed, double rotate,
+													double x, double y) {
 		if (linearSpeed == 0 && rotate == 0)
 			return new double[] { 0, 0 };
 
