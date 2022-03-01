@@ -48,6 +48,7 @@ public class BallPickup {
 				piston.set(Value.kForward);
 			else
 				piston.set(Value.kReverse);
+			updateOutput = false;
 		}
 	}
 }
