@@ -160,11 +160,6 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		double effectiveLinearAngle = currentTargetLinearAngle;
 		double effectiveLinearSpeed = currentTargetLinearSpeed;
 		double effectiveRotate = currentTargetRotate;
-		if (targetLinearSpeed == 0 && targetRotate == 0) {
-			effectiveLinearAngle = 0;
-			effectiveLinearSpeed = 0;
-			effectiveRotate = 0;
-		}
 
 		double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, length);
 		double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, length);
