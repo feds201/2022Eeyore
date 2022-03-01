@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI.Port;
+import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
@@ -36,9 +37,12 @@ public class Robot extends TimedRobot {
 
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
+	public static final String INTAKE_CONFIG_FILE = "intakeconfig.ini";
 	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
+
+	public static final int PCM_CHANNEL = 8;
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
 	public static final int SWERVE_FRONT_LEFT_DRIVE = 22;
@@ -55,6 +59,10 @@ public class Robot extends TimedRobot {
 	public static final int SWERVE_BACK_RIGHT_STEER = 41;
 	public static final int SWERVE_BACK_RIGHT_DRIVE = 42;
 	public static final int SWERVE_BACK_RIGHT_ENCODER = 2;
+
+	public static final int INTAKE_SOLENOID_DEPLOY = 0;
+	public static final int INTAKE_SOLENOID_STANDBY = 1;
+	public static final int INTAKE_MOTOR = 6;
 
 	public static final int SHOOTER_TOP_ID = 60;
 	public static final int SHOOTER_BOTTOM_ID = 61;
@@ -74,12 +82,14 @@ public class Robot extends TimedRobot {
 	private XboxController operatorController;
 
 	private ISwerveDrive swerveDrive;
+	private BallPickup intake;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
 	private IndicatorLights indicatorLights;
 	private UsbCamera driverCamera;
 
 	private SwerveDriveConfig swerveDriveConfig;
+	private IntakeConfig intakeConfig;
 	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
 
@@ -132,6 +142,8 @@ public class Robot extends TimedRobot {
 													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, swerveDriveConfig);
 		}
 
+		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
+
 		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
@@ -163,6 +175,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		swerveDrive.tick();
+		intake.tick();
 		shooterVision.tick();
 		shooter.tick();
 		indicatorLights.tick();
@@ -202,6 +215,9 @@ public class Robot extends TimedRobot {
 		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
 										activeProfile.getSwerveLinearSpeed(),
 										swerveRotate);
+
+		intake.setDeployed(activeProfile.getIntakeDeploy());
+		intake.setActive(activeProfile.getIntakeActive());
 	}
 
 	@Override
@@ -250,6 +266,7 @@ public class Robot extends TimedRobot {
 
 	private void loadConfigs() throws PersistentException {
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+		intakeConfig = IntakeConfig.load(Filesystem.getDeployDirectory() + "/" + INTAKE_CONFIG_FILE);
 		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE,
 														Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
@@ -257,6 +274,7 @@ public class Robot extends TimedRobot {
 
 	private void applyConfigs() {
 		swerveDrive.configure(swerveDriveConfig);
+		intake.configure(intakeConfig);
 		shooterVision.configure(shooterVisionConfig);
 		shooter.configure(shooterConfig);
 	}
