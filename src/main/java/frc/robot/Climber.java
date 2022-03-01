@@ -9,6 +9,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+
 public class Climber implements Subsystem {
 
 	public static final double CURRENT_LIMIT = 35;
@@ -16,12 +18,13 @@ public class Climber implements Subsystem {
 
 	private final TalonFX leftMotor;
 	private final TalonFX rightMotor;
+	private final DigitalInput limitSwitch;
 	private final double speed;
 
 	private boolean update = true;
 	private int position = 0;
 
-	public Climber(int leftChannel, int rightChannel, int encoderCounts, double speed, double ramp) {
+	public Climber(int leftChannel, int rightChannel, int limitSwitchPort, int encoderCounts, double speed, double ramp) {
 		if (speed < 0 || speed > 1)
 			throw new IllegalArgumentException("speed out of bounds");
 
@@ -36,9 +39,9 @@ public class Climber implements Subsystem {
 		leftConfig.supplyCurrLimit.enable = true;
 		leftConfig.supplyCurrLimit.currentLimit = CURRENT_LIMIT;
 		leftConfig.supplyCurrLimit.triggerThresholdTime = CURRENT_LIMIT_TIME;
-		leftConfig.forwardSoftLimitEnable = false;
+		leftConfig.forwardSoftLimitEnable = true;
 		leftConfig.forwardSoftLimitThreshold = encoderCounts;
-		leftConfig.reverseSoftLimitEnable = false;
+		leftConfig.reverseSoftLimitEnable = true;
 		leftConfig.reverseSoftLimitThreshold = 0;
 		leftMotor.configAllSettings(leftConfig, 1000);
 		leftMotor.setInverted(true);
@@ -56,6 +59,8 @@ public class Climber implements Subsystem {
 		rightMotor.setNeutralMode(NeutralMode.Brake);
 		rightMotor.follow(leftMotor);
 
+		limitSwitch = new DigitalInput(limitSwitchPort);
+
 		this.speed = speed;
 	}
 
@@ -68,6 +73,9 @@ public class Climber implements Subsystem {
 
 	@Override
 	public void tick() {
+		if (limitSwitch.get())
+			leftMotor.setSelectedSensorPosition(0);
+
 		if (update) {
 			if (position == 1)
 				leftMotor.set(ControlMode.PercentOutput, speed);
