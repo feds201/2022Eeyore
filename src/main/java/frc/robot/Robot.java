@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
 		new TestDriverProfile(),
 		new MichaelsDriverProfile()
 	};
-	private DriverProfile activeProfile = profiles[1];
+	private DriverProfile activeProfile = profiles[0];
 
 	private XboxController driverController;
 	private XboxController operatorController;
