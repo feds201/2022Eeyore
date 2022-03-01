@@ -26,6 +26,7 @@ import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.DefaultDriverProfile;
 import frc.robot.profiles.DriverProfile;
 import frc.robot.profiles.MichaelsDriverProfile;
+import frc.robot.profiles.TestDriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
@@ -64,6 +65,7 @@ public class Robot extends TimedRobot {
 
 	private final DriverProfile[] profiles = {
 		new DefaultDriverProfile(),
+		new TestDriverProfile(),
 		new MichaelsDriverProfile()
 	};
 	private DriverProfile activeProfile = profiles[0];
