@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
-public class BallPickup {
+public class BallPickup implements Subsystem {
 
 	private boolean deployed = false;
 	private boolean active = false;
@@ -38,6 +38,7 @@ public class BallPickup {
 		}
 	}
 
+	@Override
 	public void tick() {
 		if (updateOutput) {
 			if (active)
