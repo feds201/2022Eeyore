@@ -26,13 +26,13 @@ public class MichaelsDriverProfile extends DriverProfile {
 			intakeDeploy = !intakeDeploy;
 		intakeActive = driver.getRightBumper();
 
-		if (!driver.getYButton() && !driver.getAButton()) {
-			if (!shooterToggleTripped && driver.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
+		if (!operator.getYButton() && !operator.getAButton()) {
+			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
 				shooterRev = !shooterRev;
 				shooterToggleTripped = true;
-			} else if (shooterToggleTripped && driver.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
+			} else if (shooterToggleTripped && operator.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 				shooterToggleTripped = false;
-			shooterFire = driver.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
+			shooterFire = operator.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
 
 			climberUp = false;
 			climberDown = false;
@@ -41,10 +41,10 @@ public class MichaelsDriverProfile extends DriverProfile {
 			shooterFire = false;
 			shooterToggleTripped = false;
 
-			if (driver.getYButton()) {
+			if (operator.getYButton()) {
 				climberUp = true;
 				climberDown = false;
-			} else if (driver.getAButton()) {
+			} else if (operator.getAButton()) {
 				climberUp = false;
 				climberDown = true;
 			}
