@@ -6,6 +6,8 @@ import frc.robot.config.SwerveDriveConfig;
 
 public class FourCornerSwerveDrive implements ISwerveDrive {
 
+	public static final double WHEEL_DISTANCE = 11.781;
+
 	private final ISwerveModule frontLeft;
 	private final ISwerveModule frontRight;
 	private final ISwerveModule backLeft;
@@ -33,6 +35,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double currentTargetLinearSpeed = 0;
 	private double currentTargetRotate = 0;
 
+	private RobotPose pose;
+
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
 									int pigeonChannel, SwerveDriveConfig config) {
@@ -50,6 +54,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.backLeft = backLeft;
 		this.backRight = backRight;
 		pigeon = new Pigeon2(pigeonChannel);
+
+		pose = new RobotPose();
 
 		configureDrive(config);
 	}
@@ -149,6 +155,11 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	}
 
 	@Override
+	public RobotPose getPose() {
+		return pose;
+	}
+
+	@Override
 	public void tick() {
 		long currentTime = System.currentTimeMillis();
 		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
@@ -217,6 +228,37 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		frontRight.tick();
 		backLeft.tick();
 		backRight.tick();
+
+		{
+			double frontLeftX = Math.sin(frontLeft.getCurrentAngle() * Math.PI * 2) *
+									frontLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleX;
+			double frontLeftY = Math.cos(frontLeft.getCurrentAngle() * Math.PI * 2) *
+									frontLeft.getCurrentSpeed() * WHEEL_DISTANCE + moduleY;
+			double frontRightX = Math.sin(frontRight.getCurrentAngle() * Math.PI * 2) *
+									frontRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleX;
+			double frontRightY = Math.cos(frontRight.getCurrentAngle() * Math.PI * 2) *
+									frontRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleY;
+			double backLeftX = Math.sin(backLeft.getCurrentAngle() * Math.PI * 2) *
+									backLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleX;
+			double backLeftY = Math.cos(backLeft.getCurrentAngle() * Math.PI * 2) *
+									backLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleY;
+			double backRightX = Math.sin(backRight.getCurrentAngle() * Math.PI * 2) *
+									backRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleX;
+			double backRightY = Math.cos(backRight.getCurrentAngle() * Math.PI * 2) *
+									backRight.getCurrentSpeed() * WHEEL_DISTANCE - moduleY;
+
+			double x = (frontLeftX + frontRightX + backLeftX + backRightX) / 4;
+			double y = (frontLeftY + frontRightY + backLeftY + backRightY) / 4;
+
+			double frontAngle = Math.atan2(frontLeftY - frontRightY, frontLeftX - frontRightX) / Math.PI / 2;
+			double backAngle = Math.atan2(backLeftY - backRightY, backLeftX - backRightX) / Math.PI / 2;
+			double angle = (frontAngle + backAngle) / 2;
+
+			pose.x += x;
+			pose.y += y;
+			pose.angle += angle;
+			pose.angle = (pose.angle % 1 + 1) % 1;
+		}
 	}
 
 	// Written by Michael Kaatz (2022)
