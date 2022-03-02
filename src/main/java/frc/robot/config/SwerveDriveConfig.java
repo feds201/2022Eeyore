@@ -11,6 +11,9 @@ public class SwerveDriveConfig {
 	public SwerveModuleConfig moduleConfig;
 	public double gyroFactor;
 
+	public double width;
+	public double length;
+
 	public double maxLinearAccel;
 	public double maxRotateAccel;
 
@@ -42,6 +45,9 @@ public class SwerveDriveConfig {
 		config.moduleConfig.driveCurrentLimitTime = table.getEntry("module.drivecurrentlimittime").getDouble(0);
 
 		config.gyroFactor = table.getEntry("gyrofactor").getDouble(0);
+
+		config.width = table.getEntry("width").getDouble(1);
+		config.length = table.getEntry("length").getDouble(1);
 
 		config.maxLinearAccel = table.getEntry("maxlinearaccel").getDouble(0);
 		config.maxRotateAccel = table.getEntry("maxrotateaccel").getDouble(0);

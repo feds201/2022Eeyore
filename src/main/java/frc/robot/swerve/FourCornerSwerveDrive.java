@@ -16,8 +16,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double lastYaw;
 	private double gyroFactor;
 
-	private double width;
-	private double length;
+	private double moduleX;
+	private double moduleY;
+	private double moduleUnitX;
+	private double moduleUnitY;
 
 	private long lastTime;
 	private double maxLinearAccel;
@@ -33,8 +35,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
-									int pigeonChannel, double width, double length,
-									SwerveDriveConfig config) {
+									int pigeonChannel, SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -44,22 +45,11 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		if (backRight == null)
 			throw new IllegalArgumentException("backRight is null");
 
-		if (width <= 0)
-			throw new IllegalArgumentException("width is less than or equal to 0");
-		if (length <= 0)
-			throw new IllegalArgumentException("length is less than or equal to 0");
-
 		this.frontLeft = frontLeft;
 		this.frontRight = frontRight;
 		this.backLeft = backLeft;
 		this.backRight = backRight;
 		pigeon = new Pigeon2(pigeonChannel);
-
-		width /= 2;
-		length /= 2;
-		double divisor = Math.sqrt(width * width + length * length);
-		this.width = width / divisor;
-		this.length = length / divisor;
 
 		configureDrive(config);
 	}
@@ -130,6 +120,14 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	private void configureDrive(SwerveDriveConfig config) {
 		gyroFactor = config.gyroFactor;
+
+		moduleX = config.width / 2;
+		moduleY = config.length / 2;
+
+		double divisor = Math.sqrt(moduleX * moduleX + moduleY * moduleY);
+		this.moduleUnitX = moduleX / divisor;
+		this.moduleUnitY = moduleY / divisor;
+
 		maxLinearAccel = config.maxLinearAccel;
 		maxRotateAccel = config.maxRotateAccel;
 		lastTime = System.currentTimeMillis();
@@ -182,10 +180,14 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			double effectiveLinearSpeed = currentTargetLinearSpeed;
 			double effectiveRotate = currentTargetRotate;
 
-			double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, length);
-			double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, length);
-			double[] backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, -width, -length);
-			double[] backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate, width, -length);
+			double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																	-moduleUnitX, moduleUnitY);
+			double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																	moduleUnitX, moduleUnitY);
+			double[] backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																	-moduleUnitX, -moduleUnitY);
+			double[] backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																	moduleUnitX, -moduleUnitY);
 
 			// A motor can only go at 100% speed so we have to reduce them if one goes faster.
 			double maxSpeed = 0;
