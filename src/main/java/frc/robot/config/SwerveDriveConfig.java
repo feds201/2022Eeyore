@@ -13,6 +13,7 @@ public class SwerveDriveConfig {
 
 	public double width;
 	public double length;
+	public double wheelDistance;
 
 	public double maxLinearAccel;
 	public double maxRotateAccel;
@@ -48,6 +49,7 @@ public class SwerveDriveConfig {
 
 		config.width = table.getEntry("width").getDouble(1);
 		config.length = table.getEntry("length").getDouble(1);
+		config.wheelDistance = table.getEntry("wheeldistance").getDouble(0);
 
 		config.maxLinearAccel = table.getEntry("maxlinearaccel").getDouble(0);
 		config.maxRotateAccel = table.getEntry("maxrotateaccel").getDouble(0);

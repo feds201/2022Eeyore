@@ -6,8 +6,6 @@ import frc.robot.config.SwerveDriveConfig;
 
 public class FourCornerSwerveDrive implements ISwerveDrive {
 
-	public static final double WHEEL_DISTANCE = 11.781;
-
 	private final ISwerveModule frontLeft;
 	private final ISwerveModule frontRight;
 	private final ISwerveModule backLeft;
@@ -22,6 +20,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double moduleY;
 	private double moduleUnitX;
 	private double moduleUnitY;
+	private double wheelDistance;
 
 	private long lastTime;
 	private double maxLinearAccel;
@@ -129,6 +128,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 		moduleX = config.width / 2;
 		moduleY = config.length / 2;
+		wheelDistance = config.wheelDistance;
 
 		double divisor = Math.sqrt(moduleX * moduleX + moduleY * moduleY);
 		this.moduleUnitX = moduleX / divisor;
@@ -231,21 +231,21 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 		{
 			double frontLeftX = Math.sin(frontLeft.getCurrentAngle() * Math.PI * 2) *
-									frontLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleX;
+									frontLeft.getCurrentSpeed() * wheelDistance - moduleX;
 			double frontLeftY = Math.cos(frontLeft.getCurrentAngle() * Math.PI * 2) *
-									frontLeft.getCurrentSpeed() * WHEEL_DISTANCE + moduleY;
+									frontLeft.getCurrentSpeed() * wheelDistance + moduleY;
 			double frontRightX = Math.sin(frontRight.getCurrentAngle() * Math.PI * 2) *
-									frontRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleX;
+									frontRight.getCurrentSpeed() * wheelDistance + moduleX;
 			double frontRightY = Math.cos(frontRight.getCurrentAngle() * Math.PI * 2) *
-									frontRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleY;
+									frontRight.getCurrentSpeed() * wheelDistance + moduleY;
 			double backLeftX = Math.sin(backLeft.getCurrentAngle() * Math.PI * 2) *
-									backLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleX;
+									backLeft.getCurrentSpeed() * wheelDistance - moduleX;
 			double backLeftY = Math.cos(backLeft.getCurrentAngle() * Math.PI * 2) *
-									backLeft.getCurrentSpeed() * WHEEL_DISTANCE - moduleY;
+									backLeft.getCurrentSpeed() * wheelDistance - moduleY;
 			double backRightX = Math.sin(backRight.getCurrentAngle() * Math.PI * 2) *
-									backRight.getCurrentSpeed() * WHEEL_DISTANCE + moduleX;
+									backRight.getCurrentSpeed() * wheelDistance + moduleX;
 			double backRightY = Math.cos(backRight.getCurrentAngle() * Math.PI * 2) *
-									backRight.getCurrentSpeed() * WHEEL_DISTANCE - moduleY;
+									backRight.getCurrentSpeed() * wheelDistance - moduleY;
 
 			double x = (frontLeftX + frontRightX + backLeftX + backRightX) / 4;
 			double y = (frontLeftY + frontRightY + backLeftY + backRightY) / 4;
