@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.FilterConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 
 import frc.robot.config.SwerveModuleConfig;
 
@@ -63,7 +64,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		if (initialized) {
 			realCurrentAngle = steer.getSelectedSensorPosition() / STEER_MOTOR_ENCODER_COUNTS;
 			effectiveCurrentAngle = ((realCurrentAngle - angleOffset) % 1 + (reversed ? 0.5 : 0) + 1) % 1;
-			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10;
+			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 50;
 
 			// We don't want to move the wheels if we don't have to.
 			if (targetSpeed != 0) {
@@ -129,6 +130,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.neutralDeadband = 0.001;
 		driveConfig.openloopRamp = config.maxRamp;
 		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_20Ms;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
 		driveConfig.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
