@@ -254,8 +254,13 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			double backAngle = Math.atan2(backLeftY - backRightY, backLeftX - backRightX) / Math.PI / 2;
 			double angle = (frontAngle + backAngle) / 2;
 
-			pose.x += x;
-			pose.y += y;
+			double transAngle = Math.atan2(y, x) / Math.PI / 2;
+			double transDistance = Math.sqrt(x * x + y * y);
+			double deltaX = Math.sin((pose.angle + transAngle) * Math.PI * 2) * transDistance;
+			double deltaY = Math.cos((pose.angle + transAngle) * Math.PI * 2) * transDistance;
+
+			pose.x += deltaX;
+			pose.y += deltaY;
 			pose.angle += angle;
 			pose.angle = (pose.angle % 1 + 1) % 1;
 		}
