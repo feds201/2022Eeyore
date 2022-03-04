@@ -14,10 +14,8 @@ import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.IntakeConfig;
@@ -59,6 +57,8 @@ public class Robot extends TimedRobot {
 	public static final int SWERVE_BACK_RIGHT_STEER = 41;
 	public static final int SWERVE_BACK_RIGHT_DRIVE = 42;
 	public static final int SWERVE_BACK_RIGHT_ENCODER = 2;
+
+	public static final int SWERVE_PIGEON = 1;
 
 	public static final int INTAKE_SOLENOID_DEPLOY = 0;
 	public static final int INTAKE_SOLENOID_STANDBY = 1;
@@ -139,7 +139,7 @@ public class Robot extends TimedRobot {
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													new ADXRS450_Gyro(Port.kOnboardCS0), 30, 30, swerveDriveConfig);
+													SWERVE_PIGEON, 30, 30, swerveDriveConfig);
 		}
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);

@@ -1,6 +1,7 @@
 package frc.robot.swerve;
 
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import com.ctre.phoenix.sensors.Pigeon2;
+
 import frc.robot.config.SwerveDriveConfig;
 
 public class FourCornerSwerveDrive implements ISwerveDrive {
@@ -9,9 +10,12 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private final ISwerveModule frontRight;
 	private final ISwerveModule backLeft;
 	private final ISwerveModule backRight;
-	private final Gyro gyro;
 
+	private final Pigeon2 pigeon;
+	private boolean straight = false;
+	private double lastYaw;
 	private double gyroFactor;
+
 	private double width;
 	private double length;
 
@@ -28,7 +32,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
-									Gyro gyro, double width, double length, SwerveDriveConfig config) {
+									int pigeonChannel, double width, double length, SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -47,7 +51,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.frontRight = frontRight;
 		this.backLeft = backLeft;
 		this.backRight = backRight;
-		this.gyro = gyro;
+		pigeon = new Pigeon2(pigeonChannel);
 
 		width /= 2;
 		length /= 2;
@@ -61,8 +65,18 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	// Written by Michael Kaatz (2022)
 	@Override
 	public void setTargetVelocity(double linearAngle, double linearSpeed, double rotate) {
-		if (rotate == 0 && linearSpeed != 0)
-			rotate = -gyro.getRate() * gyroFactor;
+		if (rotate == 0 && currentTargetLinearSpeed != 0) {
+			if (straight) {
+				double yaw = pigeon.getYaw();
+				rotate = (yaw - lastYaw) * gyroFactor;
+				lastYaw = yaw;
+			} else {
+				lastYaw = pigeon.getYaw();
+				straight = true;
+			}
+		} else {
+			straight = false;
+		}
 
 		targetLinearAngle = (linearAngle % 1 + 1) % 1;
 		targetLinearSpeed = linearSpeed;
