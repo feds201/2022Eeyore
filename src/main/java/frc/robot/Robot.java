@@ -72,7 +72,6 @@ public class Robot extends TimedRobot {
 
 	public static final int CLIMBER_LEFT_ID = 51;
 	public static final int CLIMBER_RIGHT_ID = 52;
-	public static final int CLIMBER_LIMIT_ID = 0;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
@@ -156,7 +155,7 @@ public class Robot extends TimedRobot {
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
-		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, CLIMBER_LIMIT_ID, climberConfig);
+		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, climberConfig);
 
 		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
 

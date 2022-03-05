@@ -10,24 +10,21 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.config.ClimberConfig;
 
 public class Climber implements Subsystem {
 
 	private final TalonFX leftMotor;
 	private final TalonFX rightMotor;
-	private final DigitalInput limitSwitch;
 
 	private double speed;
 
 	private boolean update = true;
 	private int position = 0;
 
-	public Climber(int leftChannel, int rightChannel, int limitSwitchPort, ClimberConfig config) {
+	public Climber(int leftChannel, int rightChannel, ClimberConfig config) {
 		leftMotor = new TalonFX(leftChannel);
 		rightMotor = new TalonFX(rightChannel);
-		limitSwitch = new DigitalInput(limitSwitchPort);
 
 		configure(config);
 	}
@@ -41,9 +38,6 @@ public class Climber implements Subsystem {
 
 	@Override
 	public void tick() {
-		if (limitSwitch.get())
-			leftMotor.setSelectedSensorPosition(0);
-
 		if (update) {
 			if (position == 1)
 				leftMotor.set(ControlMode.PercentOutput, speed);
@@ -72,6 +66,7 @@ public class Climber implements Subsystem {
 		leftMotor.configAllSettings(leftConfig);
 		leftMotor.setInverted(true);
 		leftMotor.setNeutralMode(NeutralMode.Brake);
+		leftMotor.setSelectedSensorPosition(0);
 		leftMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 10);
 		leftMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
 		leftMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
