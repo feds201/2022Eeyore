@@ -17,7 +17,8 @@ public class Climber implements Subsystem {
 	private final TalonFX leftMotor;
 	private final TalonFX rightMotor;
 
-	private double speed;
+	private double forwardSpeed;
+	private double reverseSpeed;
 
 	private boolean update = true;
 	private int position = 0;
@@ -40,9 +41,9 @@ public class Climber implements Subsystem {
 	public void tick() {
 		if (update) {
 			if (position == 1)
-				leftMotor.set(ControlMode.PercentOutput, speed);
+				leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
 			else if (position == -1)
-				leftMotor.set(ControlMode.PercentOutput, -speed);
+				leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
 			else
 				leftMotor.set(ControlMode.PercentOutput, 0);
 		}
@@ -99,6 +100,7 @@ public class Climber implements Subsystem {
 		rightMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		rightMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
-		speed = config.speed;
+		forwardSpeed = config.forwardSpeed;
+		reverseSpeed = config.reverseSpeed;
 	}
 }

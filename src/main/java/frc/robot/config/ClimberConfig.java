@@ -6,7 +6,8 @@ import edu.wpi.first.networktables.PersistentException;
 
 public class ClimberConfig {
 
-	public double speed;
+	public double forwardSpeed;
+	public double reverseSpeed;
 	public double ramp;
 	public double encoderCounts;
 
@@ -19,7 +20,8 @@ public class ClimberConfig {
 		ClimberConfig config = new ClimberConfig();
 		table.loadEntries(file);
 
-		config.speed = table.getEntry("speed").getDouble(0);
+		config.forwardSpeed = table.getEntry("forwardspeed").getDouble(0);
+		config.reverseSpeed = table.getEntry("reversespeed").getDouble(0);
 		config.ramp = table.getEntry("ramp").getDouble(0);
 		config.encoderCounts = table.getEntry("encodercounts").getDouble(0);
 
