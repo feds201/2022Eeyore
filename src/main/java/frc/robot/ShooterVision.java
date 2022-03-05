@@ -11,7 +11,8 @@ import frc.robot.config.ShooterVisionConfig.ShooterVisionPoint;
 
 public class ShooterVision implements Subsystem {
 
-	public static final DoubleUnaryOperator ANGLE_TO_DISTANCE = (x) -> 5.71 - 0.21 * x + 0.00328 * x * x - 0.000277 * x * x * x;
+	public static final DoubleUnaryOperator ANGLE_TO_DISTANCE =
+		(x) -> 10.9 - 0.313 * x + 0.00885 * x * x - 0.00038 * x * x * x;
 
 	private final NetworkTable table;
 
