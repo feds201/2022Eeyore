@@ -149,6 +149,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
+		reversed = false;
 		initialized = false;
 		initTime = System.currentTimeMillis();
 	}
@@ -172,7 +173,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 
 	@Override
 	public void align() {
-		angleOffset += realCurrentAngle;
+		angleOffset = realCurrentAngle;
 		angleOffset = (angleOffset % 1 + 1) % 1;
 	}
 

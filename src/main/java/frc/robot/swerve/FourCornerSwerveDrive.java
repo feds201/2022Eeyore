@@ -65,7 +65,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	// Written by Michael Kaatz (2022)
 	@Override
 	public void setTargetVelocity(double linearAngle, double linearSpeed, double rotate) {
-		if (rotate == 0 && currentTargetLinearSpeed != 0) {
+		if (rotate == 0 && targetLinearSpeed != 0) {
 			if (straight) {
 				double yaw = pigeon.getYaw();
 				rotate = (yaw - lastYaw) * gyroFactor;
@@ -111,10 +111,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	@Override
 	public void align() {
-		frontLeft.setAngleOffsetRelative(frontLeft.getCurrentAngle());
-		frontRight.setAngleOffsetRelative(frontRight.getCurrentAngle());
-		backLeft.setAngleOffsetRelative(backLeft.getCurrentAngle());
-		backRight.setAngleOffsetRelative(backRight.getCurrentAngle());
+		frontLeft.align();
+		frontRight.align();
+		backLeft.align();
+		backRight.align();
 	}
 
 	@Override
