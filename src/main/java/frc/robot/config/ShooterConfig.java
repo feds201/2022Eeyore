@@ -8,7 +8,8 @@ import edu.wpi.first.networktables.PersistentException;
 
 public class ShooterConfig {
 
-	public SlotConfiguration pid;
+	public SlotConfiguration topPid;
+	public SlotConfiguration bottomPid;
 	public double fireThresholdLower;
 	public double fireThresholdUpper;
 	public double feederSpeed;
@@ -27,14 +28,23 @@ public class ShooterConfig {
 		ShooterConfig config = new ShooterConfig();
 		table.loadEntries(file);
 
-		config.pid = new SlotConfiguration();
-		config.pid.closedLoopPeriod = (int) table.getEntry("pid.period").getDouble(1);
-		config.pid.kP = table.getEntry("pid.kp").getDouble(0);
-		config.pid.kI = table.getEntry("pid.ki").getDouble(0);
-		config.pid.integralZone = table.getEntry("pid.izone").getDouble(0);
-		config.pid.maxIntegralAccumulator = table.getEntry("pid.maxiacc").getDouble(0);
-		config.pid.kD = table.getEntry("pid.kd").getDouble(0);
-		config.pid.kF = table.getEntry("pid.kf").getDouble(0);
+		config.topPid = new SlotConfiguration();
+		config.topPid.closedLoopPeriod = (int) table.getEntry("toppid.period").getDouble(1);
+		config.topPid.kP = table.getEntry("toppid.kp").getDouble(0);
+		config.topPid.kI = table.getEntry("toppid.ki").getDouble(0);
+		config.topPid.integralZone = table.getEntry("toppid.izone").getDouble(0);
+		config.topPid.maxIntegralAccumulator = table.getEntry("toppid.maxiacc").getDouble(0);
+		config.topPid.kD = table.getEntry("toppid.kd").getDouble(0);
+		config.topPid.kF = table.getEntry("toppid.kf").getDouble(0);
+
+		config.bottomPid = new SlotConfiguration();
+		config.bottomPid.closedLoopPeriod = (int) table.getEntry("bottompid.period").getDouble(1);
+		config.bottomPid.kP = table.getEntry("bottompid.kp").getDouble(0);
+		config.bottomPid.kI = table.getEntry("bottompid.ki").getDouble(0);
+		config.bottomPid.integralZone = table.getEntry("bottompid.izone").getDouble(0);
+		config.bottomPid.maxIntegralAccumulator = table.getEntry("bottompid.maxiacc").getDouble(0);
+		config.bottomPid.kD = table.getEntry("bottompid.kd").getDouble(0);
+		config.bottomPid.kF = table.getEntry("bottompid.kf").getDouble(0);
 
 		config.shooterBrake = table.getEntry("shooterbrake").getBoolean(false);
 		config.fireThresholdLower = table.getEntry("firethresholdlower").getDouble(0);

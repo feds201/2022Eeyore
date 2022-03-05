@@ -66,7 +66,7 @@ public class Shooter implements Subsystem {
 				bottomMotor.set(ControlMode.PercentOutput, 0);
 		}
 
-		boolean shouldFire = fire && topSpeed != 0 && bottomSpeed != 0 &&
+		boolean shouldFire = fire && (topSpeed != 0 || bottomSpeed != 0) &&
 								getCurrentSpeedTopPercentage() > fireThresholdLower &&
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
@@ -78,17 +78,17 @@ public class Shooter implements Subsystem {
 	}
 
 	public void configure(ShooterConfig config) {
-		TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
-		shooterMotorConfig.neutralDeadband = 0.001;
-		shooterMotorConfig.openloopRamp = 0;
-		shooterMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		shooterMotorConfig.slot0 = config.pid;
-		shooterMotorConfig.voltageCompSaturation = 12;
-		shooterMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
-		shooterMotorConfig.supplyCurrLimit.enable = config.shooterCurrentLimitEnabled;
-		shooterMotorConfig.supplyCurrLimit.currentLimit = config.shooterCurrentLimit;
-		shooterMotorConfig.supplyCurrLimit.triggerThresholdTime = config.shooterCurrentLimitTime;
-		topMotor.configAllSettings(shooterMotorConfig);
+		TalonFXConfiguration topMotorConfig = new TalonFXConfiguration();
+		topMotorConfig.neutralDeadband = 0.001;
+		topMotorConfig.openloopRamp = 0;
+		topMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		topMotorConfig.slot0 = config.topPid;
+		topMotorConfig.voltageCompSaturation = 12;
+		topMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		topMotorConfig.supplyCurrLimit.enable = config.shooterCurrentLimitEnabled;
+		topMotorConfig.supplyCurrLimit.currentLimit = config.shooterCurrentLimit;
+		topMotorConfig.supplyCurrLimit.triggerThresholdTime = config.shooterCurrentLimitTime;
+		topMotor.configAllSettings(topMotorConfig);
 		topMotor.selectProfileSlot(0, 0);
 		topMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		topMotor.setInverted(TalonFXInvertType.CounterClockwise);
@@ -103,7 +103,18 @@ public class Shooter implements Subsystem {
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
-		bottomMotor.configAllSettings(shooterMotorConfig);
+		
+		TalonFXConfiguration bottomMotorConfig = new TalonFXConfiguration();
+		bottomMotorConfig.neutralDeadband = 0.001;
+		bottomMotorConfig.openloopRamp = 0;
+		bottomMotorConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		bottomMotorConfig.slot0 = config.bottomPid;
+		bottomMotorConfig.voltageCompSaturation = 12;
+		bottomMotorConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
+		bottomMotorConfig.supplyCurrLimit.enable = config.shooterCurrentLimitEnabled;
+		bottomMotorConfig.supplyCurrLimit.currentLimit = config.shooterCurrentLimit;
+		bottomMotorConfig.supplyCurrLimit.triggerThresholdTime = config.shooterCurrentLimitTime;
+		bottomMotor.configAllSettings(bottomMotorConfig);
 		bottomMotor.selectProfileSlot(0, 0);
 		bottomMotor.setNeutralMode(config.shooterBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		bottomMotor.setInverted(TalonFXInvertType.Clockwise);
