@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.IntakeConfig;
+import frc.robot.config.ClimberConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
@@ -39,6 +40,7 @@ public class Robot extends TimedRobot {
 	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
+	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
 
 	public static final int PCM_CHANNEL = 8;
 
@@ -68,6 +70,9 @@ public class Robot extends TimedRobot {
 	public static final int SHOOTER_BOTTOM_ID = 61;
 	public static final int SHOOTER_FEEDER_ID = 62;
 
+	public static final int CLIMBER_LEFT_ID = 51;
+	public static final int CLIMBER_RIGHT_ID = 52;
+
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
@@ -85,6 +90,7 @@ public class Robot extends TimedRobot {
 	private BallPickup intake;
 	private ShooterVision shooterVision;
 	private Shooter shooter;
+	private Climber climber;
 	private IndicatorLights indicatorLights;
 	private UsbCamera driverCamera;
 
@@ -92,6 +98,7 @@ public class Robot extends TimedRobot {
 	private IntakeConfig intakeConfig;
 	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
+	private ClimberConfig climberConfig;
 
 	public Robot() {
 		super(0.05);
@@ -148,6 +155,8 @@ public class Robot extends TimedRobot {
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
+		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, climberConfig);
+
 		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
 
 		driverCamera = CameraServer.startAutomaticCapture();
@@ -178,6 +187,7 @@ public class Robot extends TimedRobot {
 		intake.tick();
 		shooterVision.tick();
 		shooter.tick();
+		climber.tick();
 		indicatorLights.tick();
 	}
 
@@ -218,6 +228,13 @@ public class Robot extends TimedRobot {
 
 		intake.setDeployed(activeProfile.getIntakeDeploy());
 		intake.setActive(activeProfile.getIntakeActive());
+
+		if (activeProfile.getClimberUp())
+			climber.setTargetPosition(1);
+		else if (activeProfile.getClimberDown())
+			climber.setTargetPosition(-1);
+		else
+			climber.setTargetPosition(0);
 	}
 
 	@Override
@@ -270,6 +287,7 @@ public class Robot extends TimedRobot {
 		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE,
 														Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
+		climberConfig = ClimberConfig.load(Filesystem.getDeployDirectory() + "/" + CLIMBER_CONFIG_FILE);
 	}
 
 	private void applyConfigs() {
@@ -277,5 +295,6 @@ public class Robot extends TimedRobot {
 		intake.configure(intakeConfig);
 		shooterVision.configure(shooterVisionConfig);
 		shooter.configure(shooterConfig);
+		climber.configure(climberConfig);
 	}
 }
