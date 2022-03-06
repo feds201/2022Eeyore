@@ -207,39 +207,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		activeProfile.update();
-
-		if (activeProfile.getDecreaseShooterDistance())
-			shooterVision.adjustDistance(-1);
-		else if (activeProfile.getIncreaseShooterDistance())
-			shooterVision.adjustDistance(+1);
-
-		double swerveRotate = activeProfile.getSwerveRotate();
-		if (activeProfile.getShooterRev()) {
-			shooterVision.setActive(true);
-			double[] shooterSpeeds = shooterVision.getShooterSpeeds();
-			shooter.setSpeed(shooterSpeeds[0], shooterSpeeds[1]);
-			if (shooterVision.hasTarget())
-				swerveRotate = shooterVision.getYawCorrection();
-		} else {
-			shooterVision.setActive(false);
-			shooter.setSpeed(0, 0);
-		}
-		shooter.setFire(activeProfile.getShooterFire());
-
-		swerveDrive.setTargetVelocity(activeProfile.getSwerveLinearAngle(),
-										activeProfile.getSwerveLinearSpeed(),
-										swerveRotate);
-
-		intake.setDeployed(activeProfile.getIntakeDeploy());
-		intake.setActive(activeProfile.getIntakeActive());
-
-		if (activeProfile.getClimberUp())
-			climber.setTargetPosition(1);
-		else if (activeProfile.getClimberDown())
-			climber.setTargetPosition(-1);
-		else
-			climber.setTargetPosition(0);
+		applyProfile(activeProfile);
 	}
 
 	@Override
@@ -284,6 +252,40 @@ public class Robot extends TimedRobot {
 			}
 		}
 		driverController.setRumble(RumbleType.kRightRumble, activeProfile.getConfigReloadRumble() ? 1 : 0);
+	}
+
+	private void applyProfile(DriverProfile profile) {
+		if (profile.getDecreaseShooterDistance())
+			shooterVision.adjustDistance(-1);
+		else if (profile.getIncreaseShooterDistance())
+			shooterVision.adjustDistance(+1);
+
+		double swerveRotate = profile.getSwerveRotate();
+		if (profile.getShooterRev()) {
+			shooterVision.setActive(true);
+			double[] shooterSpeeds = shooterVision.getShooterSpeeds();
+			shooter.setSpeed(shooterSpeeds[0], shooterSpeeds[1]);
+			if (shooterVision.hasTarget())
+				swerveRotate = shooterVision.getYawCorrection();
+		} else {
+			shooterVision.setActive(false);
+			shooter.setSpeed(0, 0);
+		}
+		shooter.setFire(profile.getShooterFire());
+
+		swerveDrive.setTargetVelocity(profile.getSwerveLinearAngle(),
+										profile.getSwerveLinearSpeed(),
+										swerveRotate);
+
+		intake.setDeployed(profile.getIntakeDeploy());
+		intake.setActive(profile.getIntakeActive());
+
+		if (profile.getClimberUp())
+			climber.setTargetPosition(1);
+		else if (profile.getClimberDown())
+			climber.setTargetPosition(-1);
+		else
+			climber.setTargetPosition(0);
 	}
 
 	private void loadConfigs() throws PersistentException {
