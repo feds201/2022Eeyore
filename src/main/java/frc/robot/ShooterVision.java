@@ -15,6 +15,7 @@ public class ShooterVision implements Subsystem {
 		(x) -> 10.9 - 0.313 * x + 0.00885 * x * x - 0.00038 * x * x * x;
 
 	private final NetworkTable table;
+	private final double period;
 
 	private SlotConfiguration pid;
 
@@ -26,11 +27,10 @@ public class ShooterVision implements Subsystem {
 
 	private double iacc = 0;
 	private double lastErr = 0;
-	private double lastTime;
 
-	public ShooterVision(ShooterVisionConfig config) {
+	public ShooterVision(double period, ShooterVisionConfig config) {
 		table = NetworkTableInstance.getDefault().getTable("limelight");
-		lastTime = System.currentTimeMillis();
+		this.period = period;
 
 		configure(config);
 		setActive(false);
@@ -49,19 +49,15 @@ public class ShooterVision implements Subsystem {
 	}
 
 	public double getYawCorrection() {
-		double currentTime = System.currentTimeMillis();
-		double delta = currentTime - lastTime;
-		lastTime = currentTime;
-
 		double error = table.getEntry("tx").getDouble(0);
 		if (Math.abs(error) <= pid.integralZone) {
-			iacc += error * delta;
+			iacc += error * period;
 			if (Math.abs(iacc) > pid.maxIntegralAccumulator)
 				iacc = Math.signum(iacc) * pid.maxIntegralAccumulator;
 		}
 		else
 			iacc = 0;
-		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / delta * pid.kD;
+		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / period * pid.kD;
 		lastErr = error;
 		return output;
 	}

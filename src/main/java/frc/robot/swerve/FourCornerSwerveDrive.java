@@ -19,6 +19,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double width;
 	private double length;
 
+	private final double period;
 	private double maxLinearAccel;
 	private double maxRotateAccel;
 
@@ -32,7 +33,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
-									int pigeonChannel, double width, double length, SwerveDriveConfig config) {
+									int pigeonChannel, double width, double length,
+									double period, SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -59,6 +61,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.width = width / divisor;
 		this.length = length / divisor;
 
+		this.period = period;
 		configureDrive(config);
 	}
 
@@ -128,8 +131,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	private void configureDrive(SwerveDriveConfig config) {
 		gyroFactor = config.gyroFactor;
-		maxLinearAccel = config.maxLinearAccel;
-		maxRotateAccel = config.maxRotateAccel;
+		maxLinearAccel = config.maxLinearAccel * period;
+		maxRotateAccel = config.maxRotateAccel * period;
 	}
 
 	@Override
