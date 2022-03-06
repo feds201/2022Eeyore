@@ -8,10 +8,17 @@ public class DefaultDriverProfile extends DriverProfile {
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
 	public static final double SHOOTER_STOP_THRESHOLD = 0.4;
 
+	private final XboxController driver;
+	private final XboxController operator;
+
 	private boolean shooterToggleTripped = false;
 
-	public void update(XboxController driver, XboxController operator) {
+	public DefaultDriverProfile(XboxController driver, XboxController operator) {
+		this.driver = driver;
+		this.operator = operator;
+	}
 
+	public void update() {
 		double forward = -driver.getLeftY();
 		double strafe = driver.getLeftX();
 		double rotate = driver.getRightX();

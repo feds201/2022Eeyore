@@ -78,12 +78,8 @@ public class Robot extends TimedRobot {
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
-	private final DriverProfile[] profiles = {
-		new DefaultDriverProfile(),
-		new TestDriverProfile(),
-		new MichaelsDriverProfile()
-	};
-	private DriverProfile activeProfile = profiles[0];
+	private DriverProfile[] profiles;
+	private DriverProfile activeProfile;
 
 	private XboxController driverController;
 	private XboxController operatorController;
@@ -166,6 +162,13 @@ public class Robot extends TimedRobot {
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
+
+		profiles = new DriverProfile[] {
+			new DefaultDriverProfile(driverController, operatorController),
+			new TestDriverProfile(driverController),
+			new MichaelsDriverProfile(driverController, operatorController)
+		};
+		activeProfile = profiles[0];
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
@@ -204,7 +207,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		activeProfile.update(driverController, operatorController);
+		activeProfile.update();
 
 		if (activeProfile.getDecreaseShooterDistance())
 			shooterVision.adjustDistance(-1);

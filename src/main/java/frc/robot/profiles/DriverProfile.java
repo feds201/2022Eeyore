@@ -1,7 +1,5 @@
 package frc.robot.profiles;
 
-import edu.wpi.first.wpilibj.XboxController;
-
 public abstract class DriverProfile {
 
 	protected double swerveLinearAngle = 0;
@@ -30,7 +28,7 @@ public abstract class DriverProfile {
 		return Math.signum(input) * (Math.abs(input) - threshold) / (1 - threshold);
 	}
 
-	public abstract void update(XboxController driver, XboxController operator);
+	public abstract void update();
 
 	public double getSwerveLinearAngle() {
 		return swerveLinearAngle;
