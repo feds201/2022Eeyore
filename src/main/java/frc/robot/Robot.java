@@ -24,6 +24,7 @@ import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
+import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
@@ -172,9 +173,9 @@ public class Robot extends TimedRobot {
 		};
 		activeDriverProfile = driverProfiles[0];
 		autonProfiles = new ControlProfile[] {
-
+			new BasicDualBallAutonProfile(PERIOD)
 		};
-		activeAutonProfile = null;
+		activeAutonProfile = autonProfiles[0];
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
