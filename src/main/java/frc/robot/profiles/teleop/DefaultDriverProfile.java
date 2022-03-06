@@ -1,8 +1,9 @@
-package frc.robot.profiles;
+package frc.robot.profiles.teleop;
 
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.profiles.ControlProfile;
 
-public class MichaelsDriverProfile extends DriverProfile {
+public class DefaultDriverProfile extends ControlProfile {
 
 	public static final double THRESHOLD = 0.025;
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
@@ -13,7 +14,7 @@ public class MichaelsDriverProfile extends DriverProfile {
 
 	private boolean shooterToggleTripped = false;
 
-	public MichaelsDriverProfile(XboxController driver, XboxController operator) {
+	public DefaultDriverProfile(XboxController driver, XboxController operator) {
 		this.driver = driver;
 		this.operator = operator;
 	}
@@ -26,12 +27,12 @@ public class MichaelsDriverProfile extends DriverProfile {
 		linearAngle = (linearAngle % 1 + 1) % 1;
 		double linearSpeed = Math.sqrt(forward * forward + strafe * strafe);
 		swerveLinearAngle = linearAngle;
-		swerveLinearSpeed = Math.pow(deadzone(linearSpeed, THRESHOLD), 2);
+		swerveLinearSpeed = deadzone(linearSpeed, THRESHOLD);
 		swerveRotate = deadzone(rotate, THRESHOLD) / 2;
 
-		if (driver.getLeftBumperPressed())
-			intakeDeploy = !intakeDeploy;
-		intakeActive = driver.getRightBumper();
+		if (driver.getRightBumperPressed())
+			intakeActive = !intakeActive;
+		intakeDeploy = intakeActive || driver.getLeftBumper();
 
 		if (!operator.getYButton() && !operator.getAButton()) {
 			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {

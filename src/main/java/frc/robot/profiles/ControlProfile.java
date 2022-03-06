@@ -1,6 +1,6 @@
 package frc.robot.profiles;
 
-public abstract class DriverProfile {
+public abstract class ControlProfile {
 
 	protected double swerveLinearAngle = 0;
 	protected double swerveLinearSpeed = 0;

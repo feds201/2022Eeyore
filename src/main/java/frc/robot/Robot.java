@@ -23,10 +23,10 @@ import frc.robot.config.ClimberConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
-import frc.robot.profiles.DefaultDriverProfile;
-import frc.robot.profiles.DriverProfile;
-import frc.robot.profiles.MichaelsDriverProfile;
-import frc.robot.profiles.TestDriverProfile;
+import frc.robot.profiles.ControlProfile;
+import frc.robot.profiles.teleop.DefaultDriverProfile;
+import frc.robot.profiles.teleop.MichaelsDriverProfile;
+import frc.robot.profiles.teleop.TestDriverProfile;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
@@ -78,8 +78,10 @@ public class Robot extends TimedRobot {
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
 
-	private DriverProfile[] profiles;
-	private DriverProfile activeProfile;
+	private ControlProfile[] driverProfiles;
+	private ControlProfile activeDriverProfile;
+	private ControlProfile[] autonProfiles;
+	private ControlProfile activeAutonProfile;
 
 	private XboxController driverController;
 	private XboxController operatorController;
@@ -163,12 +165,16 @@ public class Robot extends TimedRobot {
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
 
-		profiles = new DriverProfile[] {
+		driverProfiles = new ControlProfile[] {
 			new DefaultDriverProfile(driverController, operatorController),
 			new TestDriverProfile(driverController),
 			new MichaelsDriverProfile(driverController, operatorController)
 		};
-		activeProfile = profiles[0];
+		activeDriverProfile = driverProfiles[0];
+		autonProfiles = new ControlProfile[] {
+
+		};
+		activeAutonProfile = null;
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
@@ -200,14 +206,16 @@ public class Robot extends TimedRobot {
 	public void autonomousInit() {}
 
 	@Override
-	public void autonomousPeriodic() {}
+	public void autonomousPeriodic() {
+		applyProfile(activeAutonProfile);
+	}
 
 	@Override
 	public void teleopInit() {}
 
 	@Override
 	public void teleopPeriodic() {
-		applyProfile(activeProfile);
+		applyProfile(activeDriverProfile);
 	}
 
 	@Override
@@ -223,7 +231,7 @@ public class Robot extends TimedRobot {
 	public void testPeriodic() {
 		teleopPeriodic();
 
-		if (activeProfile.getSwerveAlign()) {
+		if (activeDriverProfile.getSwerveAlign()) {
 			swerveDrive.align();
 			double[] alignments = swerveDrive.getAlignments();
 			try {
@@ -239,9 +247,9 @@ public class Robot extends TimedRobot {
 				System.err.println(e);
 			}
 		}
-		driverController.setRumble(RumbleType.kLeftRumble, activeProfile.getSwerveAlignRumble() ? 1 : 0);
+		driverController.setRumble(RumbleType.kLeftRumble, activeDriverProfile.getSwerveAlignRumble() ? 1 : 0);
 
-		if (activeProfile.getConfigReload()) {
+		if (activeDriverProfile.getConfigReload()) {
 			try {
 				loadConfigs();
 				applyConfigs();
@@ -251,10 +259,10 @@ public class Robot extends TimedRobot {
 				System.err.println(e);
 			}
 		}
-		driverController.setRumble(RumbleType.kRightRumble, activeProfile.getConfigReloadRumble() ? 1 : 0);
+		driverController.setRumble(RumbleType.kRightRumble, activeDriverProfile.getConfigReloadRumble() ? 1 : 0);
 	}
 
-	private void applyProfile(DriverProfile profile) {
+	private void applyProfile(ControlProfile profile) {
 		if (profile.getDecreaseShooterDistance())
 			shooterVision.adjustDistance(-1);
 		else if (profile.getIncreaseShooterDistance())

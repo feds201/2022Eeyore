@@ -1,8 +1,9 @@
-package frc.robot.profiles;
+package frc.robot.profiles.teleop;
 
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.profiles.ControlProfile;
 
-public class TestDriverProfile extends DriverProfile {
+public class TestDriverProfile extends ControlProfile {
 
 	public static final double THRESHOLD = 0.025;
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
