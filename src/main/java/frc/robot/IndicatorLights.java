@@ -15,6 +15,9 @@ public class IndicatorLights implements Subsystem {
 	private final AddressableLEDBuffer buffer;
 	private final HashMap<LEDZone, ZoneController> zones;
 
+	private int position = 0;
+	private int time = 0;
+
 	public IndicatorLights(int port, int count) {
 		this.count = count;
 		strip = new AddressableLED(port);
@@ -38,6 +41,12 @@ public class IndicatorLights implements Subsystem {
 
 	@Override
 	public void tick() {
+		time--;
+		if (time <= 0) {
+			position++;
+			time = PERIOD;
+		}
+
 		for (LEDZone zone : LEDZone.values())
 			zones.get(zone).tick();
 
@@ -80,15 +89,12 @@ public class IndicatorLights implements Subsystem {
 		BASE, TIPS, TOP, BOTTOM
 	}
 
-	private static class ZoneController {
+	private class ZoneController {
 
 		private final Color[] buffer;
 
 		private LEDPattern pattern;
 		private Color color;
-
-		private int position = 0;
-		private int time = 0;
 
 		public ZoneController(int size) {
 			buffer = new Color[size];
@@ -108,12 +114,6 @@ public class IndicatorLights implements Subsystem {
 		}
 
 		public void tick() {
-			time--;
-			if (time <= 0) {
-				position++;
-				time = PERIOD;
-			}
-
 			switch (pattern) {
 			case PASS:
 				break;
