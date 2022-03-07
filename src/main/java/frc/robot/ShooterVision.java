@@ -15,7 +15,6 @@ public class ShooterVision implements Subsystem {
 		(x) -> 10.9 - 0.313 * x + 0.00885 * x * x - 0.00038 * x * x * x;
 
 	private final NetworkTable table;
-	private final double period;
 
 	private SlotConfiguration pid;
 
@@ -25,12 +24,12 @@ public class ShooterVision implements Subsystem {
 	private ShooterVisionPoint[] points;
 	private double distanceOffset;
 
+	private long lastTime;
 	private double iacc = 0;
 	private double lastErr = 0;
 
-	public ShooterVision(double period, ShooterVisionConfig config) {
+	public ShooterVision(ShooterVisionConfig config) {
 		table = NetworkTableInstance.getDefault().getTable("limelight");
-		this.period = period;
 
 		configure(config);
 		setActive(false);
@@ -49,15 +48,19 @@ public class ShooterVision implements Subsystem {
 	}
 
 	public double getYawCorrection() {
+		long currentTime = System.currentTimeMillis();
+		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
+		lastTime = currentTime;
+
 		double error = table.getEntry("tx").getDouble(0);
 		if (Math.abs(error) <= pid.integralZone) {
-			iacc += error * period;
+			iacc += error * timeDeltaSeconds;
 			if (Math.abs(iacc) > pid.maxIntegralAccumulator)
 				iacc = Math.signum(iacc) * pid.maxIntegralAccumulator;
 		}
 		else
 			iacc = 0;
-		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / period * pid.kD;
+		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / timeDeltaSeconds * pid.kD;
 		lastErr = error;
 		return output;
 	}
@@ -95,6 +98,7 @@ public class ShooterVision implements Subsystem {
 		points = config.points;
 		distanceOffset = config.distanceOffset;
 
+		lastTime = System.currentTimeMillis();
 		iacc = 0;
 		lastErr = 0;
 	}
