@@ -14,13 +14,18 @@ import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.config.IntakeConfig;
+import frc.robot.IndicatorLights.LEDPattern;
+import frc.robot.IndicatorLights.LEDZone;
 import frc.robot.config.ClimberConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.ShooterVisionConfig;
@@ -215,6 +220,26 @@ public class Robot extends TimedRobot {
 		shooterVision.tick();
 		shooter.tick();
 		climber.tick();
+
+		if (shooter.isSpinning()) {
+			if (shooter.isReady())
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+			else
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kYellow);
+			if (shooterVision.hasTarget())
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kLime);
+			else
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.SOLID, Color.kRed);
+			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+		} else {
+			Alliance alliance = DriverStation.getAlliance();
+			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
+								alliance == Alliance.Red ? Color.kFirstRed : Color.kFirstBlue);
+			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+		}
 		indicatorLights.tick();
 	}
 
