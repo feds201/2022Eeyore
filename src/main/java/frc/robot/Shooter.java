@@ -53,6 +53,22 @@ public class Shooter implements Subsystem {
 		this.fire = fire;
 	}
 
+	public boolean isSpinning() {
+		return topSpeed != 0 || bottomSpeed != 0;
+	}
+
+	public boolean isReady() {
+		return isSpinning() &&
+				getCurrentSpeedTopPercentage() > fireThresholdLower &&
+				getCurrentSpeedTopPercentage() < fireThresholdUpper &&
+				getCurrentSpeedBottomPercentage() > fireThresholdLower &&
+				getCurrentSpeedBottomPercentage() < fireThresholdUpper;
+	}
+
+	public boolean isFiring() {
+		return currentlyFiring;
+	}
+
 	@Override
 	public void tick() {
 		if (updateSpeed) {
@@ -66,15 +82,19 @@ public class Shooter implements Subsystem {
 				bottomMotor.set(ControlMode.PercentOutput, 0);
 		}
 
-		boolean shouldFire = fire && (topSpeed != 0 || bottomSpeed != 0) &&
-								getCurrentSpeedTopPercentage() > fireThresholdLower &&
-								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
-								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
-								getCurrentSpeedBottomPercentage() < fireThresholdUpper;
+		boolean shouldFire = fire && isReady();
 		if (shouldFire != currentlyFiring) {
 			feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
 			currentlyFiring = shouldFire;
 		}
+	}
+
+	public double getCurrentSpeedTopPercentage() {
+		return topMotor.getSelectedSensorVelocity() / topSpeed;
+	}
+
+	public double getCurrentSpeedBottomPercentage() {
+		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 
 	public void configure(ShooterConfig config) {
@@ -103,7 +123,7 @@ public class Shooter implements Subsystem {
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
-		
+
 		TalonFXConfiguration bottomMotorConfig = new TalonFXConfiguration();
 		bottomMotorConfig.neutralDeadband = 0.001;
 		bottomMotorConfig.openloopRamp = 0;
@@ -153,13 +173,5 @@ public class Shooter implements Subsystem {
 		fireThresholdLower = config.fireThresholdLower;
 		fireThresholdUpper = config.fireThresholdUpper;
 		feederSpeed = config.feederSpeed;
-	}
-
-	public double getCurrentSpeedTopPercentage() {
-		return topMotor.getSelectedSensorVelocity() / topSpeed;
-	}
-
-	public double getCurrentSpeedBottomPercentage() {
-		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 }
