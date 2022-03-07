@@ -1,152 +1,152 @@
 package frc.robot;
 
+import java.util.HashMap;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.util.Color;
 
 public class IndicatorLights implements Subsystem {
 
-	public static final int SLOW_PERIOD = 10;
-	public static final int FAST_PERIOD = 5;
+	public static final int PERIOD = 5;
 
+	private final int count;
 	private final AddressableLED strip;
 	private final AddressableLEDBuffer buffer;
-
-	private LEDPattern pattern = LEDPattern.SOLID;
-	private int red = 0;
-	private int green = 0;
-	private int blue = 0;
-
-	private int position = 0;
-	private int time = 0;
+	private final HashMap<LEDZone, ZoneController> zones;
 
 	public IndicatorLights(int port, int count) {
+		this.count = count;
 		strip = new AddressableLED(port);
 		strip.setLength(count);
 		buffer = new AddressableLEDBuffer(count);
+
+		zones = new HashMap<>();
+		zones.put(LEDZone.BASE, new ZoneController(60));
+		zones.put(LEDZone.TIPS, new ZoneController(10));
+		zones.put(LEDZone.TOP, new ZoneController(5));
+		zones.put(LEDZone.BOTTOM, new ZoneController(5));
 	}
 
-	public void set(LEDPattern pattern, int red, int green, int blue) {
-		if (red < 0 || red > 255 ||
-			green < 0 || green > 255 ||
-			blue < 0 || blue > 255)
-			throw new IllegalArgumentException("color out of bounds");
-		this.pattern = pattern;
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		position = 0;
-		time = 0;
+	public void set(LEDZone zone, LEDPattern pattern, Color color) {
+		if (zone == null)
+			throw new IllegalArgumentException("zone is null");
+		if (pattern == null)
+			throw new IllegalArgumentException("pattern is null");
+		zones.get(zone).set(pattern, color != null ? color : Color.kBlack);
 	}
 
 	@Override
 	public void tick() {
-		switch (pattern) {
-		case SOLID:
-			for (int i = 0; i < buffer.getLength(); i++)
-				buffer.setRGB(i, red, green, blue);
-			break;
-		case BLINK:
-			if (time <= 0) {
-				if (position == 0) {
-					for (int i = 0; i < buffer.getLength(); i++)
-						buffer.setRGB(i, red, green, blue);
-					position = 1;
-				} else {
-					for (int i = 0; i < buffer.getLength(); i++)
-						buffer.setRGB(i, 0, 0, 0);
-					position = 0;
-				}
-				time = SLOW_PERIOD;
-			} else {
-				time--;
-			}
-			break;
-		case FORWARD:
-			if (time <= 0) {
-				for (int i = 0; i < buffer.getLength(); i++) {
-					if ((i + position) % 4 == 0)
-						buffer.setRGB(i, red, green, blue);
-					else
-						buffer.setRGB(i, 0, 0, 0);
-				}
-				position++;
-				if (position >= 4)
-					position = 0;
-				time = SLOW_PERIOD;
-			} else {
-				time--;
-			}
-			break;
-		case REVERSE:
-			if (time <= 0) {
-				for (int i = 0; i < buffer.getLength(); i++) {
-					if ((i + position) % 4 == 0)
-						buffer.setRGB(i, red, green, blue);
-					else
-						buffer.setRGB(i, 0, 0, 0);
-				}
-				position--;
-				if (position <= 0)
-					position = 4;
-				time = SLOW_PERIOD;
-			} else {
-				time--;
-			}
-			break;
-		case BLINK_FAST:
-			if (time <= 0) {
-				if (position == 0) {
-					for (int i = 0; i < buffer.getLength(); i++)
-						buffer.setRGB(i, red, green, blue);
-					position = 1;
-				} else {
-					for (int i = 0; i < buffer.getLength(); i++)
-						buffer.setRGB(i, 0, 0, 0);
-					position = 0;
-				}
-				time = FAST_PERIOD;
-			} else {
-				time--;
-			}
-			break;
-		case FORWARD_FAST:
-			if (time <= 0) {
-				for (int i = 0; i < buffer.getLength(); i++) {
-					if ((i + position) % 6 == 0)
-						buffer.setRGB(i, red, green, blue);
-					else
-						buffer.setRGB(i, 0, 0, 0);
-				}
-				position++;
-				if (position >= 6)
-					position = 0;
-				time = FAST_PERIOD;
-			} else {
-				time--;
-			}
-			break;
-		case REVERSE_FAST:
-			if (time <= 0) {
-				for (int i = 0; i < buffer.getLength(); i++) {
-					if ((i + position) % 6 == 0)
-						buffer.setRGB(i, red, green, blue);
-					else
-						buffer.setRGB(i, 0, 0, 0);
-				}
-				position--;
-				if (position <= 0)
-					position = 6;
-				time = FAST_PERIOD;
-			} else {
-				time--;
-			}
-			break;
+		for (LEDZone zone : LEDZone.values())
+			zones.get(zone).tick();
+
+		ZoneController zone = zones.get(LEDZone.BASE);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < count; i++)
+				buffer.setLED(i, zoneBuffer[i]);
 		}
+		zone = zones.get(LEDZone.TIPS);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 5; i++)
+				buffer.setLED(i, zoneBuffer[i]);
+			for (int i = 5; i < 10; i++)
+				buffer.setLED(i + (count - 10), zoneBuffer[i]);
+		}
+		zone = zones.get(LEDZone.TOP);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 5; i++)
+				buffer.setLED(i, zoneBuffer[i]);
+		}
+		zone = zones.get(LEDZone.BOTTOM);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 5; i++)
+				buffer.setLED(i + (count - 5), zoneBuffer[i]);
+		}
+
 		strip.setData(buffer);
 		strip.start();
 	}
 
 	public static enum LEDPattern {
-		SOLID, BLINK, FORWARD, REVERSE, BLINK_FAST, FORWARD_FAST, REVERSE_FAST
+		PASS, SOLID, BLINK, FORWARD, REVERSE
+	}
+
+	public static enum LEDZone {
+		BASE, TIPS, TOP, BOTTOM
+	}
+
+	private static class ZoneController {
+
+		private final Color[] buffer;
+
+		private LEDPattern pattern;
+		private Color color;
+
+		private int position = 0;
+		private int time = 0;
+
+		public ZoneController(int size) {
+			buffer = new Color[size];
+		}
+
+		public void set(LEDPattern pattern, Color color) {
+			this.pattern = pattern;
+			this.color = color;
+		}
+
+		public boolean isPassthrough() {
+			return pattern == LEDPattern.PASS;
+		}
+
+		public Color[] getBuffer() {
+			return buffer;
+		}
+
+		public void tick() {
+			time--;
+			if (time <= 0) {
+				position++;
+				time = PERIOD;
+			}
+
+			switch (pattern) {
+			case PASS:
+				break;
+			case SOLID:
+				for (int i = 0; i < buffer.length; i++)
+					buffer[i] = color;
+				break;
+			case BLINK:
+				if (position % 2 == 0) {
+					for (int i = 0; i < buffer.length; i++)
+						buffer[i] = color;
+				} else {
+					for (int i = 0; i < buffer.length; i++)
+						buffer[i] = Color.kBlack;
+				}
+				break;
+			case FORWARD:
+				for (int i = 0; i < buffer.length; i++) {
+					if ((i + position) % 4 == 0)
+						buffer[i] = color;
+					else
+						buffer[i] = Color.kBlack;
+				}
+				break;
+			case REVERSE:
+				for (int i = 0; i < buffer.length; i++) {
+					if ((i + position) % 4 == 0)
+						buffer[i] = color;
+					else
+						buffer[i] = Color.kBlack;
+				}
+				break;
+			}
+		}
 	}
 }
