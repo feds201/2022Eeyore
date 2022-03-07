@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.IntakeConfig;
@@ -100,6 +102,9 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
+	private SendableChooser<Integer> driverSelector;
+	private SendableChooser<Integer> autonSelector;
+
 	public Robot() {
 		super(PERIOD);
 	}
@@ -171,10 +176,18 @@ public class Robot extends TimedRobot {
 			new MichaelsDriverProfile(driverController, operatorController)
 		};
 		activeDriverProfile = driverProfiles[0];
-		autonProfiles = new ControlProfile[] {
+		driverSelector.setDefaultOption("Default", 0);
+		driverSelector.addOption("Test", 1);
+		driverSelector.addOption("Michael", 2);
 
+		autonProfiles = new ControlProfile[] {
+			null
 		};
-		activeAutonProfile = null;
+		activeAutonProfile = autonProfiles[0];
+		autonSelector.setDefaultOption("TODO", 0);
+
+		SmartDashboard.putData(driverSelector);
+		SmartDashboard.putData(autonSelector);
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
@@ -194,6 +207,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotPeriodic() {
+		activeDriverProfile = driverProfiles[driverSelector.getSelected()];
+		activeAutonProfile = autonProfiles[autonSelector.getSelected()];
+
 		swerveDrive.tick();
 		intake.tick();
 		shooterVision.tick();
