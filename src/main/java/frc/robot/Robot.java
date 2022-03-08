@@ -191,8 +191,10 @@ public class Robot extends TimedRobot {
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
+		talon.configFactoryDefault();
 		talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		talon.setSensorPhase(false);
+		talon.configFeedbackNotContinuous(true, 50);
+		talon.setSensorPhase(true);
 		talon.setInverted(false);
 		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
 		talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
