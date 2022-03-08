@@ -6,6 +6,7 @@ public class SwerveModuleConfig {
 
 	public SlotConfiguration pid;
 	public double maxRamp;
+	public double reverseThreshold;
 	public boolean steerBrake;
 
 	public boolean steerCurrentLimitEnabled;
