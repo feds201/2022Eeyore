@@ -14,9 +14,6 @@ import frc.robot.config.SwerveModuleConfig;
 
 public class SDSMk4FXModule implements ISwerveModule {
 
-	// The threshold to reverse is 0.3 vs what you might expect (0.25) to prevent the wheels from losing control.
-	public static final double REVERSE_THRESHOLD = 0.3;
-
 	public static final double DRIVE_ENCODER_COUNTS = 8.41 * 2048;
 	public static final double STEER_CENTRAL_ENCODER_COUNTS = 4096;
 	public static final double STEER_MOTOR_ENCODER_COUNTS = 2048 * 12.8;
@@ -27,6 +24,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 	private final TalonFX drive;
 	private final int encoderChannel;
 	private double angleOffset;
+	private double reverseThreshold;
 
 	private long initTime;
 	private boolean initialized = false;
@@ -81,7 +79,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 					targetError = errorLoop;
 
 				// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
-				if (Math.abs(targetError) > REVERSE_THRESHOLD) {
+				if (Math.abs(targetError) > reverseThreshold) {
 					reversed = !reversed;
 					drive.setInverted(!reversed);
 					// Quick way to recalculate the offset of the new angle from the target.
@@ -148,6 +146,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+
+		reverseThreshold = config.reverseThreshold;
 
 		reversed = false;
 		initialized = false;

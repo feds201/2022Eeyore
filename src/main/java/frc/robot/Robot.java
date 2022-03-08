@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.IntakeConfig;
@@ -101,6 +103,9 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
+	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
+	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
+
 	public Robot() {
 		super(PERIOD);
 	}
@@ -147,12 +152,12 @@ public class Robot extends TimedRobot {
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													SWERVE_PIGEON, 30, 30, PERIOD, swerveDriveConfig);
+													SWERVE_PIGEON, 30, 30, swerveDriveConfig);
 		}
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
 
-		shooterVision = new ShooterVision(PERIOD, shooterVisionConfig);
+		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
@@ -172,10 +177,18 @@ public class Robot extends TimedRobot {
 			new MichaelsDriverProfile(driverController, operatorController)
 		};
 		activeDriverProfile = driverProfiles[0];
+		driverSelector.setDefaultOption("Default", 0);
+		driverSelector.addOption("Test", 1);
+		driverSelector.addOption("Michael", 2);
+
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD)
 		};
 		activeAutonProfile = autonProfiles[0];
+		autonSelector.setDefaultOption("Basic 2-Ball", 0);
+
+		SmartDashboard.putData(driverSelector);
+		SmartDashboard.putData(autonSelector);
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
@@ -195,6 +208,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotPeriodic() {
+		activeDriverProfile = driverProfiles[driverSelector.getSelected()];
+		activeAutonProfile = autonProfiles[autonSelector.getSelected()];
+
 		swerveDrive.tick();
 		intake.tick();
 		shooterVision.tick();
@@ -264,6 +280,8 @@ public class Robot extends TimedRobot {
 	}
 
 	private void applyProfile(ControlProfile profile) {
+		profile.update();
+
 		if (profile.getDecreaseShooterDistance())
 			shooterVision.adjustDistance(-1);
 		else if (profile.getIncreaseShooterDistance())
