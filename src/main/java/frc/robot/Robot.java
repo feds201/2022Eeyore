@@ -107,8 +107,8 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
-	private SendableChooser<Integer> driverSelector;
-	private SendableChooser<Integer> autonSelector;
+	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
+	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
 
 	public Robot() {
 		super(PERIOD);
@@ -156,12 +156,12 @@ public class Robot extends TimedRobot {
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													SWERVE_PIGEON, 30, 30, PERIOD, swerveDriveConfig);
+													SWERVE_PIGEON, 30, 30, swerveDriveConfig);
 		}
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
 
-		shooterVision = new ShooterVision(PERIOD, shooterVisionConfig);
+		shooterVision = new ShooterVision(shooterVisionConfig);
 		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig);
 
@@ -304,6 +304,8 @@ public class Robot extends TimedRobot {
 	}
 
 	private void applyProfile(ControlProfile profile) {
+		profile.update();
+
 		if (profile.getDecreaseShooterDistance())
 			shooterVision.adjustDistance(-1);
 		else if (profile.getIncreaseShooterDistance())

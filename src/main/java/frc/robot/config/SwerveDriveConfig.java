@@ -30,6 +30,7 @@ public class SwerveDriveConfig {
 		config.moduleConfig.pid.kF = table.getEntry("module.pid.kf").getDouble(0);
 
 		config.moduleConfig.maxRamp = table.getEntry("module.maxramp").getDouble(0);
+		config.moduleConfig.reverseThreshold = table.getEntry("module.reversethreshold").getDouble(0.25);
 		config.moduleConfig.steerBrake = table.getEntry("module.steerbrake").getBoolean(false);
 
 		config.moduleConfig.steerCurrentLimitEnabled = table.getEntry("module.steercurrentlimitenabled").getBoolean(false);

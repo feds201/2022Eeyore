@@ -19,7 +19,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double width;
 	private double length;
 
-	private final double period;
+	private long lastTime;
 	private double maxLinearAccel;
 	private double maxRotateAccel;
 
@@ -34,7 +34,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
 									int pigeonChannel, double width, double length,
-									double period, SwerveDriveConfig config) {
+									SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -61,7 +61,6 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.width = width / divisor;
 		this.length = length / divisor;
 
-		this.period = period;
 		configureDrive(config);
 	}
 
@@ -131,8 +130,9 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	private void configureDrive(SwerveDriveConfig config) {
 		gyroFactor = config.gyroFactor;
-		maxLinearAccel = config.maxLinearAccel * period;
-		maxRotateAccel = config.maxRotateAccel * period;
+		maxLinearAccel = config.maxLinearAccel;
+		maxRotateAccel = config.maxRotateAccel;
+		lastTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -152,6 +152,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 	@Override
 	public void tick() {
+		long currentTime = System.currentTimeMillis();
+		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
+		lastTime = currentTime;
+
 		{
 			double targetX = Math.sin(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
 			double targetY = Math.cos(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
@@ -161,8 +165,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			double translatedTargetY = targetY - currentY;
 
 			double accelAngleRadians = Math.atan2(translatedTargetY, translatedTargetX);
-			double deltaX = Math.cos(accelAngleRadians) * maxLinearAccel;
-			double deltaY = Math.sin(accelAngleRadians) * maxLinearAccel;
+			double deltaX = Math.cos(accelAngleRadians) * maxLinearAccel * timeDeltaSeconds;
+			double deltaY = Math.sin(accelAngleRadians) * maxLinearAccel * timeDeltaSeconds;
 
 			currentX += Math.signum(translatedTargetX) * Math.min(Math.abs(deltaX), Math.abs(translatedTargetX));
 			currentY += Math.signum(translatedTargetY) * Math.min(Math.abs(deltaY), Math.abs(translatedTargetY));
@@ -171,7 +175,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		}
 		{
 			double deltaRotate = targetRotate - currentTargetRotate;
-			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel, Math.abs(deltaRotate));
+			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel * timeDeltaSeconds, Math.abs(deltaRotate));
 		}
 
 		double effectiveLinearAngle = currentTargetLinearAngle;
