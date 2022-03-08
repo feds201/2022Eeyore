@@ -102,8 +102,8 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
-	private SendableChooser<Integer> driverSelector;
-	private SendableChooser<Integer> autonSelector;
+	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
+	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
 
 	public Robot() {
 		super(PERIOD);
@@ -279,6 +279,8 @@ public class Robot extends TimedRobot {
 	}
 
 	private void applyProfile(ControlProfile profile) {
+		profile.update();
+
 		if (profile.getDecreaseShooterDistance())
 			shooterVision.adjustDistance(-1);
 		else if (profile.getIncreaseShooterDistance())
