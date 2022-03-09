@@ -5,12 +5,12 @@ import frc.robot.profiles.ControlProfile;
 public class BasicDualBallAutonProfile extends ControlProfile {
 
 	public static final double STEP1 = 2;
-	public static final double STEP1_SPEED = 0.2;
+	public static final double STEP1_SPEED = 0.25;
 
 	public static final double STEP2 = 3;
 
 	public static final double STEP3 = 4.5;
-	public static final double STEP3_SPEED = 0.5;
+	public static final double STEP3_SPEED = 0.2;
 
 	public static final double STEP4 = 8;
 
