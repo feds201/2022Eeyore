@@ -36,7 +36,7 @@ public class MichaelsDriverProfile extends ControlProfile {
 
 		if (!operator.getYButton() && !operator.getAButton()) {
 			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterRev = !shooterRev;
+				shooterSpin = !shooterSpin;
 				shooterToggleTripped = true;
 			} else if (shooterToggleTripped && operator.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 				shooterToggleTripped = false;
@@ -45,7 +45,7 @@ public class MichaelsDriverProfile extends ControlProfile {
 			climberUp = false;
 			climberDown = false;
 		} else {
-			shooterRev = false;
+			shooterSpin = false;
 			shooterFire = false;
 			shooterToggleTripped = false;
 

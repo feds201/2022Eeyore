@@ -34,7 +34,7 @@ public class TestDriverProfile extends ControlProfile {
 
 		if (!controller.getYButton() && !controller.getAButton()) {
 			if (!shooterToggleTripped && controller.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterRev = !shooterRev;
+				shooterSpin = !shooterSpin;
 				shooterToggleTripped = true;
 			} else if (shooterToggleTripped && controller.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 				shooterToggleTripped = false;
@@ -43,7 +43,7 @@ public class TestDriverProfile extends ControlProfile {
 			climberUp = false;
 			climberDown = false;
 		} else {
-			shooterRev = false;
+			shooterSpin = false;
 			shooterFire = false;
 			shooterToggleTripped = false;
 

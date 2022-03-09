@@ -289,7 +289,7 @@ public class Robot extends TimedRobot {
 			shooterVision.adjustDistance(+1);
 
 		double swerveRotate = profile.getSwerveRotate();
-		if (profile.getShooterRev()) {
+		if (profile.getShooterSpin()) {
 			shooterVision.setActive(true);
 			double[] shooterSpeeds = shooterVision.getShooterSpeeds();
 			shooter.setSpeed(shooterSpeeds[0], shooterSpeeds[1]);

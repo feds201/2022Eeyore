@@ -11,7 +11,7 @@ public abstract class ControlProfile {
 	protected boolean intakeDeploy = false;
 	protected boolean intakeActive = false;
 
-	protected boolean shooterRev = false;
+	protected boolean shooterSpin = false;
 	protected boolean shooterFire = false;
 	protected boolean decreaseShooterDistance = false;
 	protected boolean increaseShooterDistance = false;
@@ -58,8 +58,8 @@ public abstract class ControlProfile {
 		return intakeActive;
 	}
 
-	public boolean getShooterRev() {
-		return shooterRev;
+	public boolean getShooterSpin() {
+		return shooterSpin;
 	}
 
 	public boolean getShooterFire() {
