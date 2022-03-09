@@ -23,12 +23,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.config.ClimberConfig;
 import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
-import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
+import frc.robot.shooter.Shooter;
+import frc.robot.shooter.ShooterHardware;
+import frc.robot.shooter.ShooterMode;
+import frc.robot.shooter.ShooterVision;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
@@ -41,9 +44,8 @@ public class Robot extends TimedRobot {
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
 	public static final String INTAKE_CONFIG_FILE = "intakeconfig.ini";
-	public static final String SHOOTER_VISION_CONFIG_FILE = "shootervisionconfig.ini";
-	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
+	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
 
 	public static final int PCM_CHANNEL = 8;
@@ -90,7 +92,6 @@ public class Robot extends TimedRobot {
 
 	private ISwerveDrive swerveDrive;
 	private BallPickup intake;
-	private ShooterVision shooterVision;
 	private Shooter shooter;
 	private Climber climber;
 	private IndicatorLights indicatorLights;
@@ -98,7 +99,6 @@ public class Robot extends TimedRobot {
 
 	private SwerveDriveConfig swerveDriveConfig;
 	private IntakeConfig intakeConfig;
-	private ShooterVisionConfig shooterVisionConfig;
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
@@ -156,8 +156,8 @@ public class Robot extends TimedRobot {
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
 
-		shooterVision = new ShooterVision(shooterVisionConfig);
-		shooter = new Shooter(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
+		shooter = new Shooter(new ShooterHardware(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
+								shooterConfig.hardwareConfig), new ShooterVision(shooterConfig.visionConfig),
 								shooterConfig);
 
 		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, climberConfig);
@@ -214,7 +214,6 @@ public class Robot extends TimedRobot {
 
 		swerveDrive.tick();
 		intake.tick();
-		shooterVision.tick();
 		shooter.tick();
 		climber.tick();
 		indicatorLights.tick();
@@ -283,22 +282,17 @@ public class Robot extends TimedRobot {
 	private void applyProfile(ControlProfile profile) {
 		profile.update();
 
-		if (profile.getDecreaseShooterDistance())
-			shooterVision.adjustDistance(-1);
-		else if (profile.getIncreaseShooterDistance())
-			shooterVision.adjustDistance(+1);
+		shooter.setMode(profile.getShooterMode());
 
+		if (profile.getDecreaseShooterDistance())
+			shooter.adjustDistance(-1);
+		else if (profile.getIncreaseShooterDistance())
+			shooter.adjustDistance(+1);
+
+		shooter.setSpin(profile.getShooterSpin());
 		double swerveRotate = profile.getSwerveRotate();
-		if (profile.getShooterSpin()) {
-			shooterVision.setActive(true);
-			double[] shooterSpeeds = shooterVision.getShooterSpeeds();
-			shooter.setSpeed(shooterSpeeds[0], shooterSpeeds[1]);
-			if (shooterVision.hasTarget())
-				swerveRotate = shooterVision.getYawCorrection();
-		} else {
-			shooterVision.setActive(false);
-			shooter.setSpeed(0, 0);
-		}
+		if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION && shooter.hasTarget())
+			swerveRotate = shooter.getYawCorrection();
 		shooter.setFire(profile.getShooterFire());
 
 		swerveDrive.setTargetVelocity(profile.getSwerveLinearAngle(),
@@ -319,16 +313,14 @@ public class Robot extends TimedRobot {
 	private void loadConfigs() throws PersistentException {
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
 		intakeConfig = IntakeConfig.load(Filesystem.getDeployDirectory() + "/" + INTAKE_CONFIG_FILE);
-		shooterVisionConfig = ShooterVisionConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_CONFIG_FILE,
-														Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
-		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE);
+		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE,
+											Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
 		climberConfig = ClimberConfig.load(Filesystem.getDeployDirectory() + "/" + CLIMBER_CONFIG_FILE);
 	}
 
 	private void applyConfigs() {
 		swerveDrive.configure(swerveDriveConfig);
 		intake.configure(intakeConfig);
-		shooterVision.configure(shooterVisionConfig);
 		shooter.configure(shooterConfig);
 		climber.configure(climberConfig);
 	}

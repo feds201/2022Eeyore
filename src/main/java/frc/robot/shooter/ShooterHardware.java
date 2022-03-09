@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.shooter;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -9,9 +9,10 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
-import frc.robot.config.ShooterConfig;
+import frc.robot.Subsystem;
+import frc.robot.config.ShooterHardwareConfig;
 
-public class Shooter implements Subsystem {
+public class ShooterHardware implements Subsystem {
 
 	private final TalonFX topMotor;
 	private final TalonFX bottomMotor;
@@ -28,8 +29,8 @@ public class Shooter implements Subsystem {
 	private boolean updateSpeed = true;
 	private boolean currentlyFiring = false;
 
-	public Shooter(int topChannel, int bottomChannel, int feederChannel,
-					ShooterConfig config) {
+	public ShooterHardware(int topChannel, int bottomChannel, int feederChannel,
+							ShooterHardwareConfig config) {
 		if (feederSpeed < 0 || feederSpeed > 1)
 			throw new IllegalArgumentException("feeder speed out of bounds");
 
@@ -85,7 +86,7 @@ public class Shooter implements Subsystem {
 		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 
-	public void configure(ShooterConfig config) {
+	public void configure(ShooterHardwareConfig config) {
 		TalonFXConfiguration topMotorConfig = new TalonFXConfiguration();
 		topMotorConfig.neutralDeadband = 0.001;
 		topMotorConfig.openloopRamp = 0;

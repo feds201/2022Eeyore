@@ -1,0 +1,95 @@
+package frc.robot.shooter;
+
+import frc.robot.Subsystem;
+import frc.robot.config.ShooterConfig;
+
+public class Shooter implements Subsystem {
+
+	private final ShooterHardware hardware;
+	private final ShooterVision vision;
+
+	private double lowGoalSpeedTop;
+	private double lowGoalSpeedBottom;
+
+	private double ejectSpeedTop;
+	private double ejectSpeedBottom;
+
+	private ShooterMode mode = ShooterMode.HIGH_GOAL_VISION;
+	private boolean spin = false;
+
+	public Shooter(ShooterHardware hardware, ShooterVision vision,
+					ShooterConfig config) {
+		if (hardware == null)
+			throw new IllegalArgumentException("hardware is null");
+		if (vision == null)
+			throw new IllegalArgumentException("vision is null");
+		this.hardware = hardware;
+		this.vision = vision;
+
+		configureController(config);
+	}
+
+	public void setMode(ShooterMode mode) {
+		if (mode == null)
+			throw new IllegalArgumentException("mode is null");
+		this.mode = mode;
+	}
+
+	public ShooterMode getMode() {
+		return mode;
+	}
+
+	public void setSpin(boolean spin) {
+		this.spin = spin;
+	}
+
+	public void setFire(boolean fire) {
+		hardware.setFire(fire);
+	}
+
+	public void adjustDistance(int offsetDelta) {
+		vision.adjustDistance(offsetDelta);
+	}
+
+	public boolean hasTarget() {
+		return vision.hasTarget();
+	}
+
+	public double getYawCorrection() {
+		return vision.getYawCorrection();
+	}
+
+	@Override
+	public void tick() {
+		vision.setActive(spin && mode == ShooterMode.HIGH_GOAL_VISION);
+		vision.tick();
+
+		if (spin) {
+			if (mode == ShooterMode.HIGH_GOAL_VISION) {
+				double[] speeds = vision.getShooterSpeeds();
+				hardware.setSpeed(speeds[0], speeds[1]);
+			} else if (mode == ShooterMode.LOW_GOAL) {
+				hardware.setSpeed(lowGoalSpeedTop, lowGoalSpeedBottom);
+			} else if (mode == ShooterMode.EJECT) {
+				hardware.setSpeed(ejectSpeedTop, ejectSpeedBottom);
+			}
+		} else {
+			hardware.setSpeed(0, 0);
+		}
+
+		hardware.tick();
+	}
+
+	public void configure(ShooterConfig config) {
+		hardware.configure(config.hardwareConfig);
+		vision.configure(config.visionConfig);
+		configureController(config);
+	}
+
+	private void configureController(ShooterConfig config) {
+		lowGoalSpeedTop = config.lowGoalSpeedTop;
+		lowGoalSpeedBottom = config.lowGoalSpeedBottom;
+		ejectSpeedTop = config.ejectSpeedTop;
+		ejectSpeedBottom = config.ejectSpeedBottom;
+	}
+}

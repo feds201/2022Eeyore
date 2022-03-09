@@ -1,5 +1,7 @@
 package frc.robot.profiles;
 
+import frc.robot.shooter.ShooterMode;
+
 public abstract class ControlProfile {
 
 	protected double swerveLinearAngle = 0;
@@ -11,6 +13,7 @@ public abstract class ControlProfile {
 	protected boolean intakeDeploy = false;
 	protected boolean intakeActive = false;
 
+	protected ShooterMode shooterMode = ShooterMode.HIGH_GOAL_VISION;
 	protected boolean shooterSpin = false;
 	protected boolean shooterFire = false;
 	protected boolean decreaseShooterDistance = false;
@@ -56,6 +59,10 @@ public abstract class ControlProfile {
 
 	public boolean getIntakeActive() {
 		return intakeActive;
+	}
+
+	public ShooterMode getShooterMode() {
+		return shooterMode;
 	}
 
 	public boolean getShooterSpin() {
