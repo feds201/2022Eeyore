@@ -2,6 +2,7 @@ package frc.robot.profiles.teleop;
 
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.profiles.ControlProfile;
+import frc.robot.shooter.ShooterMode;
 
 public class MichaelsDriverProfile extends ControlProfile {
 
@@ -35,7 +36,14 @@ public class MichaelsDriverProfile extends ControlProfile {
 			intakeDeploy = !intakeDeploy;
 		intakeActive = driver.getRightBumper();
 
-		if (!operator.getYButton() && !operator.getAButton()) {
+		if (operator.getYButton())
+			shooterMode = ShooterMode.HIGH_GOAL_VISION;
+		else if (operator.getAButton())
+			shooterMode = ShooterMode.LOW_GOAL;
+		else if (operator.getBButton())
+			shooterMode = ShooterMode.EJECT;
+
+		if (operator.getPOV() == -1) {
 			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
 				shooterSpin = !shooterSpin;
 				shooterToggleTripped = true;
@@ -50,10 +58,10 @@ public class MichaelsDriverProfile extends ControlProfile {
 			shooterFire = false;
 			shooterToggleTripped = false;
 
-			if (operator.getYButton()) {
+			if (operator.getPOV() == 0) {
 				climberUp = true;
 				climberDown = false;
-			} else if (operator.getAButton()) {
+			} else if (operator.getPOV() == 180) {
 				climberUp = false;
 				climberDown = true;
 			}
