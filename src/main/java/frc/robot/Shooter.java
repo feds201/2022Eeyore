@@ -59,11 +59,11 @@ public class Shooter implements Subsystem {
 			if (topSpeed != 0)
 				topMotor.set(ControlMode.Velocity, topSpeed);
 			else
-				topMotor.set(ControlMode.PercentOutput, 0);
+				topMotor.neutralOutput();
 			if (bottomSpeed != 0)
 				bottomMotor.set(ControlMode.Velocity, bottomSpeed);
 			else
-				bottomMotor.set(ControlMode.PercentOutput, 0);
+				bottomMotor.neutralOutput();
 		}
 
 		boolean shouldFire = fire && (topSpeed != 0 || bottomSpeed != 0) &&
@@ -75,6 +75,14 @@ public class Shooter implements Subsystem {
 			feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
 			currentlyFiring = shouldFire;
 		}
+	}
+
+	public double getCurrentSpeedTopPercentage() {
+		return topMotor.getSelectedSensorVelocity() / topSpeed;
+	}
+
+	public double getCurrentSpeedBottomPercentage() {
+		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 
 	public void configure(ShooterConfig config) {
@@ -103,7 +111,7 @@ public class Shooter implements Subsystem {
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		topMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
-		
+
 		TalonFXConfiguration bottomMotorConfig = new TalonFXConfiguration();
 		bottomMotorConfig.neutralDeadband = 0.001;
 		bottomMotorConfig.openloopRamp = 0;
@@ -153,13 +161,5 @@ public class Shooter implements Subsystem {
 		fireThresholdLower = config.fireThresholdLower;
 		fireThresholdUpper = config.fireThresholdUpper;
 		feederSpeed = config.feederSpeed;
-	}
-
-	public double getCurrentSpeedTopPercentage() {
-		return topMotor.getSelectedSensorVelocity() / topSpeed;
-	}
-
-	public double getCurrentSpeedBottomPercentage() {
-		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 }

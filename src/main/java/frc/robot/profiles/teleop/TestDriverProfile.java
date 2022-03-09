@@ -17,6 +17,7 @@ public class TestDriverProfile extends ControlProfile {
 		this.controller = controller;
 	}
 
+	@Override
 	public void update() {
 		double forward = -controller.getLeftY();
 		double strafe = controller.getLeftX();

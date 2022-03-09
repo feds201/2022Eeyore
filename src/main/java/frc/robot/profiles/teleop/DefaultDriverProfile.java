@@ -19,6 +19,7 @@ public class DefaultDriverProfile extends ControlProfile {
 		this.operator = operator;
 	}
 
+	@Override
 	public void update() {
 		double forward = -driver.getLeftY();
 		double strafe = driver.getLeftX();

@@ -89,8 +89,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 				steer.set(ControlMode.Position, (realCurrentAngle + targetError) * STEER_MOTOR_ENCODER_COUNTS);
 				drive.set(ControlMode.PercentOutput, targetSpeed);
 			} else {
-				steer.set(ControlMode.PercentOutput, 0);
-				drive.set(ControlMode.PercentOutput, 0);
+				steer.neutralOutput();
+				drive.neutralOutput();
 			}
 		}
 	}
