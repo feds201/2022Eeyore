@@ -32,6 +32,10 @@ public class ShooterHardware implements Subsystem {
 	private boolean currentlyFiring = false;
 	private boolean currentlyUnjamming = false;
 
+	private long lastTime;
+	private double minFireTime;
+	private double fireTime;
+
 	public ShooterHardware(int topChannel, int bottomChannel, int feederChannel,
 							ShooterHardwareConfig config) {
 		if (feederSpeed < 0 || feederSpeed > 1)
@@ -63,6 +67,10 @@ public class ShooterHardware implements Subsystem {
 
 	@Override
 	public void tick() {
+		long currentTime = System.currentTimeMillis();
+		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
+		lastTime = currentTime;
+
 		if (updateSpeed) {
 			if (topSpeed != 0)
 				topMotor.set(ControlMode.Velocity, topSpeed);
@@ -74,19 +82,25 @@ public class ShooterHardware implements Subsystem {
 				bottomMotor.neutralOutput();
 		}
 
-		boolean shouldFire = fire && (topSpeed != 0 || bottomSpeed != 0) &&
+		if (fireTime > 0)
+			fireTime -= timeDeltaSeconds;
+		boolean shouldFire = fireTime > 0 || (fire && (topSpeed != 0 || bottomSpeed != 0) &&
 								getCurrentSpeedTopPercentage() > fireThresholdLower &&
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
-								getCurrentSpeedBottomPercentage() < fireThresholdUpper;
+								getCurrentSpeedBottomPercentage() < fireThresholdUpper);
+
 		if (unjam || currentlyUnjamming) {
 			if (unjam != currentlyUnjamming) {
 				feederMotor.set(ControlMode.PercentOutput, unjam ? feederUnjamSpeed : 0);
 				currentlyUnjamming = unjam;
+				fireTime = 0;
 			}
 		} else {
 			if (shouldFire != currentlyFiring) {
 				feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
+				if (shouldFire)
+					fireTime = minFireTime;
 				currentlyFiring = shouldFire;
 			}
 		}
@@ -177,5 +191,9 @@ public class ShooterHardware implements Subsystem {
 		fireThresholdUpper = config.fireThresholdUpper;
 		feederSpeed = config.feederSpeed;
 		feederUnjamSpeed = config.feederUnjamSpeed;
+		minFireTime = config.minFireTime;
+
+		lastTime = System.currentTimeMillis();
+		fireTime = 0;
 	}
 }

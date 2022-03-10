@@ -61,6 +61,7 @@ public class ShooterConfig {
 			config.hardwareConfig.fireThresholdUpper = table.getEntry("hardware.firethresholdupper").getDouble(2);
 			config.hardwareConfig.feederSpeed = table.getEntry("hardware.feederspeed").getDouble(0);
 			config.hardwareConfig.feederUnjamSpeed = table.getEntry("hardware.feederunjamspeed").getDouble(0);
+			config.hardwareConfig.minFireTime = table.getEntry("hardware.minfiretime").getDouble(0);
 			config.hardwareConfig.shooterBrake = table.getEntry("hardware.shooterbrake").getBoolean(false);
 
 			config.hardwareConfig.shooterCurrentLimitEnabled = table.getEntry("hardware.shootercurrentlimitenabled").getBoolean(false);
