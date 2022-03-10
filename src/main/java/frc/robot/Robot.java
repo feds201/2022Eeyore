@@ -86,6 +86,7 @@ public class Robot extends TimedRobot {
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 104;
+	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 30;
 
 	private ControlProfile[] driverProfiles;
 	private ControlProfile activeDriverProfile;
@@ -253,7 +254,10 @@ public class Robot extends TimedRobot {
 			Alliance alliance = DriverStation.getAlliance();
 			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
 								alliance == Alliance.Red ? Color.kFirstRed : Color.kFirstBlue);
-			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+			if (DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME)
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kOrange);
+			else
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 		}
