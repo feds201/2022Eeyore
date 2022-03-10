@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
 	public static final int CLIMBER_RIGHT_ID = 52;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
-	public static final int INDICATOR_LIGHTS_COUNT = 104;
+	public static final int INDICATOR_LIGHTS_COUNT = 60;
 	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 30;
 
 	private ControlProfile[] driverProfiles;
