@@ -43,6 +43,8 @@ public class MichaelsDriverProfile extends ControlProfile {
 		else if (operator.getBButton())
 			shooterMode = ShooterMode.EJECT;
 
+		shooterUnjam = operator.getXButton();
+
 		if (operator.getPOV() == -1) {
 			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
 				shooterSpin = !shooterSpin;

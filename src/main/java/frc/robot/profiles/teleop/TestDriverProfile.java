@@ -41,6 +41,8 @@ public class TestDriverProfile extends ControlProfile {
 		else if (controller.getBButton())
 			shooterMode = ShooterMode.EJECT;
 
+		shooterUnjam = controller.getXButton();
+
 		if (controller.getPOV() == -1) {
 			if (!shooterToggleTripped && controller.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
 				shooterSpin = !shooterSpin;

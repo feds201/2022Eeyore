@@ -21,13 +21,16 @@ public class ShooterHardware implements Subsystem {
 	private double fireThresholdLower;
 	private double fireThresholdUpper;
 	private double feederSpeed;
+	private double feederUnjamSpeed;
 
 	private double topSpeed;
 	private double bottomSpeed;
 	private boolean fire = false;
+	private boolean unjam = false;
 
 	private boolean updateSpeed = true;
 	private boolean currentlyFiring = false;
+	private boolean currentlyUnjamming = false;
 
 	public ShooterHardware(int topChannel, int bottomChannel, int feederChannel,
 							ShooterHardwareConfig config) {
@@ -54,6 +57,10 @@ public class ShooterHardware implements Subsystem {
 		this.fire = fire;
 	}
 
+	public void setUnjam(boolean unjam) {
+		this.unjam = unjam;
+	}
+
 	@Override
 	public void tick() {
 		if (updateSpeed) {
@@ -72,9 +79,16 @@ public class ShooterHardware implements Subsystem {
 								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
 								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
 								getCurrentSpeedBottomPercentage() < fireThresholdUpper;
-		if (shouldFire != currentlyFiring) {
-			feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
-			currentlyFiring = shouldFire;
+		if (unjam || currentlyUnjamming) {
+			if (unjam != currentlyUnjamming) {
+				feederMotor.set(ControlMode.PercentOutput, unjam ? feederUnjamSpeed : 0);
+				currentlyUnjamming = unjam;
+			}
+		} else {
+			if (shouldFire != currentlyFiring) {
+				feederMotor.set(ControlMode.PercentOutput, shouldFire ? feederSpeed : 0);
+				currentlyFiring = shouldFire;
+			}
 		}
 	}
 
@@ -162,5 +176,6 @@ public class ShooterHardware implements Subsystem {
 		fireThresholdLower = config.fireThresholdLower;
 		fireThresholdUpper = config.fireThresholdUpper;
 		feederSpeed = config.feederSpeed;
+		feederUnjamSpeed = config.feederUnjamSpeed;
 	}
 }

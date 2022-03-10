@@ -16,6 +16,7 @@ public abstract class ControlProfile {
 	protected ShooterMode shooterMode = ShooterMode.HIGH_GOAL_VISION;
 	protected boolean shooterSpin = false;
 	protected boolean shooterFire = false;
+	protected boolean shooterUnjam = false;
 	protected boolean decreaseShooterDistance = false;
 	protected boolean increaseShooterDistance = false;
 
@@ -71,6 +72,10 @@ public abstract class ControlProfile {
 
 	public boolean getShooterFire() {
 		return shooterFire;
+	}
+
+	public boolean getShooterUnjam() {
+		return shooterUnjam;
 	}
 
 	public boolean getDecreaseShooterDistance() {

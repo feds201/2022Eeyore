@@ -47,6 +47,10 @@ public class Shooter implements Subsystem {
 		hardware.setFire(fire);
 	}
 
+	public void setUnjam(boolean unjam) {
+		hardware.setUnjam(unjam);
+	}
+
 	public void adjustDistance(int offsetDelta) {
 		vision.adjustDistance(offsetDelta);
 	}

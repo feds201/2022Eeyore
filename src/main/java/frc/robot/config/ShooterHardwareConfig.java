@@ -9,6 +9,7 @@ public class ShooterHardwareConfig {
 	public double fireThresholdLower;
 	public double fireThresholdUpper;
 	public double feederSpeed;
+	public double feederUnjamSpeed;
 	public boolean shooterBrake;
 
 	public boolean shooterCurrentLimitEnabled;
