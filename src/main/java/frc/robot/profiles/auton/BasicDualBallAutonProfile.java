@@ -39,7 +39,7 @@ public class BasicDualBallAutonProfile extends ControlProfile {
 		} else if (time < STEP4) {
 			swerveRotate = 0;
 
-			shooterRev = true;
+			shooterSpin = true;
 			shooterFire = true;
 		} else {
 			swerveLinearAngle = 0;
@@ -49,7 +49,7 @@ public class BasicDualBallAutonProfile extends ControlProfile {
 			intakeDeploy = false;
 			intakeActive = false;
 
-			shooterRev = false;
+			shooterSpin = false;
 			shooterFire = false;
 		}
 
