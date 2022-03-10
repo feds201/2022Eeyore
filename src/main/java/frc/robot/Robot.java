@@ -222,15 +222,31 @@ public class Robot extends TimedRobot {
 		shooter.tick();
 		climber.tick();
 
-		if (shooter.isSpinning()) {
-			if (shooter.isReady())
-				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
-			else
-				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kYellow);
-			if (shooter.hasTarget())
-				indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kLime);
-			else
+		if (shooter.getSpin()) {
+			if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION) {
+				if (shooter.hasTarget()) {
+					if (shooter.isReady())
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+					else
+						indicatorLights.set(LEDZone.BASE, LEDPattern.FORWARD, Color.kYellow);
+					indicatorLights.set(LEDZone.TIPS, LEDPattern.SOLID, Color.kLime);
+				} else {
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
+					indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kYellow);
+				}
+			} else if (shooter.getMode() == ShooterMode.LOW_GOAL) {
+				if (shooter.isReady())
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+				else
+					indicatorLights.set(LEDZone.BASE, LEDPattern.FORWARD, Color.kYellow);
 				indicatorLights.set(LEDZone.TIPS, LEDPattern.SOLID, Color.kRed);
+			} else if (shooter.getMode() == ShooterMode.EJECT) {
+				if (shooter.isReady())
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+				else
+					indicatorLights.set(LEDZone.BASE, LEDPattern.FORWARD, Color.kYellow);
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kRed);
+			}
 			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 		} else {

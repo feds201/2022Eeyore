@@ -43,6 +43,10 @@ public class Shooter implements Subsystem {
 		this.spin = spin;
 	}
 
+	public boolean getSpin() {
+		return spin;
+	}
+
 	public boolean isSpinning() {
 		return hardware.isSpinning();
 	}
