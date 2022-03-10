@@ -56,7 +56,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 	@Override
 	public void tick() {
 		if (!initialized && System.currentTimeMillis() > initTime + RELATIVE_INIT_DELAY) {
-			steer.setSelectedSensorPosition((STEER_CENTRAL_ENCODER_COUNTS - steer.getSelectedSensorPosition(1)) *
+			steer.setSelectedSensorPosition(steer.getSelectedSensorPosition(1) *
 											STEER_MOTOR_ENCODER_COUNTS / STEER_CENTRAL_ENCODER_COUNTS);
 			initialized = true;
 		}
@@ -89,8 +89,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 				steer.set(ControlMode.Position, (realCurrentAngle + targetError) * STEER_MOTOR_ENCODER_COUNTS);
 				drive.set(ControlMode.PercentOutput, targetSpeed);
 			} else {
-				steer.set(ControlMode.PercentOutput, 0);
-				drive.set(ControlMode.PercentOutput, 0);
+				steer.neutralOutput();
+				drive.neutralOutput();
 			}
 		}
 	}

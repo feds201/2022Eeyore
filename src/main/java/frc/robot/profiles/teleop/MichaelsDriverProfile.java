@@ -2,6 +2,7 @@ package frc.robot.profiles.teleop;
 
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.profiles.ControlProfile;
+import frc.robot.shooter.ShooterMode;
 
 public class MichaelsDriverProfile extends ControlProfile {
 
@@ -19,6 +20,7 @@ public class MichaelsDriverProfile extends ControlProfile {
 		this.operator = operator;
 	}
 
+	@Override
 	public void update() {
 		double forward = -driver.getLeftY();
 		double strafe = driver.getLeftX();
@@ -34,9 +36,18 @@ public class MichaelsDriverProfile extends ControlProfile {
 			intakeDeploy = !intakeDeploy;
 		intakeActive = driver.getRightBumper();
 
-		if (!operator.getYButton() && !operator.getAButton()) {
+		if (operator.getYButton())
+			shooterMode = ShooterMode.HIGH_GOAL_VISION;
+		else if (operator.getAButton())
+			shooterMode = ShooterMode.LOW_GOAL;
+		else if (operator.getBButton())
+			shooterMode = ShooterMode.EJECT;
+
+		shooterUnjam = operator.getXButton();
+
+		if (operator.getPOV() == -1) {
 			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterRev = !shooterRev;
+				shooterSpin = !shooterSpin;
 				shooterToggleTripped = true;
 			} else if (shooterToggleTripped && operator.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 				shooterToggleTripped = false;
@@ -45,14 +56,14 @@ public class MichaelsDriverProfile extends ControlProfile {
 			climberUp = false;
 			climberDown = false;
 		} else {
-			shooterRev = false;
+			shooterSpin = false;
 			shooterFire = false;
 			shooterToggleTripped = false;
 
-			if (operator.getYButton()) {
+			if (operator.getPOV() == 0) {
 				climberUp = true;
 				climberDown = false;
-			} else if (operator.getAButton()) {
+			} else if (operator.getPOV() == 180) {
 				climberUp = false;
 				climberDown = true;
 			}

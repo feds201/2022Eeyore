@@ -2,6 +2,7 @@ package frc.robot.profiles.teleop;
 
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.profiles.ControlProfile;
+import frc.robot.shooter.ShooterMode;
 
 public class TestDriverProfile extends ControlProfile {
 
@@ -17,6 +18,7 @@ public class TestDriverProfile extends ControlProfile {
 		this.controller = controller;
 	}
 
+	@Override
 	public void update() {
 		double forward = -controller.getLeftY();
 		double strafe = controller.getLeftX();
@@ -32,9 +34,18 @@ public class TestDriverProfile extends ControlProfile {
 			intakeDeploy = !intakeDeploy;
 		intakeActive = controller.getRightBumper();
 
-		if (!controller.getYButton() && !controller.getAButton()) {
+		if (controller.getYButton())
+			shooterMode = ShooterMode.HIGH_GOAL_VISION;
+		else if (controller.getAButton())
+			shooterMode = ShooterMode.LOW_GOAL;
+		else if (controller.getBButton())
+			shooterMode = ShooterMode.EJECT;
+
+		shooterUnjam = controller.getXButton();
+
+		if (controller.getPOV() == -1) {
 			if (!shooterToggleTripped && controller.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterRev = !shooterRev;
+				shooterSpin = !shooterSpin;
 				shooterToggleTripped = true;
 			} else if (shooterToggleTripped && controller.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 				shooterToggleTripped = false;
@@ -43,21 +54,21 @@ public class TestDriverProfile extends ControlProfile {
 			climberUp = false;
 			climberDown = false;
 		} else {
-			shooterRev = false;
+			shooterSpin = false;
 			shooterFire = false;
 			shooterToggleTripped = false;
 
-			if (controller.getYButton()) {
+			if (controller.getPOV() == 0) {
 				climberUp = true;
 				climberDown = false;
-			} else if (controller.getAButton()) {
+			} else if (controller.getPOV() == 180) {
 				climberUp = false;
 				climberDown = true;
 			}
 		}
 
-		decreaseShooterDistance = controller.getXButtonPressed();
-		increaseShooterDistance = controller.getBButtonPressed();
+		decreaseShooterDistance = controller.getLeftStickButtonPressed();
+		increaseShooterDistance = controller.getRightStickButtonPressed();
 
 		swerveAlign = (controller.getBackButton() && controller.getStartButton()) &&
 						(controller.getBackButtonPressed() || controller.getStartButtonPressed());

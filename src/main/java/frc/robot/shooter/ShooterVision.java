@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.shooter;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.Subsystem;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.ShooterVisionConfig.ShooterVisionPoint;
 
@@ -17,9 +18,6 @@ public class ShooterVision implements Subsystem {
 	private final NetworkTable table;
 
 	private SlotConfiguration pid;
-
-	private double lowGoalSpeedTop;
-	private double lowGoalSpeedBottom;
 
 	private ShooterVisionPoint[] points;
 	private double distanceOffset;
@@ -67,7 +65,7 @@ public class ShooterVision implements Subsystem {
 
 	public double[] getShooterSpeeds() {
 		if (!hasTarget())
-			return new double[] { lowGoalSpeedTop, lowGoalSpeedBottom };
+			return new double[] { 0, 0 };
 		double distance = ANGLE_TO_DISTANCE.applyAsDouble(table.getEntry("ty").getDouble(0)) + distanceOffset;
 
 		ShooterVisionPoint lowPoint = points[0];
@@ -91,9 +89,6 @@ public class ShooterVision implements Subsystem {
 
 	public void configure(ShooterVisionConfig config) {
 		pid = config.pid;
-
-		lowGoalSpeedTop = config.lowGoalSpeedTop;
-		lowGoalSpeedBottom = config.lowGoalSpeedBottom;
 
 		points = config.points;
 		distanceOffset = config.distanceOffset;
