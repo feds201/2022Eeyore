@@ -12,6 +12,8 @@ public class BasicSingleBallAutonProfile extends ControlProfile {
 
 	public static final double STEP3 = 5;
 
+	public static final double STEP4 = 6;
+
 	private final double period;
 
 	private double time = 0;
@@ -29,6 +31,7 @@ public class BasicSingleBallAutonProfile extends ControlProfile {
 		} else if (time < STEP3) {
 			shooterMode = ShooterMode.HIGH_GOAL_VISION;
 			shooterSpin = true;
+		} else if (time < STEP4) {
 			shooterFire = true;
 		} else {
 			swerveLinearAngle = 0;

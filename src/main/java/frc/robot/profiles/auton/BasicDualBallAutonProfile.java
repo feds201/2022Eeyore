@@ -1,6 +1,7 @@
 package frc.robot.profiles.auton;
 
 import frc.robot.profiles.ControlProfile;
+import frc.robot.shooter.ShooterMode;
 
 public class BasicDualBallAutonProfile extends ControlProfile {
 
@@ -9,10 +10,12 @@ public class BasicDualBallAutonProfile extends ControlProfile {
 
 	public static final double STEP2 = 3;
 
-	public static final double STEP3 = 4.5;
+	public static final double STEP3 = 5;
 	public static final double STEP3_SPEED = 0.2;
 
 	public static final double STEP4 = 8;
+
+	public static final double STEP5 = 13;
 
 	private final double period;
 
@@ -34,12 +37,14 @@ public class BasicDualBallAutonProfile extends ControlProfile {
 		} else if (time < STEP3) {
 			swerveRotate = STEP3_SPEED;
 
+			shooterMode = ShooterMode.HIGH_GOAL_VISION;
+			shooterSpin = true;
+
 			intakeDeploy = false;
 			intakeActive = false;
 		} else if (time < STEP4) {
 			swerveRotate = 0;
-
-			shooterSpin = true;
+		} else if (time < STEP5) {
 			shooterFire = true;
 		} else {
 			swerveLinearAngle = 0;
