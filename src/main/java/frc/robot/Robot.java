@@ -311,6 +311,8 @@ public class Robot extends TimedRobot {
 			climber.setTargetPosition(1);
 		else if (profile.getClimberDown())
 			climber.setTargetPosition(-1);
+		else if (profile.getClimberHigh())
+			climber.setTargetPosition(2);
 		else
 			climber.setTargetPosition(0);
 	}

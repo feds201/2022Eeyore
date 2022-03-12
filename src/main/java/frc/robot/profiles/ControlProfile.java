@@ -22,6 +22,7 @@ public abstract class ControlProfile {
 
 	protected boolean climberUp = false;
 	protected boolean climberDown = false;
+	protected boolean climberHigh = false;
 
 	protected boolean configReload = false;
 	protected boolean configReloadRumble = false;
@@ -92,6 +93,10 @@ public abstract class ControlProfile {
 
 	public boolean getClimberDown() {
 		return climberDown;
+	}
+
+	public boolean getClimberHigh() {
+		return climberHigh;
 	}
 
 	public boolean getConfigReload() {
