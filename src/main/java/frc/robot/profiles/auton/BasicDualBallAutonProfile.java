@@ -5,8 +5,8 @@ import frc.robot.shooter.ShooterMode;
 
 public class BasicDualBallAutonProfile extends ControlProfile {
 
-	public static final double STEP1 = 2;
-	public static final double STEP1_SPEED = 0.25;
+	public static final double STEP1 = 1.5;
+	public static final double STEP1_SPEED = 0.35;
 
 	public static final double STEP2 = 3;
 
