@@ -221,6 +221,13 @@ public class Robot extends TimedRobot {
 		shooter.tick();
 		climber.tick();
 		indicatorLights.tick();
+
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("/swerve");
+			table.getEntry("x").setDouble(swerveDrive.getPose().x);
+			table.getEntry("y").setDouble(swerveDrive.getPose().y);
+			table.getEntry("angle").setDouble(swerveDrive.getPose().angle * 360);
+		}
 	}
 
 	@Override

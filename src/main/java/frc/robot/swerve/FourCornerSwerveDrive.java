@@ -229,40 +229,130 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		backLeft.tick();
 		backRight.tick();
 
-		{
-			double frontLeftX = Math.sin(frontLeft.getCurrentAngle() * Math.PI * 2) *
-									frontLeft.getCurrentSpeed() * wheelDistance - moduleX;
-			double frontLeftY = Math.cos(frontLeft.getCurrentAngle() * Math.PI * 2) *
-									frontLeft.getCurrentSpeed() * wheelDistance + moduleY;
-			double frontRightX = Math.sin(frontRight.getCurrentAngle() * Math.PI * 2) *
-									frontRight.getCurrentSpeed() * wheelDistance + moduleX;
-			double frontRightY = Math.cos(frontRight.getCurrentAngle() * Math.PI * 2) *
-									frontRight.getCurrentSpeed() * wheelDistance + moduleY;
-			double backLeftX = Math.sin(backLeft.getCurrentAngle() * Math.PI * 2) *
-									backLeft.getCurrentSpeed() * wheelDistance - moduleX;
-			double backLeftY = Math.cos(backLeft.getCurrentAngle() * Math.PI * 2) *
-									backLeft.getCurrentSpeed() * wheelDistance - moduleY;
-			double backRightX = Math.sin(backRight.getCurrentAngle() * Math.PI * 2) *
-									backRight.getCurrentSpeed() * wheelDistance + moduleX;
-			double backRightY = Math.cos(backRight.getCurrentAngle() * Math.PI * 2) *
-									backRight.getCurrentSpeed() * wheelDistance - moduleY;
+		if (frontLeft.getCurrentSpeed() > 0.1 || backRight.getCurrentSpeed() > 0.1) {
+			double eps = 5e-3;
 
-			double x = (frontLeftX + frontRightX + backLeftX + backRightX) / 4;
-			double y = (frontLeftY + frontRightY + backLeftY + backRightY) / 4;
+			double xSum = 0;
+			double ySum = 0;
+			boolean ccw = false;
+			int points = 0;
+			double[] center;
 
-			double frontAngle = Math.atan2(frontLeftY - frontRightY, frontLeftX - frontRightX) / Math.PI / 2;
-			double backAngle = Math.atan2(backLeftY - backRightY, backLeftX - backRightX) / Math.PI / 2;
-			double angle = (frontAngle + backAngle) / 2;
+			center = calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, frontRight, moduleX, moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
+			center = calculateZeroVelocityCenter(backRight, moduleX, -moduleY, frontRight, moduleX, moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
+			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, backRight, moduleX, -moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
+			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontLeft, -moduleX, moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
+			center = calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, backRight, moduleX, -moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
+			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontRight, moduleX, moduleY);
+			if (center[2] > eps && center[3] > eps && center[4] > eps) {
+				xSum += center[0];
+				ySum += center[1];
+				ccw = center[5] == 1;
+				points++;
+			}
 
-			double transAngle = Math.atan2(y, x) / Math.PI / 2;
-			double transDistance = Math.sqrt(x * x + y * y);
-			double deltaX = Math.sin((pose.angle + transAngle) * Math.PI * 2) * transDistance;
-			double deltaY = Math.cos((pose.angle + transAngle) * Math.PI * 2) * transDistance;
+			double xDiff = 0;
+			double yDiff = 0;
+			double angleDiff = 0;
+			if (points > 0) {
+				double centerX = xSum / points;
+				double centerY = ySum / points;
+				double positionAngleDeltaRadians;
+				if (frontLeft.getCurrentSpeed() > backRight.getCurrentSpeed()) {
+					double xFromModule = centerX + moduleX;
+					double yFromModule = centerY - moduleY;
+					double positionModuleRadius = Math.sqrt(xFromModule * xFromModule + yFromModule * yFromModule);
+					positionAngleDeltaRadians = frontLeft.getCurrentSpeed() * wheelDistance
+													/ positionModuleRadius * timeDeltaSeconds;
+				} else {
+					double xFromModule = centerX - moduleX;
+					double yFromModule = centerY + moduleY;
+					double positionModuleRadius = Math.sqrt(xFromModule * xFromModule + yFromModule * yFromModule);
+					positionAngleDeltaRadians = backRight.getCurrentSpeed() * wheelDistance
+													/ positionModuleRadius * timeDeltaSeconds;
+				}
 
-			pose.x += deltaX;
-			pose.y += deltaY;
-			pose.angle += angle;
-			pose.angle = (pose.angle % 1 + 1) % 1;
+				double positionAngleRadians = Math.atan2(-centerY, -centerX);
+				if (ccw)
+					positionAngleRadians += positionAngleDeltaRadians;
+				else
+					positionAngleRadians -= positionAngleDeltaRadians;
+
+				double positionRadius = Math.sqrt(centerX * centerX + centerY * centerY);
+				double newX = -Math.cos(positionAngleRadians) * positionRadius;
+				double newY = -Math.sin(positionAngleRadians) * positionRadius;
+
+				xDiff = newX - centerX;
+				yDiff = newY - centerY;
+				angleDiff = positionAngleDeltaRadians / Math.PI / 2 * ((ccw) ? -1 : 1);
+			} else {
+				xDiff += Math.sin(frontLeft.getCurrentAngle() * Math.PI * 2)
+							* frontLeft.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				yDiff += Math.cos(frontLeft.getCurrentAngle() * Math.PI * 2)
+							* frontLeft.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				xDiff += Math.sin(frontRight.getCurrentAngle() * Math.PI * 2)
+							* frontRight.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				yDiff += Math.cos(frontRight.getCurrentAngle() * Math.PI * 2)
+							* frontRight.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				xDiff += Math.sin(backLeft.getCurrentAngle() * Math.PI * 2)
+							* backLeft.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				yDiff += Math.cos(backLeft.getCurrentAngle() * Math.PI * 2)
+							* backLeft.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				xDiff += Math.sin(backRight.getCurrentAngle() * Math.PI * 2)
+							* backRight.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+				yDiff += Math.cos(backRight.getCurrentAngle() * Math.PI * 2)
+							* backRight.getCurrentSpeed() * wheelDistance * timeDeltaSeconds;
+
+				xDiff /= 4;
+				yDiff /= 4;
+			}
+
+			if (xDiff != 0 || yDiff != 0) {
+				double xyDiffPolarAngle = ((-Math.atan2(yDiff, xDiff) / Math.PI / 2 + 0.25 + pose.angle) % 1 + 1) % 1;
+				double xyDiffPolarRadius = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+				double fieldXDiff = Math.sin(xyDiffPolarAngle * Math.PI * 2) * xyDiffPolarRadius;
+				double fieldYDiff = Math.cos(xyDiffPolarAngle * Math.PI * 2) * xyDiffPolarRadius;
+
+				pose.x += fieldXDiff;
+				pose.y += fieldYDiff;
+				pose.linearAngle = ((-Math.atan2(fieldYDiff, fieldXDiff) / Math.PI / 2 + 0.25) % 1 + 1) % 1;
+				pose.linearSpeed = xyDiffPolarRadius;
+			} else {
+				pose.linearAngle = 0;
+				pose.linearSpeed = 0;
+			}
+			pose.angle += angleDiff;
+			pose.rotate = angleDiff;
 		}
 	}
 
@@ -285,5 +375,59 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 		// I don't like boxing so I use an array versus a Tuple.
 		return new double[] { targetAngle, targetSpeed };
+	}
+
+	private static double[] calculateZeroVelocityCenter(ISwerveModule module1, double x1, double y1,
+														ISwerveModule module2, double x2, double y2) {
+		double yDiff = y2 - y1;
+		double xDiff = x2 - x1;
+
+		double module1Angle = module1.getCurrentAngle();
+		double module2Angle = module2.getCurrentAngle();
+
+		double moduleAngle = Math.atan2(yDiff, xDiff) / Math.PI / 2;
+		double angle1 = 0;
+		double angle2 = 0;
+
+		boolean side = ((module2Angle - module1Angle) % 1 + 1) % 1 > 0.5;
+		boolean down = ((module2Angle + moduleAngle) % 1 + 1) % 1 > 0.5;
+		if (side) {
+			// Left side
+			if (down) {
+				angle1 = 1 - module1Angle - moduleAngle;
+				angle2 = module2Angle + moduleAngle - 0.5;
+			} else {
+				angle1 = 0.5 - module1Angle - moduleAngle;
+				angle2 = module2Angle + moduleAngle;
+			}
+		} else {
+			// Right side
+			if (down) {
+				angle1 = module1Angle + moduleAngle - 0.5;
+				angle2 = 1 - module2Angle - moduleAngle;
+			} else {
+				angle1 = module1Angle + moduleAngle;
+				angle2 = 0.5 - module2Angle - moduleAngle;
+			}
+		}
+		angle1 = (Math.abs(angle1) % 1 + 1) % 1;
+		angle2 = (angle2 % 1 + 1) % 1;
+		double angle3 = 0.5 - angle1 - angle2;
+
+		double distance3 = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+		double radius1 = Math.sin(angle2 * Math.PI * 2) * distance3 / Math.sin(angle3 * Math.PI * 2);
+
+		boolean ccw = side ^ down;
+		double x;
+		double y;
+		if (ccw) {
+			x = Math.sin((module1Angle + 0.25) * Math.PI * 2) * radius1 - x1;
+			y = Math.cos((module1Angle + 0.25) * Math.PI * 2) * radius1 - y1;
+		} else {
+			x = Math.sin((module1Angle - 0.25) * Math.PI * 2) * radius1 - x1;
+			y = Math.cos((module1Angle - 0.25) * Math.PI * 2) * radius1 - y1;
+		}
+
+		return new double[] { -x, y, angle1, angle2, angle3, ccw ? 1 : 0 };
 	}
 }
