@@ -41,7 +41,7 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	public static final double PERIOD = 0.05;
+	public static final double PERIOD = 0.02;
 
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";

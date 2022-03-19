@@ -229,8 +229,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		backLeft.tick();
 		backRight.tick();
 
-		if (frontLeft.getCurrentSpeed() > 0.1 || backRight.getCurrentSpeed() > 0.1) {
-			double eps = 0.1;
+		if (frontLeft.getCurrentSpeed() > 0.01 || backRight.getCurrentSpeed() > 0.01) {
+			double eps = 0.01;
 
 			double xSum = 0;
 			double ySum = 0;

@@ -64,7 +64,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		if (initialized) {
 			realCurrentAngle = steer.getSelectedSensorPosition() / STEER_MOTOR_ENCODER_COUNTS;
 			effectiveCurrentAngle = ((realCurrentAngle - angleOffset) % 1 + (reversed ? 0.5 : 0) + 1) % 1;
-			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 50;
+			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10;
 
 			// We don't want to move the wheels if we don't have to.
 			if (targetSpeed != 0) {
@@ -116,7 +116,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		steer.setInverted(true);
 		steer.setNeutralMode(config.steerBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
@@ -130,7 +130,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.neutralDeadband = 0.001;
 		driveConfig.openloopRamp = config.maxRamp;
 		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_20Ms;
+		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
 		driveConfig.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
@@ -139,7 +139,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Coast);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
