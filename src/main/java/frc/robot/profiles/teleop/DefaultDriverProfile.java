@@ -3,6 +3,7 @@ package frc.robot.profiles.teleop;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.shooter.ShooterMode;
+import frc.robot.swerve.RobotPose;
 
 public class DefaultDriverProfile extends ControlProfile {
 
@@ -12,20 +13,31 @@ public class DefaultDriverProfile extends ControlProfile {
 
 	private final XboxController driver;
 	private final XboxController operator;
+	private final RobotPose pose;
 
 	private boolean shooterToggleTripped = false;
 
-	public DefaultDriverProfile(XboxController driver, XboxController operator) {
+	private boolean fieldRelative = false;
+
+	public DefaultDriverProfile(XboxController driver, XboxController operator, RobotPose pose) {
 		this.driver = driver;
 		this.operator = operator;
+		this.pose = pose;
 	}
 
 	@Override
 	public void update() {
+		if (driver.getAButton())
+			fieldRelative = false;
+		else if (driver.getBButton())
+			fieldRelative = true;
+
 		double forward = -driver.getLeftY();
 		double strafe = driver.getLeftX();
 		double rotate = driver.getRightX();
 		double linearAngle = -Math.atan2(forward, strafe) / Math.PI / 2 + 0.25;
+		if (fieldRelative)
+			linearAngle -= pose.angle;
 		linearAngle = (linearAngle % 1 + 1) % 1;
 		double linearSpeed = Math.sqrt(forward * forward + strafe * strafe);
 		swerveLinearAngle = linearAngle;

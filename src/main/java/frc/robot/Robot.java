@@ -180,7 +180,7 @@ public class Robot extends TimedRobot {
 		operatorController = new XboxController(1);
 
 		driverProfiles = new ControlProfile[] {
-			new DefaultDriverProfile(driverController, operatorController),
+			new DefaultDriverProfile(driverController, operatorController, swerveDrive.getPose()),
 			new TestDriverProfile(driverController),
 			new MichaelsDriverProfile(driverController, operatorController)
 		};
