@@ -230,7 +230,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		backRight.tick();
 
 		if (frontLeft.getCurrentSpeed() > 0.1 || backRight.getCurrentSpeed() > 0.1) {
-			double eps = 5e-3;
+			double eps = 0.1;
 
 			double xSum = 0;
 			double ySum = 0;
@@ -288,6 +288,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 				double centerX = xSum / points;
 				double centerY = ySum / points;
 				double positionAngleDeltaRadians;
+
 				if (frontLeft.getCurrentSpeed() > backRight.getCurrentSpeed()) {
 					double xFromModule = centerX + moduleX;
 					double yFromModule = centerY - moduleY;
@@ -312,8 +313,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 				double newX = -Math.cos(positionAngleRadians) * positionRadius;
 				double newY = -Math.sin(positionAngleRadians) * positionRadius;
 
-				xDiff = newX - centerX;
-				yDiff = newY - centerY;
+				xDiff = -newX + centerX;
+				yDiff = -newY + centerY;
 				angleDiff = positionAngleDeltaRadians / Math.PI / 2 * ((ccw) ? -1 : 1);
 			} else {
 				xDiff += Math.sin(frontLeft.getCurrentAngle() * Math.PI * 2)
@@ -428,6 +429,6 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			y = Math.cos((module1Angle - 0.25) * Math.PI * 2) * radius1 - y1;
 		}
 
-		return new double[] { -x, y, angle1, angle2, angle3, ccw ? 1 : 0 };
+		return new double[] { -x, -y, angle1, angle2, angle3, ccw ? 1 : 0 };
 	}
 }
