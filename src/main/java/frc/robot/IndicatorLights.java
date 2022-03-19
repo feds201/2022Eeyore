@@ -25,7 +25,7 @@ public class IndicatorLights implements Subsystem {
 		buffer = new AddressableLEDBuffer(count);
 
 		zones = new HashMap<>();
-		zones.put(LEDZone.BASE, new ZoneController(60));
+		zones.put(LEDZone.BASE, new ZoneController(count));
 		zones.put(LEDZone.TIPS, new ZoneController(10));
 		zones.put(LEDZone.TOP, new ZoneController(5));
 		zones.put(LEDZone.BOTTOM, new ZoneController(5));

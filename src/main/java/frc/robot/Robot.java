@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -85,8 +86,8 @@ public class Robot extends TimedRobot {
 	public static final int CLIMBER_RIGHT_ID = 52;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
-	public static final int INDICATOR_LIGHTS_COUNT = 60;
-	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 30;
+	public static final int INDICATOR_LIGHTS_COUNT = 120;
+	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 40;
 
 	private ControlProfile[] driverProfiles;
 	private ControlProfile activeDriverProfile;
@@ -253,11 +254,14 @@ public class Robot extends TimedRobot {
 		} else {
 			Alliance alliance = DriverStation.getAlliance();
 			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
-								alliance == Alliance.Red ? Color.kFirstRed : Color.kFirstBlue);
-			if (DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME)
+								alliance == Alliance.Red ? Color.kRed : Color.kBlue);
+			if (DriverStation.getMatchType() != MatchType.None &&
+				!DriverStation.isAutonomousEnabled() &&
+				DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME) {
 				indicatorLights.set(LEDZone.TIPS, LEDPattern.BLINK, Color.kOrange);
-			else
+			} else {
 				indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+			}
 			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 		}
