@@ -26,9 +26,13 @@ public class IndicatorLights implements Subsystem {
 
 		zones = new HashMap<>();
 		zones.put(LEDZone.BASE, new ZoneController(count));
-		zones.put(LEDZone.TIPS, new ZoneController(10));
-		zones.put(LEDZone.TOP, new ZoneController(5));
-		zones.put(LEDZone.BOTTOM, new ZoneController(5));
+		zones.put(LEDZone.LEFT, new ZoneController(60));
+		zones.put(LEDZone.RIGHT, new ZoneController(60));
+		zones.put(LEDZone.ACCENT, new ZoneController(40));
+		zones.put(LEDZone.TIPS, new ZoneController(30));
+		zones.put(LEDZone.TOP, new ZoneController(15));
+		zones.put(LEDZone.BOTTOM, new ZoneController(15));
+		zones.put(LEDZone.CENTER, new ZoneController(10));
 	}
 
 	public void set(LEDZone zone, LEDPattern pattern, Color color) {
@@ -56,25 +60,53 @@ public class IndicatorLights implements Subsystem {
 			for (int i = 0; i < count; i++)
 				buffer.setLED(i, zoneBuffer[i]);
 		}
+		zone = zones.get(LEDZone.LEFT);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 60; i++)
+				buffer.setLED(i, zoneBuffer[i]);
+		}
+		zone = zones.get(LEDZone.RIGHT);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 60; i++)
+				buffer.setLED(i + (count - 60), zoneBuffer[i]);
+		}
+		zone = zones.get(LEDZone.ACCENT);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 15; i++)
+				buffer.setLED(i, zoneBuffer[i]);
+			for (int i = 15; i < 25; i++)
+				buffer.setLED(i + (count - 80), zoneBuffer[i]);
+			for (int i = 25; i < 40; i++)
+				buffer.setLED(i + (count - 40), zoneBuffer[i]);
+		}
 		zone = zones.get(LEDZone.TIPS);
 		if (!zone.isPassthrough()) {
 			Color[] zoneBuffer = zone.getBuffer();
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 15; i++)
 				buffer.setLED(i, zoneBuffer[i]);
-			for (int i = 5; i < 10; i++)
-				buffer.setLED(i + (count - 10), zoneBuffer[i]);
+			for (int i = 15; i < 30; i++)
+				buffer.setLED(i + (count - 30), zoneBuffer[i]);
 		}
 		zone = zones.get(LEDZone.TOP);
 		if (!zone.isPassthrough()) {
 			Color[] zoneBuffer = zone.getBuffer();
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 15; i++)
 				buffer.setLED(i, zoneBuffer[i]);
 		}
 		zone = zones.get(LEDZone.BOTTOM);
 		if (!zone.isPassthrough()) {
 			Color[] zoneBuffer = zone.getBuffer();
-			for (int i = 0; i < 5; i++)
-				buffer.setLED(i + (count - 5), zoneBuffer[i]);
+			for (int i = 0; i < 15; i++)
+				buffer.setLED(i + (count - 15), zoneBuffer[i]);
+		}
+		zone = zones.get(LEDZone.CENTER);
+		if (!zone.isPassthrough()) {
+			Color[] zoneBuffer = zone.getBuffer();
+			for (int i = 0; i < 10; i++)
+				buffer.setLED(i + (count - 65), zoneBuffer[i]);
 		}
 
 		strip.setData(buffer);
@@ -86,7 +118,7 @@ public class IndicatorLights implements Subsystem {
 	}
 
 	public static enum LEDZone {
-		BASE, TIPS, TOP, BOTTOM
+		BASE, LEFT, RIGHT, ACCENT, TIPS, TOP, BOTTOM, CENTER
 	}
 
 	private class ZoneController {
