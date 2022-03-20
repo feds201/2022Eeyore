@@ -73,7 +73,7 @@ public class Climber implements Subsystem {
 		leftConfig.forwardSoftLimitEnable = true;
 		leftConfig.forwardSoftLimitThreshold = config.upEncoderCounts;
 		leftConfig.reverseSoftLimitEnable = true;
-		leftConfig.reverseSoftLimitThreshold = 0;
+		leftConfig.reverseSoftLimitThreshold = config.downEncoderCounts;
 		leftMotor.configAllSettings(leftConfig);
 		leftMotor.setInverted(true);
 		leftMotor.setNeutralMode(NeutralMode.Brake);

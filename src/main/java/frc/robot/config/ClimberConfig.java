@@ -10,6 +10,7 @@ public class ClimberConfig {
 	public double reverseSpeed;
 	public double ramp;
 	public double upEncoderCounts;
+	public double downEncoderCounts;
 	public double highEncoderCountsLow;
 	public double highEncoderCountsHigh;
 
@@ -26,6 +27,7 @@ public class ClimberConfig {
 		config.reverseSpeed = table.getEntry("reversespeed").getDouble(0);
 		config.ramp = table.getEntry("ramp").getDouble(0);
 		config.upEncoderCounts = table.getEntry("upencodercounts").getDouble(0);
+		config.downEncoderCounts = table.getEntry("downencodercounts").getDouble(0);
 		config.highEncoderCountsLow = table.getEntry("highencodercountslow").getDouble(0);
 		config.highEncoderCountsHigh = table.getEntry("highencodercountshigh").getDouble(0);
 
