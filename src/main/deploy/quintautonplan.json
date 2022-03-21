@@ -1,13 +1,63 @@
 {
+	"start": {
+		"x": 48.462,
+		"y": -18.603,
+		"angle": 0.3083
+	},
 	"points": [
 		{
-			"x": 0,
-			"y": 0,
-			"angle": 0,
+			"x": 123.8,
+			"y": -24.7,
+			"angle": 0.2569,
+			"linearcruise": 0.5,
+			"rotatecruise": 0.2,
+			"linearramp": 40,
+			"rotateramp": 0.125
+		},
+		{
+			"x": 123.8,
+			"y": -24.7,
+			"angle": 0.7639,
 			"linearcruise": 0,
-			"rotatecruise": 0,
+			"rotatecruise": 0.5,
 			"linearramp": 0,
-			"rotateramp": 0
+			"rotateramp": 0.125
+		},
+		{
+			"x": 120.1,
+			"y": -255.2,
+			"angle": 0.5139,
+			"linearcruise": 1,
+			"rotatecruise": 0.1,
+			"linearramp": 60,
+			"rotateramp": 0.0625
+		},
+		{
+			"x": 95.2,
+			"y": -164.3,
+			"angle": 0.9583,
+			"linearcruise": 1,
+			"rotatecruise": 0.2,
+			"linearramp": 60,
+			"rotateramp": 0.125
+		},
+		{
+			"x": 93,
+			"y": -151.5,
+			"angle": 0.9722,
+			"linearcruise": 0.25,
+			"rotatecruise": 0.5,
+			"linearramp": 5,
+			"rotateramp": 0.125
+		},
+		{
+			"x": 93,
+			"y": -151.5,
+			"angle": 0.9583,
+			"linearcruise": 0,
+			"rotatecruise": 0.2,
+			"linearramp": 0,
+			"rotateramp": 0.125
 		}
 	]
 }
