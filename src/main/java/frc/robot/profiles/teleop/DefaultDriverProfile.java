@@ -1,6 +1,9 @@
 package frc.robot.profiles.teleop;
 
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
+
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.config.AbsoluteSteeringConfig;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.shooter.ShooterMode;
 import frc.robot.swerve.RobotPose;
@@ -8,41 +11,106 @@ import frc.robot.swerve.RobotPose;
 public class DefaultDriverProfile extends ControlProfile {
 
 	public static final double THRESHOLD = 0.025;
+	public static final double ABSOLUTE_STEERING_THRESHOLD = 0.2;
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
 	public static final double SHOOTER_STOP_THRESHOLD = 0.4;
 
 	private final XboxController driver;
 	private final XboxController operator;
 	private final RobotPose pose;
+	private final SlotConfiguration steeringPid;
 
 	private boolean shooterToggleTripped = false;
 
 	private boolean fieldRelative = false;
+	private boolean absoluteSteering = false;
 
-	public DefaultDriverProfile(XboxController driver, XboxController operator, RobotPose pose) {
+	private long lastTime;
+	private double iacc = 0;
+	private double lastErr = 0;
+
+	public DefaultDriverProfile(XboxController driver, XboxController operator,
+								RobotPose pose, AbsoluteSteeringConfig config) {
 		this.driver = driver;
 		this.operator = operator;
 		this.pose = pose;
+		this.steeringPid = config.pid;
 	}
 
 	@Override
 	public void update() {
-		if (driver.getAButton())
+		if (driver.getAButton()) {
 			fieldRelative = false;
-		else if (driver.getBButton())
+			absoluteSteering = false;
+		} else if (driver.getBButton()) {
 			fieldRelative = true;
+			absoluteSteering = false;
+		} else if (driver.getYButton()) {
+			fieldRelative = true;
+			absoluteSteering = true;
+		}
 
 		double forward = -driver.getLeftY();
 		double strafe = driver.getLeftX();
-		double rotate = driver.getRightX();
+		double rotateY = -driver.getRightY();
+		double rotateX = driver.getRightX();
+
 		double linearAngle = -Math.atan2(forward, strafe) / Math.PI / 2 + 0.25;
 		if (fieldRelative)
 			linearAngle -= pose.angle;
 		linearAngle = (linearAngle % 1 + 1) % 1;
-		double linearSpeed = Math.sqrt(forward * forward + strafe * strafe);
+		double linearSpeed = deadzone(Math.sqrt(forward * forward + strafe * strafe), THRESHOLD);
+
+		double rotate;
+		if (absoluteSteering) {
+			double rotateMagnitude = deadzone(Math.sqrt(rotateY * rotateY + rotateX * rotateX),
+												ABSOLUTE_STEERING_THRESHOLD);
+			if (rotateMagnitude == 0) {
+				rotate = 0;
+
+				lastTime = System.currentTimeMillis();
+				iacc = 0;
+				lastErr = 0;
+			} else {
+				double rotateAngle = -Math.atan2(rotateY, rotateX) / Math.PI / 2 + 0.25;
+				double currentAngle = (pose.angle % 1 + 1) % 1;
+
+				double errorContinous = -(currentAngle - rotateAngle);
+				double errorLoop = -(1 - Math.abs(errorContinous)) * Math.signum(errorContinous);
+
+				double targetError;
+				if (Math.abs(errorContinous) < Math.abs(errorLoop))
+					targetError = errorContinous;
+				else
+					targetError = errorLoop;
+
+				long currentTime = System.currentTimeMillis();
+				double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
+				lastTime = currentTime;
+
+				if (Math.abs(targetError) <= steeringPid.integralZone) {
+					iacc += targetError * timeDeltaSeconds;
+					if (Math.abs(iacc) > steeringPid.maxIntegralAccumulator)
+						iacc = Math.signum(iacc) * steeringPid.maxIntegralAccumulator;
+				}
+				else
+					iacc = 0;
+				rotate = targetError * steeringPid.kP +
+							iacc * steeringPid.kI +
+							(lastErr - targetError) / timeDeltaSeconds * steeringPid.kD;
+				lastErr = targetError;
+			}
+		} else {
+			rotate = deadzone(rotateX, THRESHOLD) / 2;
+
+			lastTime = System.currentTimeMillis();
+			iacc = 0;
+			lastErr = 0;
+		}
+
 		swerveLinearAngle = linearAngle;
-		swerveLinearSpeed = deadzone(linearSpeed, THRESHOLD);
-		swerveRotate = deadzone(rotate, THRESHOLD) / 2;
+		swerveLinearSpeed = linearSpeed;
+		swerveRotate = rotate;
 
 		if (driver.getRightBumperPressed())
 			intakeActive = !intakeActive;

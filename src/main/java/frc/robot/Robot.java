@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.IndicatorLights.LEDPattern;
 import frc.robot.IndicatorLights.LEDZone;
+import frc.robot.config.AbsoluteSteeringConfig;
 import frc.robot.config.ClimberConfig;
 import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
@@ -51,6 +52,7 @@ public class Robot extends TimedRobot {
 
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
+	public static final String ABSOLUTE_STEERING_CONFIG_FILE = "swerveconfig.ini";
 	public static final String INTAKE_CONFIG_FILE = "intakeconfig.ini";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
@@ -107,6 +109,7 @@ public class Robot extends TimedRobot {
 	private UsbCamera driverCamera;
 
 	private SwerveDriveConfig swerveDriveConfig;
+	private AbsoluteSteeringConfig absoluteSteeringConfig;
 	private IntakeConfig intakeConfig;
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
@@ -180,7 +183,8 @@ public class Robot extends TimedRobot {
 		operatorController = new XboxController(1);
 
 		driverProfiles = new ControlProfile[] {
-			new DefaultDriverProfile(driverController, operatorController, swerveDrive.getPose()),
+			new DefaultDriverProfile(driverController, operatorController,
+										swerveDrive.getPose(), absoluteSteeringConfig),
 			new TestDriverProfile(driverController),
 			new MichaelsDriverProfile(driverController, operatorController)
 		};
@@ -410,6 +414,7 @@ public class Robot extends TimedRobot {
 
 	private void loadConfigs() throws PersistentException {
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
+		absoluteSteeringConfig = AbsoluteSteeringConfig.load(Filesystem.getDeployDirectory() + "/" + ABSOLUTE_STEERING_CONFIG_FILE);
 		intakeConfig = IntakeConfig.load(Filesystem.getDeployDirectory() + "/" + INTAKE_CONFIG_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE,
 											Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
