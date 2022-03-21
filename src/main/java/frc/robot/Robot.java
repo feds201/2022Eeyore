@@ -207,7 +207,7 @@ public class Robot extends TimedRobot {
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
 			new BasicSingleBallAutonProfile(PERIOD),
-			new AdvancedQuintAutonProfile(swerveDrive.getPose(), quintAutonPlan)
+			new AdvancedQuintAutonProfile(PERIOD, swerveDrive.getPose(), quintAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
 		autonSelector.setDefaultOption("Basic 2-Ball", 0);
