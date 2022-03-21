@@ -14,12 +14,18 @@ import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.IndicatorLights.LEDPattern;
+import frc.robot.IndicatorLights.LEDZone;
 import frc.robot.config.ClimberConfig;
 import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
@@ -82,7 +88,8 @@ public class Robot extends TimedRobot {
 	public static final int CLIMBER_RIGHT_ID = 52;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
-	public static final int INDICATOR_LIGHTS_COUNT = 104;
+	public static final int INDICATOR_LIGHTS_COUNT = 120;
+	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 40;
 
 	private ControlProfile[] driverProfiles;
 	private ControlProfile activeDriverProfile;
@@ -220,6 +227,83 @@ public class Robot extends TimedRobot {
 		intake.tick();
 		shooter.tick();
 		climber.tick();
+
+		if (isEnabled()) {
+			if (shooter.getSpin()) {
+				if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION) {
+					if (shooter.hasTarget()) {
+						if (shooter.isReady()) {
+							indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+							indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+							indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+						} else {
+							indicatorLights.set(LEDZone.BASE, LEDPattern.PASS, null);
+							indicatorLights.set(LEDZone.LEFT, LEDPattern.REVERSE, Color.kYellow);
+							indicatorLights.set(LEDZone.RIGHT, LEDPattern.FORWARD, Color.kYellow);
+						}
+						indicatorLights.set(LEDZone.ACCENT, LEDPattern.SOLID, Color.kLime);
+					} else {
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
+						indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kYellow);
+						indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+						indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+					}
+				} else if (shooter.getMode() == ShooterMode.LOW_GOAL) {
+					if (shooter.isReady()) {
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+						indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+						indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+					} else {
+						indicatorLights.set(LEDZone.BASE, LEDPattern.PASS, null);
+						indicatorLights.set(LEDZone.LEFT, LEDPattern.REVERSE, Color.kYellow);
+						indicatorLights.set(LEDZone.RIGHT, LEDPattern.FORWARD, Color.kYellow);
+					}
+					indicatorLights.set(LEDZone.ACCENT, LEDPattern.SOLID, Color.kRed);
+				} else if (shooter.getMode() == ShooterMode.EJECT) {
+					if (shooter.isReady()) {
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kLime);
+						indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+						indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+					} else {
+						indicatorLights.set(LEDZone.BASE, LEDPattern.PASS, null);
+						indicatorLights.set(LEDZone.LEFT, LEDPattern.REVERSE, Color.kYellow);
+						indicatorLights.set(LEDZone.RIGHT, LEDPattern.FORWARD, Color.kYellow);
+					}
+					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kRed);
+				}
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
+			} else {
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
+										DriverStation.getAlliance() == Alliance.Red
+										? Color.kRed : Color.kBlue);
+				if (DriverStation.getMatchType() != MatchType.None &&
+					!DriverStation.isAutonomousEnabled() &&
+					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME) {
+					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
+				} else {
+					indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
+				}
+				indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
+			}
+		} else {
+			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
+									DriverStation.getAlliance() == Alliance.Red
+									? Color.kDarkRed : Color.kDarkBlue);
+			indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
+		}
 		indicatorLights.tick();
 	}
 

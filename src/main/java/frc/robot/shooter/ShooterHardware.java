@@ -61,6 +61,22 @@ public class ShooterHardware implements Subsystem {
 		this.fire = fire;
 	}
 
+	public boolean isSpinning() {
+		return topSpeed != 0 || bottomSpeed != 0;
+	}
+
+	public boolean isReady() {
+		return isSpinning() &&
+				getCurrentSpeedTopPercentage() > fireThresholdLower &&
+				getCurrentSpeedTopPercentage() < fireThresholdUpper &&
+				getCurrentSpeedBottomPercentage() > fireThresholdLower &&
+				getCurrentSpeedBottomPercentage() < fireThresholdUpper;
+	}
+
+	public boolean isFiring() {
+		return currentlyFiring;
+	}
+
 	public void setUnjam(boolean unjam) {
 		this.unjam = unjam;
 	}
@@ -84,11 +100,7 @@ public class ShooterHardware implements Subsystem {
 
 		if (fireTime > 0)
 			fireTime -= timeDeltaSeconds;
-		boolean shouldFire = fireTime > 0 || (fire && (topSpeed != 0 || bottomSpeed != 0) &&
-								getCurrentSpeedTopPercentage() > fireThresholdLower &&
-								getCurrentSpeedTopPercentage() < fireThresholdUpper &&
-								getCurrentSpeedBottomPercentage() > fireThresholdLower &&
-								getCurrentSpeedBottomPercentage() < fireThresholdUpper);
+		boolean shouldFire = fireTime > 0 || (fire && isReady());
 
 		if (unjam || currentlyUnjamming) {
 			if (unjam != currentlyUnjamming) {

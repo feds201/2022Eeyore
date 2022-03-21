@@ -43,8 +43,24 @@ public class Shooter implements Subsystem {
 		this.spin = spin;
 	}
 
+	public boolean getSpin() {
+		return spin;
+	}
+
+	public boolean isSpinning() {
+		return hardware.isSpinning();
+	}
+
+	public boolean isReady() {
+		return hardware.isReady();
+	}
+
 	public void setFire(boolean fire) {
 		hardware.setFire(fire);
+	}
+
+	public boolean isFiring() {
+		return hardware.isFiring();
 	}
 
 	public void setUnjam(boolean unjam) {
