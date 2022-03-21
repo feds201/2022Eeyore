@@ -53,6 +53,12 @@ public class PlannedAutonProfile extends ControlProfile {
 			swerveRotate = Math.copySign(point.rotateCruise, angleError);
 		else
 			swerveRotate = point.rotateCruise * (angleError / point.rotateRamp);
+
+		if (!Double.isFinite(swerveLinearAngle) || !Double.isFinite(swerveLinearSpeed) || !Double.isFinite(swerveRotate)) {
+			swerveLinearAngle = 0;
+			swerveLinearSpeed = 0;
+			swerveRotate = 0;
+		}
 	}
 
 	public void nextPoint() {
