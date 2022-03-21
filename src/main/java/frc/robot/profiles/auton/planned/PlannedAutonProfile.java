@@ -1,36 +1,47 @@
 package frc.robot.profiles.auton.planned;
 
 import frc.robot.profiles.ControlProfile;
+import frc.robot.profiles.auton.planned.AutonPlan.AutonPlanPoint;
 import frc.robot.swerve.RobotPose;
 
 public class PlannedAutonProfile extends ControlProfile {
 
 	private final RobotPose pose;
-	private final AutonPlanPoint[] points;
+	private final AutonPlan plan;
+	private boolean first = true;
 	private int index = 0;
 
-	public PlannedAutonProfile(RobotPose pose, AutonPlanPoint[] points) {
+	private double distanceToTarget;
+	private double angleError;
+
+	public PlannedAutonProfile(RobotPose pose, AutonPlan plan) {
 		if (pose == null)
 			throw new IllegalArgumentException("pose is null");
-		if (points == null)
-			throw new IllegalArgumentException("points is null");
-		if (points.length == 0)
-			throw new IllegalArgumentException("points is empty");
+		if (plan == null)
+			throw new IllegalArgumentException("plan is null");
+		if (plan.points.length == 0)
+			throw new IllegalArgumentException("plan is empty");
 		this.pose = pose;
-		this.points = points;
+		this.plan = plan;
 	}
 
 	@Override
 	public void update() {
-		AutonPlanPoint point = points[index];
+		if (first) {
+			pose.x = plan.start.x;
+			pose.y = plan.start.y;
+			pose.angle = plan.start.angle;
+			first = false;
+		}
+
+		AutonPlanPoint point = plan.points[index];
 
 		double xError = point.x - pose.x;
 		double yError = point.y - pose.y;
-		double angleError = point.angle - pose.angle;
-		double distanceToTarget = Math.sqrt(xError * xError + yError * yError);
+		angleError = point.angle - pose.angle;
+		distanceToTarget = Math.sqrt(xError * xError + yError * yError);
 
-		double directionToTarget = -Math.atan2(yError, xError) / Math.PI / 2 + 0.25 - pose.angle;
-		directionToTarget = (directionToTarget % 1 + 1) % 1;
+		double directionToTarget = ((-Math.atan2(yError, xError) / Math.PI / 2 + 0.25 - pose.angle) % 1 + 1) % 1;
 
 		swerveLinearAngle = directionToTarget;
 		if (distanceToTarget >= point.linearRamp)
@@ -45,14 +56,15 @@ public class PlannedAutonProfile extends ControlProfile {
 	}
 
 	public void nextPoint() {
-		if (index < points.length - 1)
+		if (index < plan.points.length - 1)
 			index++;
 	}
 
-	protected double getError() {
-		double xDiff = points[index].x - pose.x;
-		double yDiff = points[index].y - pose.y;
-		double angleDiff = points[index].angle - pose.angle;
-		return Math.sqrt(xDiff * xDiff + yDiff * yDiff + angleDiff * angleDiff);
+	public double getPositionError() {
+		return distanceToTarget;
+	}
+
+	public double getAngleError() {
+		return angleError;
 	}
 }

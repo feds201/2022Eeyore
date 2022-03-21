@@ -36,7 +36,7 @@ import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
 import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile;
-import frc.robot.profiles.auton.planned.AutonPlanPoint;
+import frc.robot.profiles.auton.planned.AutonPlan;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
@@ -117,7 +117,7 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
-	private AutonPlanPoint[] quintAutonPlan;
+	private AutonPlan quintAutonPlan;
 
 	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
 	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
@@ -144,7 +144,7 @@ public class Robot extends TimedRobot {
 			System.err.println(e);
 		}
 		try {
-			quintAutonPlan = AutonPlanPoint.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN_FILE);
+			quintAutonPlan = AutonPlan.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN_FILE);
 			System.out.println("Successfully loaded auton plans");
 		} catch (IOException e) {
 			System.err.println("Error loading auton plans");
