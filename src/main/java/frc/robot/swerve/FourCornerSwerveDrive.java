@@ -12,7 +12,6 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private final ISwerveModule backRight;
 
 	private final Pigeon2 pigeon;
-	private boolean straight = false;
 	private double lastYaw;
 	private double gyroFactor;
 
@@ -173,23 +172,17 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			currentTargetRotate += Math.signum(deltaRotate) * Math.min(maxRotateAccel * timeDeltaSeconds, Math.abs(deltaRotate));
 		}
 
+		double yaw = pigeon.getYaw() / 360;
+		double yawDiff = -(yaw - lastYaw);
+		lastYaw = yaw;
+
 		{
 			double effectiveLinearAngle = currentTargetLinearAngle;
 			double effectiveLinearSpeed = currentTargetLinearSpeed;
 			double effectiveRotate = currentTargetRotate;
 
-			if (effectiveRotate == 0 && effectiveLinearSpeed != 0) {
-				if (straight) {
-					double yaw = pigeon.getYaw();
-					effectiveRotate = (yaw - lastYaw) * gyroFactor;
-					lastYaw = yaw;
-				} else {
-					lastYaw = pigeon.getYaw();
-					straight = true;
-				}
-			} else {
-				straight = false;
-			}
+			if (effectiveRotate == 0 && effectiveLinearSpeed != 0)
+				effectiveRotate = -yawDiff * 360 * gyroFactor;
 
 			double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
 																	-moduleUnitX, moduleUnitY);
@@ -352,7 +345,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 				pose.linearAngle = 0;
 				pose.linearSpeed = 0;
 			}
-			pose.angle += angleDiff;
+			pose.angle += yawDiff;
 			pose.rotate = angleDiff;
 		}
 	}
