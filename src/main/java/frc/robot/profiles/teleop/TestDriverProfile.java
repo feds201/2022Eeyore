@@ -53,6 +53,7 @@ public class TestDriverProfile extends ControlProfile {
 
 			climberUp = false;
 			climberDown = false;
+			climberHigh = false;
 		} else {
 			shooterSpin = false;
 			shooterFire = false;
@@ -61,9 +62,19 @@ public class TestDriverProfile extends ControlProfile {
 			if (controller.getPOV() == 0) {
 				climberUp = true;
 				climberDown = false;
+				climberHigh = false;
 			} else if (controller.getPOV() == 180) {
 				climberUp = false;
 				climberDown = true;
+				climberHigh = false;
+			} else if (controller.getPOV() == 90 || controller.getPOV() == 270) {
+				climberUp = false;
+				climberDown = false;
+				climberHigh = true;
+			} else {
+				climberUp = false;
+				climberDown = false;
+				climberHigh = false;
 			}
 		}
 

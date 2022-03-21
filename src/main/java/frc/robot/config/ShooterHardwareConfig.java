@@ -10,6 +10,7 @@ public class ShooterHardwareConfig {
 	public double fireThresholdUpper;
 	public double feederSpeed;
 	public double feederUnjamSpeed;
+	public double minFireTime;
 	public boolean shooterBrake;
 
 	public boolean shooterCurrentLimitEnabled;

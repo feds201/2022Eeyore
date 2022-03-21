@@ -48,9 +48,9 @@ public class BallPickup implements Subsystem {
 			else
 				motor.set(ControlMode.PercentOutput, 0);
 			if (deployed)
-				piston.set(Value.kForward);
-			else
 				piston.set(Value.kReverse);
+			else
+				piston.set(Value.kForward);
 			updateOutput = false;
 		}
 	}

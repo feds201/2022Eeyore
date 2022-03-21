@@ -20,6 +20,9 @@ public class Climber implements Subsystem {
 	private double forwardSpeed;
 	private double reverseSpeed;
 
+	private double highEncoderCountsLow;
+	private double highEncoderCountsHigh;
+
 	private boolean update = true;
 	private int position = 0;
 
@@ -44,7 +47,14 @@ public class Climber implements Subsystem {
 				leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
 			else if (position == -1)
 				leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
-			else
+			else if (position == 2) {
+				if (leftMotor.getSelectedSensorPosition() < highEncoderCountsLow)
+					leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
+				else if (leftMotor.getSelectedSensorPosition() > highEncoderCountsHigh)
+					leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
+				else
+					leftMotor.set(ControlMode.PercentOutput, 0);
+			} else
 				leftMotor.set(ControlMode.PercentOutput, 0);
 		}
 	}
@@ -61,9 +71,9 @@ public class Climber implements Subsystem {
 		leftConfig.supplyCurrLimit.currentLimit = config.currentLimit;
 		leftConfig.supplyCurrLimit.triggerThresholdTime = config.currentLimitTime;
 		leftConfig.forwardSoftLimitEnable = true;
-		leftConfig.forwardSoftLimitThreshold = config.encoderCounts;
+		leftConfig.forwardSoftLimitThreshold = config.upEncoderCounts;
 		leftConfig.reverseSoftLimitEnable = true;
-		leftConfig.reverseSoftLimitThreshold = 0;
+		leftConfig.reverseSoftLimitThreshold = config.downEncoderCounts;
 		leftMotor.configAllSettings(leftConfig);
 		leftMotor.setInverted(true);
 		leftMotor.setNeutralMode(NeutralMode.Brake);
@@ -102,5 +112,8 @@ public class Climber implements Subsystem {
 
 		forwardSpeed = config.forwardSpeed;
 		reverseSpeed = config.reverseSpeed;
+
+		highEncoderCountsLow = config.highEncoderCountsLow;
+		highEncoderCountsHigh = config.highEncoderCountsHigh;
 	}
 }

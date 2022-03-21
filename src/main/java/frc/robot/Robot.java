@@ -31,6 +31,8 @@ import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
 import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
+import frc.robot.profiles.auton.BasicDualBallAutonProfile;
+import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
@@ -188,10 +190,12 @@ public class Robot extends TimedRobot {
 		driverSelector.addOption("Michael", 2);
 
 		autonProfiles = new ControlProfile[] {
-			null
+			new BasicDualBallAutonProfile(PERIOD),
+			new BasicSingleBallAutonProfile(PERIOD)
 		};
 		activeAutonProfile = autonProfiles[0];
-		autonSelector.setDefaultOption("TODO", 0);
+		autonSelector.setDefaultOption("Basic 2-Ball", 0);
+		autonSelector.addOption("Basic 1-Ball", 1);
 
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);
@@ -391,6 +395,8 @@ public class Robot extends TimedRobot {
 			climber.setTargetPosition(1);
 		else if (profile.getClimberDown())
 			climber.setTargetPosition(-1);
+		else if (profile.getClimberHigh())
+			climber.setTargetPosition(2);
 		else
 			climber.setTargetPosition(0);
 	}

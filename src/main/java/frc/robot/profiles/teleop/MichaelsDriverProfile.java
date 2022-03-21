@@ -55,6 +55,7 @@ public class MichaelsDriverProfile extends ControlProfile {
 
 			climberUp = false;
 			climberDown = false;
+			climberHigh = false;
 		} else {
 			shooterSpin = false;
 			shooterFire = false;
@@ -63,9 +64,19 @@ public class MichaelsDriverProfile extends ControlProfile {
 			if (operator.getPOV() == 0) {
 				climberUp = true;
 				climberDown = false;
+				climberHigh = false;
 			} else if (operator.getPOV() == 180) {
 				climberUp = false;
 				climberDown = true;
+				climberHigh = false;
+			} else if (operator.getPOV() == 90 || operator.getPOV() == 270) {
+				climberUp = false;
+				climberDown = false;
+				climberHigh = true;
+			} else {
+				climberUp = false;
+				climberDown = false;
+				climberHigh = false;
 			}
 		}
 

@@ -9,7 +9,10 @@ public class ClimberConfig {
 	public double forwardSpeed;
 	public double reverseSpeed;
 	public double ramp;
-	public double encoderCounts;
+	public double upEncoderCounts;
+	public double downEncoderCounts;
+	public double highEncoderCountsLow;
+	public double highEncoderCountsHigh;
 
 	public boolean currentLimitEnabled;
 	public double currentLimit;
@@ -23,7 +26,10 @@ public class ClimberConfig {
 		config.forwardSpeed = table.getEntry("forwardspeed").getDouble(0);
 		config.reverseSpeed = table.getEntry("reversespeed").getDouble(0);
 		config.ramp = table.getEntry("ramp").getDouble(0);
-		config.encoderCounts = table.getEntry("encodercounts").getDouble(0);
+		config.upEncoderCounts = table.getEntry("upencodercounts").getDouble(0);
+		config.downEncoderCounts = table.getEntry("downencodercounts").getDouble(0);
+		config.highEncoderCountsLow = table.getEntry("highencodercountslow").getDouble(0);
+		config.highEncoderCountsHigh = table.getEntry("highencodercountshigh").getDouble(0);
 
 		config.currentLimitEnabled = table.getEntry("currentlimitenabled").getBoolean(false);
 		config.currentLimit = table.getEntry("currentlimit").getDouble(0);
