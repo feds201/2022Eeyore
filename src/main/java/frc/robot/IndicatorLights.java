@@ -125,8 +125,8 @@ public class IndicatorLights implements Subsystem {
 
 		private final Color[] buffer;
 
-		private LEDPattern pattern;
-		private Color color;
+		private LEDPattern pattern = LEDPattern.PASS;
+		private Color color = Color.kBlack;
 
 		public ZoneController(int size) {
 			buffer = new Color[size];
@@ -172,7 +172,7 @@ public class IndicatorLights implements Subsystem {
 				break;
 			case REVERSE:
 				for (int i = 0; i < buffer.length; i++) {
-					if ((i + position) % 4 == 0)
+					if ((i - position) % 4 == 0)
 						buffer[i] = color;
 					else
 						buffer[i] = Color.kBlack;
