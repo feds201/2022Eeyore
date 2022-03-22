@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.FilterConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 
 import frc.robot.config.SwerveModuleConfig;
 
@@ -115,7 +116,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		steer.setInverted(true);
 		steer.setNeutralMode(config.steerBrake ? NeutralMode.Brake : NeutralMode.Coast);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
 		steer.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
@@ -129,6 +130,8 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.neutralDeadband = 0.001;
 		driveConfig.openloopRamp = config.maxRamp;
 		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_10Ms;
+		driveConfig.velocityMeasurementWindow = 1;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
 		driveConfig.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
@@ -137,7 +140,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Coast);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);

@@ -47,7 +47,7 @@ import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
 
-	public static final double PERIOD = 0.05;
+	public static final double PERIOD = 0.02;
 
 	public static final String SWERVE_CONFIG_FILE = "swerveconfig.ini";
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
@@ -160,7 +160,7 @@ public class Robot extends TimedRobot {
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													SWERVE_PIGEON, 30, 30, swerveDriveConfig);
+													SWERVE_PIGEON, swerveDriveConfig);
 		}
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
@@ -305,6 +305,13 @@ public class Robot extends TimedRobot {
 			indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 		}
 		indicatorLights.tick();
+
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("/swerve");
+			table.getEntry("x").setDouble(swerveDrive.getPose().x);
+			table.getEntry("y").setDouble(swerveDrive.getPose().y);
+			table.getEntry("angle").setDouble(swerveDrive.getPose().angle * 360);
+		}
 	}
 
 	@Override
