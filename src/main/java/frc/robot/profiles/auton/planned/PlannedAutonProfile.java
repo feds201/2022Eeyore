@@ -6,12 +6,13 @@ import frc.robot.swerve.RobotPose;
 
 public class PlannedAutonProfile extends ControlProfile {
 
-	private final RobotPose pose;
+	protected final RobotPose pose;
 	private final AutonPlan plan;
 	private boolean first = true;
 	private int index = 0;
 
 	private double distanceToTarget;
+	private double forwardDistanceToTarget;
 	private double angleError;
 
 	public PlannedAutonProfile(RobotPose pose, AutonPlan plan) {
@@ -42,6 +43,7 @@ public class PlannedAutonProfile extends ControlProfile {
 		distanceToTarget = Math.sqrt(xError * xError + yError * yError);
 
 		double directionToTarget = ((-Math.atan2(yError, xError) / Math.PI / 2 + 0.25 - pose.angle) % 1 + 1) % 1;
+		forwardDistanceToTarget = Math.abs(Math.cos(directionToTarget * Math.PI * 2) * distanceToTarget);
 
 		swerveLinearAngle = directionToTarget;
 		if (distanceToTarget >= point.linearRamp)
@@ -75,6 +77,10 @@ public class PlannedAutonProfile extends ControlProfile {
 
 	public double getPositionError() {
 		return distanceToTarget;
+	}
+
+	public double getForwardError() {
+		return forwardDistanceToTarget;
 	}
 
 	public double getAngleError() {

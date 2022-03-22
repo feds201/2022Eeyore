@@ -230,7 +230,8 @@ public class Robot extends TimedRobot {
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
 			new BasicSingleBallAutonProfile(PERIOD),
-			new AdvancedQuintAutonProfile(PERIOD, pose, quintAutonPlan),
+			new AdvancedQuintAutonProfile(PERIOD, pose, quintAutonPlan,
+											ballVision),
 			new AdvancedTriAutonProfile(PERIOD, pose, triAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
@@ -389,11 +390,6 @@ public class Robot extends TimedRobot {
 			double[] target = shooter.getTarget();
 			table.getEntry("x").setDouble(target[0]);
 			table.getEntry("y").setDouble(target[1]);
-		}
-		{
-			NetworkTable table = NetworkTableInstance.getDefault().getTable("/vision");
-			double correction = ballVision.getCorrection();
-			table.getEntry("correction").setDouble(correction);
 		}
 	}
 

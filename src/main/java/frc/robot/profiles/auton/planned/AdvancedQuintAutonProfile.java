@@ -2,17 +2,22 @@ package frc.robot.profiles.auton.planned;
 
 import frc.robot.shooter.ShooterMode;
 import frc.robot.swerve.RobotPose;
+import frc.robot.vision.BallVision;
 
 public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 
 	private final double period;
 
+	private final BallVision ballVision;
+
 	private int step = 0;
 	private double time = 0;
 
-	public AdvancedQuintAutonProfile(double period, RobotPose pose, AutonPlan plan) {
+	public AdvancedQuintAutonProfile(double period, RobotPose pose, AutonPlan plan,
+										BallVision ballVision) {
 		super(pose, plan);
 		this.period = period;
+		this.ballVision = ballVision;
 	}
 
 	@Override
@@ -20,13 +25,12 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 		if (step == 0) {
 			// A1
 			super.update();
+			intakeDeploy = true;
+			intakeActive = true;
 			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
 				intakeDeploy = false;
 				intakeActive = false;
 				step++;
-			} else {
-				intakeDeploy = true;
-				intakeActive = true;
 			}
 		}
 		if (step == 1) {
@@ -118,14 +122,30 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 			super.update();
 			intakeActive = true;
 			step++;
+			time = 0.5;
 		} else if (step == 13) {
 			super.update();
-			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
-				step++;
-				time = 1;
+			if (Math.abs(getAngleError()) < 0.125) {
+				if (time <= 0 || getForwardError() < 2) {
+					swerveLinearAngle = 0;
+					swerveLinearSpeed = 0;
+					swerveRotate = 0;
+					step++;
+					time = 1;
+				} else {
+					if (ballVision.hasTarget()) {
+						double x = ballVision.getCorrection();
+						double y = Math.cos(swerveLinearAngle * Math.PI * 2) * swerveLinearSpeed;
+						swerveLinearAngle = -Math.atan2(y, x) / Math.PI / 2 + 0.25;
+						swerveLinearSpeed = Math.sqrt(x * x + y * y);
+					} else {
+						time -= period;
+						swerveLinearAngle = 0;
+						swerveLinearSpeed = 0;
+					}
+				}
 			}
 		} else if (step == 14) {
-			super.update();
 			time -= period;
 			if (time <= 0) {
 				intakeDeploy = false;
