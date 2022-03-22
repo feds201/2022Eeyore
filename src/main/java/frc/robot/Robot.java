@@ -34,7 +34,6 @@ import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
-import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter.ShooterHardware;
@@ -181,13 +180,11 @@ public class Robot extends TimedRobot {
 
 		driverProfiles = new ControlProfile[] {
 			new DefaultDriverProfile(driverController, operatorController),
-			new TestDriverProfile(driverController),
-			new MichaelsDriverProfile(driverController, operatorController)
+			new TestDriverProfile(driverController)
 		};
 		activeDriverProfile = driverProfiles[0];
 		driverSelector.setDefaultOption("Default", 0);
 		driverSelector.addOption("Test", 1);
-		driverSelector.addOption("Michael", 2);
 
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
