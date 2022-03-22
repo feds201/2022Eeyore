@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.IndicatorLights.LEDPattern;
 import frc.robot.IndicatorLights.LEDZone;
 import frc.robot.config.AbsoluteSteeringConfig;
+import frc.robot.config.BallVisionConfig;
 import frc.robot.config.ClimberConfig;
 import frc.robot.config.IntakeConfig;
 import frc.robot.config.ShooterConfig;
@@ -53,6 +54,9 @@ import frc.robot.swerve.ISwerveModule;
 import frc.robot.swerve.RobotPose;
 import frc.robot.swerve.SDSMk4FXModule;
 import frc.robot.swerve.SwerveMode;
+import frc.robot.vision.BallVision;
+import frc.robot.vision.BlueBallPipeline;
+import frc.robot.vision.RedBallPipeline;
 
 public class Robot extends TimedRobot {
 
@@ -62,6 +66,7 @@ public class Robot extends TimedRobot {
 	public static final String SWERVE_ALIGNMENT_FILE = "swerve.ini";
 	public static final String ABSOLUTE_STEERING_CONFIG_FILE = "swerveconfig.ini";
 	public static final String INTAKE_CONFIG_FILE = "intakeconfig.ini";
+	public static final String BALL_VISION_CONFIG_FILE = "ballvisionconfig.ini";
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
@@ -117,14 +122,16 @@ public class Robot extends TimedRobot {
 
 	private ISwerveDrive swerveDrive;
 	private BallPickup intake;
+	private BallVision ballVision;
 	private Shooter shooter;
 	private Climber climber;
 	private IndicatorLights indicatorLights;
-	private UsbCamera driverCamera;
+	private UsbCamera camera;
 
 	private SwerveDriveConfig swerveDriveConfig;
 	private AbsoluteSteeringConfig absoluteSteeringConfig;
 	private IntakeConfig intakeConfig;
+	private BallVisionConfig ballVisionConfig;
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
@@ -196,6 +203,10 @@ public class Robot extends TimedRobot {
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
 
+		camera = CameraServer.startAutomaticCapture();
+		camera.setVideoMode(PixelFormat.kMJPEG, 320, 240, 15);
+		ballVision = new BallVision(camera, new RedBallPipeline(), new BlueBallPipeline(), ballVisionConfig);
+
 		shooter = new Shooter(new ShooterHardware(SHOOTER_TOP_ID, SHOOTER_BOTTOM_ID, SHOOTER_FEEDER_ID,
 								shooterConfig.hardwareConfig), new ShooterVision(shooterConfig.visionConfig),
 								shooterConfig);
@@ -203,9 +214,6 @@ public class Robot extends TimedRobot {
 		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, CLIMBER_LIMIT_PORT, climberConfig);
 
 		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
-
-		driverCamera = CameraServer.startAutomaticCapture();
-		driverCamera.setVideoMode(PixelFormat.kMJPEG, 320, 240, 15);
 
 		driverController = new XboxController(0);
 		operatorController = new XboxController(1);
@@ -266,6 +274,8 @@ public class Robot extends TimedRobot {
 		intake.tick();
 		shooter.tick();
 		climber.tick();
+
+		ballVision.setAlliance(DriverStation.getAlliance());
 
 		if (isEnabled()) {
 			if (shooter.getSpin()) {
@@ -380,6 +390,11 @@ public class Robot extends TimedRobot {
 			table.getEntry("x").setDouble(target[0]);
 			table.getEntry("y").setDouble(target[1]);
 		}
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("/vision");
+			double correction = ballVision.getCorrection();
+			table.getEntry("correction").setDouble(correction);
+		}
 	}
 
 	@Override
@@ -486,6 +501,7 @@ public class Robot extends TimedRobot {
 		swerveDriveConfig = SwerveDriveConfig.load(Filesystem.getDeployDirectory() + "/" + SWERVE_CONFIG_FILE);
 		absoluteSteeringConfig = AbsoluteSteeringConfig.load(Filesystem.getDeployDirectory() + "/" + ABSOLUTE_STEERING_CONFIG_FILE);
 		intakeConfig = IntakeConfig.load(Filesystem.getDeployDirectory() + "/" + INTAKE_CONFIG_FILE);
+		ballVisionConfig = BallVisionConfig.load(Filesystem.getDeployDirectory() + "/" + BALL_VISION_CONFIG_FILE);
 		shooterConfig = ShooterConfig.load(Filesystem.getDeployDirectory() + "/" + SHOOTER_CONFIG_FILE,
 											Filesystem.getDeployDirectory() + "/" + SHOOTER_VISION_POINTS_FILE);
 		climberConfig = ClimberConfig.load(Filesystem.getDeployDirectory() + "/" + CLIMBER_CONFIG_FILE);
@@ -494,6 +510,7 @@ public class Robot extends TimedRobot {
 	private void applyConfigs() {
 		swerveDrive.configure(swerveDriveConfig);
 		intake.configure(intakeConfig);
+		ballVision.configure(ballVisionConfig);
 		shooter.configure(shooterConfig);
 		climber.configure(climberConfig);
 	}
