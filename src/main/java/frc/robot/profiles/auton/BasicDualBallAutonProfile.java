@@ -60,4 +60,10 @@ public class BasicDualBallAutonProfile extends ControlProfile {
 
 		time += period;
 	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		time = 0;
+	}
 }

@@ -159,4 +159,10 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 			swerveRotate = 0;
 		}
 	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		step = 0;
+	}
 }

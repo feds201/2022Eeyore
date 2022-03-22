@@ -332,7 +332,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void autonomousInit() {}
+	public void autonomousInit() {
+		activeAutonProfile.reset();
+	}
 
 	@Override
 	public void autonomousPeriodic() {
@@ -340,7 +342,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void teleopInit() {}
+	public void teleopInit() {
+		activeDriverProfile.reset();
+	}
 
 	@Override
 	public void teleopPeriodic() {

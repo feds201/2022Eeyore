@@ -89,4 +89,10 @@ public class TestDriverProfile extends ControlProfile {
 						(controller.getLeftStickButtonPressed() || controller.getRightStickButtonPressed()));
 		configReloadRumble = controller.getLeftStickButton() && controller.getRightStickButton();
 	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		shooterToggleTripped = false;
+	}
 }

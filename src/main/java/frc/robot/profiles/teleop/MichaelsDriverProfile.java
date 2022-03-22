@@ -91,4 +91,10 @@ public class MichaelsDriverProfile extends ControlProfile {
 						(driver.getLeftStickButtonPressed() || driver.getRightStickButtonPressed()));
 		configReloadRumble = driver.getLeftStickButton() && driver.getRightStickButton();
 	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		shooterToggleTripped = false;
+	}
 }

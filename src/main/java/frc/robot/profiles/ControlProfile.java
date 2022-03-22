@@ -35,6 +35,31 @@ public abstract class ControlProfile {
 
 	public abstract void update();
 
+	public void reset() {
+		swerveLinearAngle = 0;
+		swerveLinearSpeed = 0;
+		swerveRotate = 0;
+		swerveAlign = false;
+		swerveAlignRumble = false;
+
+		intakeDeploy = false;
+		intakeActive = false;
+
+		shooterMode = ShooterMode.HIGH_GOAL_VISION;
+		shooterSpin = false;
+		shooterFire = false;
+		shooterUnjam = false;
+		decreaseShooterDistance = false;
+		increaseShooterDistance = false;
+
+		climberUp = false;
+		climberDown = false;
+		climberHigh = false;
+
+		configReload = false;
+		configReloadRumble = false;
+	}
+
 	public double getSwerveLinearAngle() {
 		return swerveLinearAngle;
 	}

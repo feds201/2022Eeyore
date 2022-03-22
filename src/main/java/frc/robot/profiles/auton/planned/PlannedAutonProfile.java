@@ -61,6 +61,13 @@ public class PlannedAutonProfile extends ControlProfile {
 		}
 	}
 
+	@Override
+	public void reset() {
+		super.reset();
+		first = true;
+		index = 0;
+	}
+
 	public void nextPoint() {
 		if (index < plan.points.length - 1)
 			index++;
