@@ -108,8 +108,15 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 			super.update();
 			intakeDeploy = true;
 			intakeActive = true;
+			time = 2;
 			step++;
 		} else if (step == 11) {
+			super.update();
+			time -= period;
+			if (time <= 0) {
+				step++;
+			}
+		} else if (step == 12) {
 			super.update();
 			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
 				intakeDeploy = false;
@@ -117,12 +124,12 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 				step++;
 			}
 		}
-		if (step == 12) {
+		if (step == 13) {
 			// C2
 			nextPoint();
 			super.update();
 			step++;
-		} else if (step == 13) {
+		} else if (step == 14) {
 			super.update();
 			if (Math.abs(getAngleError()) < 0.25 && getPositionError() < 2) {
 				shooterMode = ShooterMode.HIGH_GOAL_VISION;
@@ -130,15 +137,15 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 				step++;
 				time = 1;
 			}
-		} else if (step == 14) {
+		} else if (step == 15) {
 			super.update();
 			time -= period;
 			if (time <= 0) {
 				shooterFire = true;
 				step++;
-				time = 2;
+				time = 1;
 			}
-		} else if (step == 15) {
+		} else if (step == 16) {
 			super.update();
 			time -= period;
 			if (time <= 0) {
@@ -146,6 +153,10 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 				shooterFire = false;
 				step++;
 			}
+		} else if (step == 17) {
+			swerveLinearAngle = 0;
+			swerveLinearSpeed = 0;
+			swerveRotate = 0;
 		}
 	}
 }
