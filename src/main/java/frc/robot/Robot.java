@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -276,9 +275,9 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
 										DriverStation.getAlliance() == Alliance.Red
 										? Color.kRed : Color.kBlue);
-				if (DriverStation.getMatchType() != MatchType.None &&
-					!DriverStation.isAutonomousEnabled() &&
-					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME) {
+				if (DriverStation.getMatchTime() > 0 &&
+					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
+					!DriverStation.isAutonomousEnabled()) {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
 				} else {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
