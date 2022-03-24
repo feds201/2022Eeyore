@@ -35,7 +35,7 @@ import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
-import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile2;
+import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile;
 import frc.robot.profiles.auton.planned.AutonPlan;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.MichaelsDriverProfile;
@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
 
-	public static final String QUINT_AUTON_PLAN2_FILE = "quintautonplan2.json";
+	public static final String QUINT_AUTON_PLAN_FILE = "quintautonplan.json";
 
 	public static final int PCM_CHANNEL = 8;
 
@@ -117,7 +117,7 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
-	private AutonPlan quintAutonPlan2;
+	private AutonPlan quintAutonPlan;
 
 	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
 	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
@@ -144,7 +144,7 @@ public class Robot extends TimedRobot {
 			System.err.println(e);
 		}
 		try {
-			quintAutonPlan2 = AutonPlan.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN2_FILE);
+			quintAutonPlan = AutonPlan.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN_FILE);
 			System.out.println("Successfully loaded auton plans");
 		} catch (IOException e) {
 			System.err.println("Error loading auton plans");
@@ -207,12 +207,12 @@ public class Robot extends TimedRobot {
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
 			new BasicSingleBallAutonProfile(PERIOD),
-			new AdvancedQuintAutonProfile2(PERIOD, swerveDrive.getPose(), quintAutonPlan2)
+			new AdvancedQuintAutonProfile(PERIOD, swerveDrive.getPose(), quintAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
 		autonSelector.setDefaultOption("Basic 2-Ball", 0);
 		autonSelector.addOption("Basic 1-Ball", 1);
-		autonSelector.addOption("5-Ball B", 2);
+		autonSelector.addOption("5-Ball A", 2);
 
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);

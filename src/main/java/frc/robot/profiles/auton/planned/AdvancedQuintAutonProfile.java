@@ -3,14 +3,14 @@ package frc.robot.profiles.auton.planned;
 import frc.robot.shooter.ShooterMode;
 import frc.robot.swerve.RobotPose;
 
-public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
+public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 
 	private final double period;
 
 	private int step = 0;
 	private double time = 0;
 
-	public AdvancedQuintAutonProfile2(double period, RobotPose pose, AutonPlan plan) {
+	public AdvancedQuintAutonProfile(double period, RobotPose pose, AutonPlan plan) {
 		super(pose, plan);
 		this.period = period;
 	}
