@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.util.Color;
 
 public class IndicatorLights implements Subsystem {
 
-	public static final int PERIOD = 5;
+	public static final int PERIOD = 10;
 
 	private final int count;
 	private final AddressableLED strip;

@@ -18,7 +18,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -38,7 +37,6 @@ import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
 import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile;
 import frc.robot.profiles.auton.planned.AutonPlan;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
-import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter.ShooterHardware;
@@ -196,13 +194,11 @@ public class Robot extends TimedRobot {
 
 		driverProfiles = new ControlProfile[] {
 			new DefaultDriverProfile(driverController, operatorController),
-			new TestDriverProfile(driverController),
-			new MichaelsDriverProfile(driverController, operatorController)
+			new TestDriverProfile(driverController)
 		};
 		activeDriverProfile = driverProfiles[0];
 		driverSelector.setDefaultOption("Default", 0);
 		driverSelector.addOption("Test", 1);
-		driverSelector.addOption("Michael", 2);
 
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
@@ -296,9 +292,9 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
 										DriverStation.getAlliance() == Alliance.Red
 										? Color.kRed : Color.kBlue);
-				if (DriverStation.getMatchType() != MatchType.None &&
-					!DriverStation.isAutonomousEnabled() &&
-					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME) {
+				if (DriverStation.getMatchTime() > 0 &&
+					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
+					!DriverStation.isAutonomousEnabled()) {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
 				} else {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
@@ -407,7 +403,8 @@ public class Robot extends TimedRobot {
 
 		shooter.setSpin(profile.getShooterSpin());
 		double swerveRotate = profile.getSwerveRotate();
-		if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION && shooter.hasTarget())
+		if (shooter.getSpin() && shooter.hasTarget() &&
+			shooter.getMode() == ShooterMode.HIGH_GOAL_VISION)
 			swerveRotate = shooter.getYawCorrection();
 		shooter.setFire(profile.getShooterFire());
 		shooter.setUnjam(profile.getShooterUnjam());
