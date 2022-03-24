@@ -37,9 +37,6 @@ public class ShooterHardware implements Subsystem {
 
 	public ShooterHardware(int topChannel, int bottomChannel, int feederChannel,
 							ShooterHardwareConfig config) {
-		if (feederSpeed < 0 || feederSpeed > 1)
-			throw new IllegalArgumentException("feeder speed out of bounds");
-
 		topMotor = new TalonFX(topChannel);
 		bottomMotor = new TalonFX(bottomChannel);
 		feederMotor = new TalonFX(feederChannel);
