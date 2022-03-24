@@ -43,7 +43,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			if (time <= 0) {
 				shooterFire = true;
 				step++;
-				time = 2;
+				time = 1.6;
 			}
 		} else if (step == 3) {
 			super.update();
@@ -61,7 +61,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			step++;
 		} else if (step == 5) {
 			super.update();
-			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
+			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 6) {
 				intakeDeploy = false;
 				intakeActive = false;
 				step++;
@@ -77,7 +77,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			step++;
 		} else if (step == 7) {
 			super.update();
-			if (Math.abs(getAngleError()) < 0.25 && getPositionError() < 2) {
+			if (Math.abs(getAngleError()) < 0.25) {
 				shooterMode = ShooterMode.HIGH_GOAL_VISION;
 				shooterSpin = true;
 				step++;
@@ -106,7 +106,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			super.update();
 			intakeDeploy = true;
 			intakeActive = true;
-			time = 2;
+			time = 1.6;
 			step++;
 		} else if (step == 11) {
 			super.update();
@@ -129,7 +129,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			step++;
 		} else if (step == 14) {
 			super.update();
-			if (Math.abs(getAngleError()) < 0.25 && getPositionError() < 2) {
+			if (Math.abs(getAngleError()) < 0.25 && getPositionError() < 6) {
 				shooterMode = ShooterMode.HIGH_GOAL_VISION;
 				shooterSpin = true;
 				step++;
@@ -141,7 +141,7 @@ public class AdvancedQuintAutonProfile2 extends PlannedAutonProfile {
 			if (time <= 0) {
 				shooterFire = true;
 				step++;
-				time = 2;
+				time = 1.6;
 			}
 		} else if (step == 16) {
 			super.update();
