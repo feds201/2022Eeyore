@@ -57,8 +57,7 @@ public class ShooterConfig {
 			config.hardwareConfig.bottomPid.kD = table.getEntry("hardware.bottompid.kd").getDouble(0);
 			config.hardwareConfig.bottomPid.kF = table.getEntry("hardware.bottompid.kf").getDouble(0);
 
-			config.hardwareConfig.fireThresholdLower = table.getEntry("hardware.firethresholdlower").getDouble(0);
-			config.hardwareConfig.fireThresholdUpper = table.getEntry("hardware.firethresholdupper").getDouble(2);
+			config.hardwareConfig.fireThreshold = table.getEntry("hardware.firethreshold").getDouble(1000);
 			config.hardwareConfig.feederSpeed = table.getEntry("hardware.feederspeed").getDouble(0);
 			config.hardwareConfig.feederUnjamSpeed = table.getEntry("hardware.feederunjamspeed").getDouble(0);
 			config.hardwareConfig.minFireTime = table.getEntry("hardware.minfiretime").getDouble(0);

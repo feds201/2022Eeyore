@@ -18,8 +18,7 @@ public class ShooterHardware implements Subsystem {
 	private final TalonFX bottomMotor;
 	private final TalonFX feederMotor;
 
-	private double fireThresholdLower;
-	private double fireThresholdUpper;
+	private double fireThreshold;
 	private double feederSpeed;
 	private double feederUnjamSpeed;
 
@@ -67,10 +66,8 @@ public class ShooterHardware implements Subsystem {
 
 	public boolean isReady() {
 		return isSpinning() &&
-				getCurrentSpeedTopPercentage() > fireThresholdLower &&
-				getCurrentSpeedTopPercentage() < fireThresholdUpper &&
-				getCurrentSpeedBottomPercentage() > fireThresholdLower &&
-				getCurrentSpeedBottomPercentage() < fireThresholdUpper;
+				Math.abs(topSpeed - topMotor.getSelectedSensorVelocity()) < fireThreshold &&
+				Math.abs(bottomSpeed - bottomMotor.getSelectedSensorVelocity()) < fireThreshold;
 	}
 
 	public boolean isFiring() {
@@ -116,14 +113,6 @@ public class ShooterHardware implements Subsystem {
 				currentlyFiring = shouldFire;
 			}
 		}
-	}
-
-	public double getCurrentSpeedTopPercentage() {
-		return topMotor.getSelectedSensorVelocity() / topSpeed;
-	}
-
-	public double getCurrentSpeedBottomPercentage() {
-		return bottomMotor.getSelectedSensorVelocity() / bottomSpeed;
 	}
 
 	public void configure(ShooterHardwareConfig config) {
@@ -199,8 +188,7 @@ public class ShooterHardware implements Subsystem {
 		feederMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
 		feederMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
-		fireThresholdLower = config.fireThresholdLower;
-		fireThresholdUpper = config.fireThresholdUpper;
+		fireThreshold = config.fireThreshold;
 		feederSpeed = config.feederSpeed;
 		feederUnjamSpeed = config.feederUnjamSpeed;
 		minFireTime = config.minFireTime;
