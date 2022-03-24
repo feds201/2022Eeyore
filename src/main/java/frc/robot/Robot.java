@@ -382,7 +382,8 @@ public class Robot extends TimedRobot {
 
 		shooter.setSpin(profile.getShooterSpin());
 		double swerveRotate = profile.getSwerveRotate();
-		if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION && shooter.hasTarget())
+		if (shooter.getSpin() && shooter.hasTarget() &&
+			shooter.getMode() == ShooterMode.HIGH_GOAL_VISION)
 			swerveRotate = shooter.getYawCorrection();
 		shooter.setFire(profile.getShooterFire());
 		shooter.setUnjam(profile.getShooterUnjam());
