@@ -320,6 +320,7 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
 			indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
