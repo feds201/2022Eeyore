@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -32,6 +34,8 @@ import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
+import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile;
+import frc.robot.profiles.auton.planned.AutonPlan;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
 import frc.robot.shooter.Shooter;
@@ -53,6 +57,8 @@ public class Robot extends TimedRobot {
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
+
+	public static final String QUINT_AUTON_PLAN_FILE = "quintautonplan.json";
 
 	public static final int PCM_CHANNEL = 8;
 
@@ -109,6 +115,8 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
+	private AutonPlan quintAutonPlan;
+
 	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
 	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
 
@@ -131,6 +139,13 @@ public class Robot extends TimedRobot {
 			System.out.println("Successfully loaded subsystem configuration files");
 		} catch (PersistentException e) {
 			System.err.println("Error loading subsystem configuration files");
+			System.err.println(e);
+		}
+		try {
+			quintAutonPlan = AutonPlan.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN_FILE);
+			System.out.println("Successfully loaded auton plans");
+		} catch (IOException e) {
+			System.err.println("Error loading auton plans");
 			System.err.println(e);
 		}
 
@@ -187,11 +202,13 @@ public class Robot extends TimedRobot {
 
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
-			new BasicSingleBallAutonProfile(PERIOD)
+			new BasicSingleBallAutonProfile(PERIOD),
+			new AdvancedQuintAutonProfile(PERIOD, swerveDrive.getPose(), quintAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
 		autonSelector.setDefaultOption("Basic 2-Ball", 0);
 		autonSelector.addOption("Basic 1-Ball", 1);
+		autonSelector.addOption("5-Ball A", 2);
 
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);
@@ -311,7 +328,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void autonomousInit() {}
+	public void autonomousInit() {
+		activeAutonProfile.reset();
+	}
 
 	@Override
 	public void autonomousPeriodic() {
@@ -319,7 +338,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void teleopInit() {}
+	public void teleopInit() {
+		activeDriverProfile.reset();
+	}
 
 	@Override
 	public void teleopPeriodic() {
