@@ -23,7 +23,6 @@ public class Climber implements Subsystem {
 	private double highEncoderCountsLow;
 	private double highEncoderCountsHigh;
 
-	private boolean update = true;
 	private int position = 0;
 
 	public Climber(int leftChannel, int rightChannel, ClimberConfig config) {
@@ -34,29 +33,24 @@ public class Climber implements Subsystem {
 	}
 
 	public void setTargetPosition(int position) {
-		if (this.position != position) {
-			this.position = position;
-			update = true;
-		}
+		this.position = position;
 	}
 
 	@Override
 	public void tick() {
-		if (update) {
-			if (position == 1)
+		if (position == 1)
+			leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
+		else if (position == -1)
+			leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
+		else if (position == 2) {
+			if (leftMotor.getSelectedSensorPosition() < highEncoderCountsLow)
 				leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
-			else if (position == -1)
+			else if (leftMotor.getSelectedSensorPosition() > highEncoderCountsHigh)
 				leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
-			else if (position == 2) {
-				if (leftMotor.getSelectedSensorPosition() < highEncoderCountsLow)
-					leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
-				else if (leftMotor.getSelectedSensorPosition() > highEncoderCountsHigh)
-					leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
-				else
-					leftMotor.set(ControlMode.PercentOutput, 0);
-			} else
+			else
 				leftMotor.set(ControlMode.PercentOutput, 0);
-		}
+		} else
+			leftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
 	public void configure(ClimberConfig config) {
