@@ -289,9 +289,13 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			} else {
-				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
-										DriverStation.getAlliance() == Alliance.Red
-										? Color.kRed : Color.kBlue);
+				Alliance alliance = DriverStation.getAlliance();
+				if (alliance == Alliance.Red)
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
+				else if (alliance == Alliance.Blue)
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kBlue);
+				else
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
 				if (DriverStation.getMatchTime() > 0 &&
 					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
 					!DriverStation.isAutonomousEnabled()) {
@@ -307,9 +311,13 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			}
 		} else {
-			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
-									DriverStation.getAlliance() == Alliance.Red
-									? Color.kDarkRed : Color.kDarkBlue);
+			Alliance alliance = DriverStation.getAlliance();
+			if (alliance == Alliance.Red)
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kDarkRed);
+			else if (alliance == Alliance.Blue)
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kDarkBlue);
+			else
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
 			indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
