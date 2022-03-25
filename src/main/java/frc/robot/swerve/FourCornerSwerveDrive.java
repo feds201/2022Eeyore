@@ -29,7 +29,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
 
-	private double currentTargetLinearAngle = 0;
+	private double currentTargetLinearAngleAbsolute = 0;
 	private double currentTargetLinearSpeed = 0;
 	private double currentTargetRotate = 0;
 
@@ -154,8 +154,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		{
 			double targetX = Math.sin(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
 			double targetY = Math.cos(targetLinearAngle * Math.PI * 2) * targetLinearSpeed;
-			double currentX = Math.sin(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
-			double currentY = Math.cos(currentTargetLinearAngle * Math.PI * 2) * currentTargetLinearSpeed;
+			double currentX = Math.sin((currentTargetLinearAngleAbsolute - pose.angle) * Math.PI * 2) * currentTargetLinearSpeed;
+			double currentY = Math.cos((currentTargetLinearAngleAbsolute - pose.angle) * Math.PI * 2) * currentTargetLinearSpeed;
 			double translatedTargetX = targetX - currentX;
 			double translatedTargetY = targetY - currentY;
 
@@ -165,7 +165,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 
 			currentX += Math.signum(translatedTargetX) * Math.min(Math.abs(deltaX), Math.abs(translatedTargetX));
 			currentY += Math.signum(translatedTargetY) * Math.min(Math.abs(deltaY), Math.abs(translatedTargetY));
-			currentTargetLinearAngle = -Math.atan2(currentY, currentX) / Math.PI / 2 + 0.25;
+			currentTargetLinearAngleAbsolute = -Math.atan2(currentY, currentX) / Math.PI / 2 + 0.25 + pose.angle;
 			currentTargetLinearSpeed = Math.sqrt(currentX * currentX + currentY * currentY);
 
 			double deltaRotate = targetRotate - currentTargetRotate;
@@ -177,7 +177,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		lastYaw = yaw;
 
 		{
-			double effectiveLinearAngle = currentTargetLinearAngle;
+			double effectiveLinearAngle = currentTargetLinearAngleAbsolute - pose.angle;
 			double effectiveLinearSpeed = currentTargetLinearSpeed;
 			double effectiveRotate = currentTargetRotate;
 
