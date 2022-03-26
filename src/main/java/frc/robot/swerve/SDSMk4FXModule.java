@@ -138,7 +138,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.supplyCurrLimit.triggerThresholdTime = config.driveCurrentLimitTime;
 		drive.configAllSettings(driveConfig);
 		drive.setInverted(true);
-		drive.setNeutralMode(NeutralMode.Coast);
+		drive.setNeutralMode(NeutralMode.Brake);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
