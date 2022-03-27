@@ -130,7 +130,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.neutralDeadband = 0.001;
 		driveConfig.openloopRamp = config.maxRamp;
 		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
-		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_10Ms;
+		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_20Ms;
 		driveConfig.velocityMeasurementWindow = 1;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
