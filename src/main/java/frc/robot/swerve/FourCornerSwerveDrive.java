@@ -347,6 +347,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			}
 			pose.angle += yawDiff;
 			pose.rotate = angleDiff;
+		} else {
+			pose.linearAngle = 0;
+			pose.linearSpeed = 0;
+			pose.rotate = 0;
 		}
 	}
 
