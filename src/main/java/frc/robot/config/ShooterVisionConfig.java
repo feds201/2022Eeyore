@@ -7,6 +7,10 @@ public class ShooterVisionConfig {
 	public SlotConfiguration pid;
 
 	public ShooterVisionPoint[] points;
+	public double a;
+	public double b;
+	public double c;
+	public double d;
 	public double distanceOffset;
 
 	public static class ShooterVisionPoint {
