@@ -132,6 +132,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		driveConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 		driveConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_20Ms;
 		driveConfig.velocityMeasurementWindow = 1;
+		driveConfig.voltageCompSaturation = 12;
 		driveConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration();
 		driveConfig.supplyCurrLimit.enable = config.driveCurrentLimitEnabled;
 		driveConfig.supplyCurrLimit.currentLimit = config.driveCurrentLimit;
@@ -139,6 +140,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		drive.configAllSettings(driveConfig);
 		drive.setInverted(true);
 		drive.setNeutralMode(NeutralMode.Brake);
+		drive.enableVoltageCompensation(true);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
 		drive.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255);
