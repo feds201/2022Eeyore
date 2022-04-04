@@ -97,7 +97,7 @@ public class DefaultDriverProfile extends ControlProfile {
 					iacc = 0;
 				rotate = targetError * steeringPid.kP +
 							iacc * steeringPid.kI +
-							(lastErr - targetError) / timeDeltaSeconds * steeringPid.kD;
+							(targetError - lastErr) / timeDeltaSeconds * steeringPid.kD;
 				lastErr = targetError;
 			}
 		} else {
