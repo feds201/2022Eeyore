@@ -10,6 +10,9 @@ import frc.robot.config.ShooterVisionConfig.ShooterVisionPoint;
 
 public class ShooterVision implements Subsystem {
 
+	public static final double MAX_VERTEX_X = 1.5;
+	public static final double MAX_VERTEX_Y = 1.5;
+
 	private final NetworkTable table;
 
 	private SlotConfiguration pid;
@@ -20,6 +23,12 @@ public class ShooterVision implements Subsystem {
 	private double c;
 	private double d;
 	private double distanceOffset;
+
+	private boolean hasTarget = false;
+	private double[] target = new double[2];
+	private double distance;
+	private double yawCorrection;
+	private double[] speeds = new double[2];
 
 	private long lastTime;
 	private double iacc = 0;
@@ -41,15 +50,94 @@ public class ShooterVision implements Subsystem {
 	}
 
 	public boolean hasTarget() {
-		return table.getEntry("tv").getDouble(0) == 1;
+		return hasTarget;
+	}
+
+	public double[] getTarget() {
+		return target;
 	}
 
 	public double getYawCorrection() {
+		return yawCorrection;
+	}
+
+	public double[] getShooterSpeeds() {
+		return speeds;
+	}
+
+	@Override
+	public void tick() {
 		long currentTime = System.currentTimeMillis();
 		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
 		lastTime = currentTime;
 
-		double error = table.getEntry("tx").getDouble(0);
+		if (table.getEntry("tv").getDouble(0) == 1) {
+			double x;
+			double y;
+			if (table.getEntry("ta2").getDouble(0) != 0) {
+				double x0 = table.getEntry("tx0").getDouble(0);
+				double y0 = table.getEntry("ty0").getDouble(0);
+				double x1 = table.getEntry("tx1").getDouble(0);
+				double y1 = table.getEntry("ty1").getDouble(0);
+				double x2 = table.getEntry("tx2").getDouble(0);
+				double y2 = table.getEntry("ty2").getDouble(0);
+
+				double d = (x0 - x1) * (x0 - x2) * (x1 - x2);
+				double a = (x2 * (y1 - y0) + x1 * (y0 - y2) + x0 * (y2 - y1)) / d;
+				double b = (x2 * x2 * (y0 - y1) + x1 * x1 * (y2 - y0) + x0 * x0 * (y1 - y2)) / d;
+				double c = (x1 * x2 * (x1 - x2) * y0 + x2 * (x2 - x0) * y1 + x0 * x1 * (x0 - x1) * y2) / d;
+
+				x = -b / (2 * a);
+				y = c - b * b / (4 * a);
+
+				if (!Double.isFinite(x) || !Double.isFinite(y) ||
+					Math.abs(x) > MAX_VERTEX_X || Math.abs(y) > MAX_VERTEX_Y) {
+					x = (x0 + x1) / 2;
+					y = (y0 + y1) / 2;
+				}
+			} else if (table.getEntry("ta1").getDouble(0) != 0) {
+				double x0 = table.getEntry("tx0").getDouble(0);
+				double y0 = table.getEntry("ty0").getDouble(0);
+				double x1 = table.getEntry("tx1").getDouble(0);
+				double y1 = table.getEntry("ty1").getDouble(0);
+
+				x = (x0 + x1) / 2;
+				y = (y0 + y1) / 2;
+			} else {
+				x = table.getEntry("tx0").getDouble(0);
+				y = table.getEntry("ty0").getDouble(0);
+			}
+
+			hasTarget = true;
+			target[0] = x;
+			target[1] = y;
+			distance = a * y * y * y + b * y * y + c * y + d + distanceOffset;
+
+			ShooterVisionPoint lowPoint = points[0];
+			ShooterVisionPoint highPoint = points[1];
+			for (int i = 2; i < points.length; i++) {
+				if (distance < highPoint.distance)
+					break;
+				lowPoint = highPoint;
+				highPoint = points[i];
+			}
+
+			double topSlope = (highPoint.topSpeed - lowPoint.topSpeed) / (highPoint.distance - lowPoint.distance);
+			double bottomSlope = (highPoint.bottomSpeed - lowPoint.bottomSpeed) / (highPoint.distance - lowPoint.distance);
+			double topIntercept = highPoint.topSpeed - topSlope * highPoint.distance;
+			double bottomIntercept = highPoint.bottomSpeed - bottomSlope * highPoint.distance;
+			speeds[0] = topSlope * distance + topIntercept;
+			speeds[1] = bottomSlope * distance + bottomIntercept;
+		} else {
+			hasTarget = false;
+			target[0] = 0;
+			target[1] = 0;
+			distance = 0;
+			speeds[0] = 0;
+			speeds[1] = 0;
+		}
+
+		double error = target[0];
 		if (Math.abs(error) <= pid.integralZone) {
 			iacc += error * timeDeltaSeconds;
 			if (Math.abs(iacc) > pid.maxIntegralAccumulator)
@@ -57,35 +145,8 @@ public class ShooterVision implements Subsystem {
 		}
 		else
 			iacc = 0;
-		double output = error * pid.kP + iacc * pid.kI + (lastErr - error) / timeDeltaSeconds * pid.kD;
+		yawCorrection = error * pid.kP + iacc * pid.kI + (error - lastErr) / timeDeltaSeconds * pid.kD;
 		lastErr = error;
-		return output;
-	}
-
-	public double[] getShooterSpeeds() {
-		if (!hasTarget())
-			return new double[] { 0, 0 };
-
-		double angle = table.getEntry("ty").getDouble(0);
-		double distance = a * angle * angle * angle + b * angle * angle + c * angle + d + distanceOffset;
-
-		ShooterVisionPoint lowPoint = points[0];
-		ShooterVisionPoint highPoint = points[1];
-		for (int i = 2; i < points.length; i++) {
-			if (distance < highPoint.distance)
-				break;
-			lowPoint = highPoint;
-			highPoint = points[i];
-		}
-
-		double topSlope = (highPoint.topSpeed - lowPoint.topSpeed) / (highPoint.distance - lowPoint.distance);
-		double bottomSlope = (highPoint.bottomSpeed - lowPoint.bottomSpeed) / (highPoint.distance - lowPoint.distance);
-		double topIntercept = highPoint.topSpeed - topSlope * highPoint.distance;
-		double bottomIntercept = highPoint.bottomSpeed - bottomSlope * highPoint.distance;
-		double topSpeed = topSlope * distance + topIntercept;
-		double bottomSpeed = bottomSlope * distance + bottomIntercept;
-
-		return new double[] { topSpeed, bottomSpeed };
 	}
 
 	public void configure(ShooterVisionConfig config) {

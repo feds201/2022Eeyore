@@ -335,6 +335,12 @@ public class Robot extends TimedRobot {
 			table.getEntry("y").setDouble(swerveDrive.getPose().y);
 			table.getEntry("angle").setDouble(swerveDrive.getPose().angle * 360);
 		}
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("/shooter");
+			double[] target = shooter.getTarget();
+			table.getEntry("x").setDouble(target[0]);
+			table.getEntry("y").setDouble(target[1]);
+		}
 	}
 
 	@Override

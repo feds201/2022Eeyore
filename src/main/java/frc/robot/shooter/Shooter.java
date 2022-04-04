@@ -75,6 +75,10 @@ public class Shooter implements Subsystem {
 		return vision.hasTarget();
 	}
 
+	public double[] getTarget() {
+		return vision.getTarget();
+	}
+
 	public double getYawCorrection() {
 		return vision.getYawCorrection();
 	}
