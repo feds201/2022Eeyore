@@ -12,6 +12,8 @@ public class ShooterVision implements Subsystem {
 
 	public static final double MAX_VERTEX_X = 1.5;
 	public static final double MAX_VERTEX_Y = 1.5;
+	public static final double LIMELIGHT_FOV = 59.6 / 2 / 360;
+	public static final double TARGET_SIZE = 4.5 / 2;
 
 	private final NetworkTable table;
 
@@ -28,6 +30,7 @@ public class ShooterVision implements Subsystem {
 	private double[] target = new double[2];
 	private double distance;
 	private double yawCorrection;
+	private boolean aligned;
 	private double[] speeds = new double[2];
 
 	private long lastTime;
@@ -59,6 +62,10 @@ public class ShooterVision implements Subsystem {
 
 	public double getYawCorrection() {
 		return yawCorrection;
+	}
+
+	public boolean isAligned() {
+		return aligned;
 	}
 
 	public double[] getShooterSpeeds() {
@@ -112,6 +119,7 @@ public class ShooterVision implements Subsystem {
 			target[0] = x;
 			target[1] = y;
 			distance = a * y * y * y + b * y * y + c * y + d + distanceOffset;
+			aligned = distance * Math.tan(Math.abs(x) * LIMELIGHT_FOV * Math.PI * 2) < TARGET_SIZE;
 
 			ShooterVisionPoint lowPoint = points[0];
 			ShooterVisionPoint highPoint = points[1];
@@ -133,6 +141,7 @@ public class ShooterVision implements Subsystem {
 			target[0] = 0;
 			target[1] = 0;
 			distance = 0;
+			aligned = false;
 			speeds[0] = 0;
 			speeds[1] = 0;
 		}
