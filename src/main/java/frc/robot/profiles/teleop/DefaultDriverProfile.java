@@ -22,6 +22,9 @@ public class DefaultDriverProfile extends ControlProfile {
 
 	private boolean shooterToggleTripped = false;
 
+	private boolean swerveAlignTripped = false;
+	private boolean configReloadTripped = false;
+
 	private boolean fieldRelative = false;
 	private boolean absoluteSteering = false;
 
@@ -163,12 +166,30 @@ public class DefaultDriverProfile extends ControlProfile {
 		decreaseShooterDistance = operator.getLeftBumperPressed();
 		increaseShooterDistance = operator.getRightBumperPressed();
 
-		swerveAlign = (driver.getBackButton() && driver.getStartButton()) &&
-						(driver.getBackButtonPressed() || driver.getStartButtonPressed());
-		swerveAlignRumble = driver.getBackButton() && driver.getStartButton();
+		if (driver.getBackButton() && driver.getStartButton()) {
+			swerveAlign = !swerveAlignTripped;
+			swerveAlignTripped = true;
+			swerveAlignRumble = true;
+		} else {
+			swerveAlign = false;
+			swerveAlignTripped = false;
+			swerveAlignRumble = false;
+		}
 
-		configReload = ((driver.getLeftStickButton() && driver.getRightStickButton()) &&
-						(driver.getLeftStickButtonPressed() || driver.getRightStickButtonPressed()));
-		configReloadRumble = driver.getLeftStickButton() && driver.getRightStickButton();
+		if (driver.getLeftStickButton() && driver.getRightStickButton()) {
+			configReload = !configReloadTripped;
+			configReloadTripped = true;
+			configReloadRumble = true;
+		} else {
+			configReload = false;
+			configReloadTripped = false;
+			configReloadRumble = false;
+		}
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		shooterToggleTripped = false;
 	}
 }

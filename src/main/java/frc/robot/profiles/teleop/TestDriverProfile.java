@@ -14,6 +14,9 @@ public class TestDriverProfile extends ControlProfile {
 
 	private boolean shooterToggleTripped = false;
 
+	private boolean swerveAlignTripped = false;
+	private boolean configReloadTripped = false;
+
 	public TestDriverProfile(XboxController controller) {
 		this.controller = controller;
 	}
@@ -81,12 +84,30 @@ public class TestDriverProfile extends ControlProfile {
 		decreaseShooterDistance = controller.getLeftStickButtonPressed();
 		increaseShooterDistance = controller.getRightStickButtonPressed();
 
-		swerveAlign = (controller.getBackButton() && controller.getStartButton()) &&
-						(controller.getBackButtonPressed() || controller.getStartButtonPressed());
-		swerveAlignRumble = controller.getBackButton() && controller.getStartButton();
+		if (controller.getBackButton() && controller.getStartButton()) {
+			swerveAlign = !swerveAlignTripped;
+			swerveAlignTripped = true;
+			swerveAlignRumble = true;
+		} else {
+			swerveAlign = false;
+			swerveAlignTripped = false;
+			swerveAlignRumble = false;
+		}
 
-		configReload = ((controller.getLeftStickButton() && controller.getRightStickButton()) &&
-						(controller.getLeftStickButtonPressed() || controller.getRightStickButtonPressed()));
-		configReloadRumble = controller.getLeftStickButton() && controller.getRightStickButton();
+		if (controller.getLeftStickButton() && controller.getRightStickButton()) {
+			configReload = !configReloadTripped;
+			configReloadTripped = true;
+			configReloadRumble = true;
+		} else {
+			configReload = false;
+			configReloadTripped = false;
+			configReloadRumble = false;
+		}
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		shooterToggleTripped = false;
 	}
 }

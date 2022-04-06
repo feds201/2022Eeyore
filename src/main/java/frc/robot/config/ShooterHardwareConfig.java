@@ -6,8 +6,7 @@ public class ShooterHardwareConfig {
 
 	public SlotConfiguration topPid;
 	public SlotConfiguration bottomPid;
-	public double fireThresholdLower;
-	public double fireThresholdUpper;
+	public double fireThreshold;
 	public double feederSpeed;
 	public double feederUnjamSpeed;
 	public double minFireTime;

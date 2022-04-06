@@ -57,8 +57,7 @@ public class ShooterConfig {
 			config.hardwareConfig.bottomPid.kD = table.getEntry("hardware.bottompid.kd").getDouble(0);
 			config.hardwareConfig.bottomPid.kF = table.getEntry("hardware.bottompid.kf").getDouble(0);
 
-			config.hardwareConfig.fireThresholdLower = table.getEntry("hardware.firethresholdlower").getDouble(0);
-			config.hardwareConfig.fireThresholdUpper = table.getEntry("hardware.firethresholdupper").getDouble(2);
+			config.hardwareConfig.fireThreshold = table.getEntry("hardware.firethreshold").getDouble(1000);
 			config.hardwareConfig.feederSpeed = table.getEntry("hardware.feederspeed").getDouble(0);
 			config.hardwareConfig.feederUnjamSpeed = table.getEntry("hardware.feederunjamspeed").getDouble(0);
 			config.hardwareConfig.minFireTime = table.getEntry("hardware.minfiretime").getDouble(0);
@@ -85,6 +84,10 @@ public class ShooterConfig {
 			config.visionConfig.pid.kD = table.getEntry("vision.pid.kd").getDouble(0);
 			config.visionConfig.pid.kF = table.getEntry("vision.pid.kf").getDouble(0);
 
+			config.visionConfig.a = table.getEntry("vision.distancefunc.a").getDouble(0);
+			config.visionConfig.b = table.getEntry("vision.distancefunc.b").getDouble(0);
+			config.visionConfig.c = table.getEntry("vision.distancefunc.c").getDouble(0);
+			config.visionConfig.d = table.getEntry("vision.distancefunc.d").getDouble(0);
 			config.visionConfig.distanceOffset = table.getEntry("vision.distanceoffset").getDouble(0);
 
 			JsonNode speeds = new ObjectMapper().readTree(new File(pointsFile)).get("speeds");

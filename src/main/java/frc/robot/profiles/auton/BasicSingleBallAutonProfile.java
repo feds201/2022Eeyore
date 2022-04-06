@@ -44,4 +44,10 @@ public class BasicSingleBallAutonProfile extends ControlProfile {
 
 		time += period;
 	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		time = 0;
+	}
 }

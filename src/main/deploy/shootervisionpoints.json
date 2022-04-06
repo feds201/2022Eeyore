@@ -1,39 +1,29 @@
 {
 	"speeds": [
 		{
-			"distance": 8,
-			"topspeed": 1500,
-			"bottomspeed": 12600
+			"distance": 9,
+			"topspeed": 5500,
+			"bottomspeed": 10500
 		},
 		{
-			"distance": 10,
+			"distance": 11,
 			"topspeed": 7000,
-			"bottomspeed": 10000
+			"bottomspeed": 10500
 		},
 		{
-			"distance": 12,
-			"topspeed": 14500,
-			"bottomspeed": 10000
+			"distance": 13,
+			"topspeed": 7000,
+			"bottomspeed": 11000
 		},
 		{
-			"distance": 14,
+			"distance": 15,
 			"topspeed": 15500,
 			"bottomspeed": 10500
 		},
 		{
-			"distance": 14.2,
-			"topspeed": 15500,
-			"bottomspeed": 11000
-		},
-		{
-			"distance": 16,
-			"topspeed": 16000,
-			"bottomspeed": 11500
-		},
-		{
-			"distance": 18,
+			"distance": 17,
 			"topspeed": 17000,
-			"bottomspeed": 12500
+			"bottomspeed": 12000
 		}
 	]
 }

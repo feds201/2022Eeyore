@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -16,7 +18,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -34,8 +35,9 @@ import frc.robot.config.SwerveDriveConfig;
 import frc.robot.profiles.ControlProfile;
 import frc.robot.profiles.auton.BasicDualBallAutonProfile;
 import frc.robot.profiles.auton.BasicSingleBallAutonProfile;
+import frc.robot.profiles.auton.planned.AdvancedQuintAutonProfile;
+import frc.robot.profiles.auton.planned.AutonPlan;
 import frc.robot.profiles.teleop.DefaultDriverProfile;
-import frc.robot.profiles.teleop.MichaelsDriverProfile;
 import frc.robot.profiles.teleop.TestDriverProfile;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter.ShooterHardware;
@@ -57,6 +59,8 @@ public class Robot extends TimedRobot {
 	public static final String SHOOTER_CONFIG_FILE = "shooterconfig.ini";
 	public static final String SHOOTER_VISION_POINTS_FILE = "shootervisionpoints.json";
 	public static final String CLIMBER_CONFIG_FILE = "climberconfig.ini";
+
+	public static final String QUINT_AUTON_PLAN_FILE = "quintautonplan.json";
 
 	public static final int PCM_CHANNEL = 8;
 
@@ -88,6 +92,7 @@ public class Robot extends TimedRobot {
 
 	public static final int CLIMBER_LEFT_ID = 51;
 	public static final int CLIMBER_RIGHT_ID = 52;
+	public static final int CLIMBER_LIMIT_PORT = 0;
 
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 120;
@@ -114,6 +119,8 @@ public class Robot extends TimedRobot {
 	private ShooterConfig shooterConfig;
 	private ClimberConfig climberConfig;
 
+	private AutonPlan quintAutonPlan;
+
 	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
 	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
 
@@ -136,6 +143,13 @@ public class Robot extends TimedRobot {
 			System.out.println("Successfully loaded subsystem configuration files");
 		} catch (PersistentException e) {
 			System.err.println("Error loading subsystem configuration files");
+			System.err.println(e);
+		}
+		try {
+			quintAutonPlan = AutonPlan.load(Filesystem.getDeployDirectory() + "/" + QUINT_AUTON_PLAN_FILE);
+			System.out.println("Successfully loaded auton plans");
+		} catch (IOException e) {
+			System.err.println("Error loading auton plans");
 			System.err.println(e);
 		}
 
@@ -172,7 +186,7 @@ public class Robot extends TimedRobot {
 								shooterConfig.hardwareConfig), new ShooterVision(shooterConfig.visionConfig),
 								shooterConfig);
 
-		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, climberConfig);
+		climber = new Climber(CLIMBER_LEFT_ID, CLIMBER_RIGHT_ID, CLIMBER_LIMIT_PORT, climberConfig);
 
 		indicatorLights = new IndicatorLights(INDICATOR_LIGHTS_PORT, INDICATOR_LIGHTS_COUNT);
 
@@ -185,21 +199,21 @@ public class Robot extends TimedRobot {
 		driverProfiles = new ControlProfile[] {
 			new DefaultDriverProfile(driverController, operatorController,
 										swerveDrive.getPose(), absoluteSteeringConfig),
-			new TestDriverProfile(driverController),
-			new MichaelsDriverProfile(driverController, operatorController)
+			new TestDriverProfile(driverController)
 		};
 		activeDriverProfile = driverProfiles[0];
 		driverSelector.setDefaultOption("Default", 0);
 		driverSelector.addOption("Test", 1);
-		driverSelector.addOption("Michael", 2);
 
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
-			new BasicSingleBallAutonProfile(PERIOD)
+			new BasicSingleBallAutonProfile(PERIOD),
+			new AdvancedQuintAutonProfile(PERIOD, swerveDrive.getPose(), quintAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
 		autonSelector.setDefaultOption("Basic 2-Ball", 0);
 		autonSelector.addOption("Basic 1-Ball", 1);
+		autonSelector.addOption("5-Ball A", 2);
 
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);
@@ -280,12 +294,16 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			} else {
-				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
-										DriverStation.getAlliance() == Alliance.Red
-										? Color.kRed : Color.kBlue);
-				if (DriverStation.getMatchType() != MatchType.None &&
-					!DriverStation.isAutonomousEnabled() &&
-					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME) {
+				Alliance alliance = DriverStation.getAlliance();
+				if (alliance == Alliance.Red)
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
+				else if (alliance == Alliance.Blue)
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kBlue);
+				else
+					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
+				if (DriverStation.getMatchTime() > 0 &&
+					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
+					!DriverStation.isAutonomousEnabled()) {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
 				} else {
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
@@ -298,11 +316,16 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			}
 		} else {
-			indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID,
-									DriverStation.getAlliance() == Alliance.Red
-									? Color.kDarkRed : Color.kDarkBlue);
+			Alliance alliance = DriverStation.getAlliance();
+			if (alliance == Alliance.Red)
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kDarkRed);
+			else if (alliance == Alliance.Blue)
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kDarkBlue);
+			else
+				indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
 			indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+			indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
 			indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
@@ -319,7 +342,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void autonomousInit() {}
+	public void autonomousInit() {
+		activeAutonProfile.reset();
+	}
 
 	@Override
 	public void autonomousPeriodic() {
@@ -327,7 +352,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void teleopInit() {}
+	public void teleopInit() {
+		activeDriverProfile.reset();
+	}
 
 	@Override
 	public void teleopPeriodic() {
@@ -390,7 +417,8 @@ public class Robot extends TimedRobot {
 
 		shooter.setSpin(profile.getShooterSpin());
 		double swerveRotate = profile.getSwerveRotate();
-		if (shooter.getMode() == ShooterMode.HIGH_GOAL_VISION && shooter.hasTarget())
+		if (shooter.getSpin() && shooter.hasTarget() &&
+			shooter.getMode() == ShooterMode.HIGH_GOAL_VISION)
 			swerveRotate = shooter.getYawCorrection();
 		shooter.setFire(profile.getShooterFire());
 		shooter.setUnjam(profile.getShooterUnjam());
