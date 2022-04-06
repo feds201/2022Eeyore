@@ -1,5 +1,8 @@
 package frc.robot.shooter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -12,6 +15,14 @@ public class ShooterVision implements Subsystem {
 
 	public static final double MAX_VERTEX_X = 1.5;
 	public static final double MAX_VERTEX_Y = 1.5;
+	public static final double MIN_X = -1.0;
+	public static final double MAX_X = 0.9;
+	public static final double MIN_Y = -0.5;
+	public static final double MAX_Y = 1.0;
+
+	public static final double MAX_DISTANCE = 0.5;
+	public static final double MAX_DISTANCE_RATIO = 3.0;
+
 	public static final double LIMELIGHT_FOV = 59.6 / 2 / 360;
 	public static final double TARGET_SIZE = 4.5 / 2;
 
@@ -26,6 +37,7 @@ public class ShooterVision implements Subsystem {
 	private double d;
 	private double distanceOffset;
 
+	private List<double[]> contours = new ArrayList<>(7);
 	private boolean hasTarget = false;
 	private double[] target = new double[2];
 	private double distance;
@@ -78,21 +90,92 @@ public class ShooterVision implements Subsystem {
 		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
 		lastTime = currentTime;
 
-		if (table.getEntry("tv").getDouble(0) == 1) {
+		int possibleContours;
+		if (table.getEntry("tv").getDouble(0) != 1)
+			possibleContours = 0;
+		else if (table.getEntry("ta6").getDouble(0) != 0)
+			possibleContours = 7;
+		else if (table.getEntry("ta5").getDouble(0) != 0)
+			possibleContours = 6;
+		else if (table.getEntry("ta4").getDouble(0) != 0)
+			possibleContours = 5;
+		else if (table.getEntry("ta3").getDouble(0) != 0)
+			possibleContours = 4;
+		else if (table.getEntry("ta2").getDouble(0) != 0)
+			possibleContours = 3;
+		else if (table.getEntry("ta1").getDouble(0) != 0)
+			possibleContours = 2;
+		else
+			possibleContours = 1;
+
+		contours.clear();
+		for (int i = 0; i < possibleContours; i++) {
+			double x = table.getEntry("tx" + i).getDouble(0);
+			double y = table.getEntry("ty" + i).getDouble(0);
+			if (x >= MIN_X && x <= MAX_X && y >= MIN_Y && y <= MAX_Y)
+				contours.add(new double[] { x, y });
+		}
+
+		if (contours.size() >= 2)
+		{
+			double[] minFirst = null;
+			double[] minSecond = null;
+			double minDistance = Double.POSITIVE_INFINITY;
+			for (int i = 0; i < contours.size() - 1; i++) {
+				for (int j = i + 1; j < contours.size(); j++) {
+					double[] first = contours.get(i);
+					double[] second = contours.get(j);
+					double xDiff = first[0] - second[0];
+					double yDiff = first[1] - second[1];
+					double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+					if (distance < minDistance) {
+						minFirst = first;
+						minSecond = second;
+						minDistance = distance;
+					}
+				}
+			}
+
+			if (minDistance > MAX_DISTANCE) {
+				contours.clear();
+				if (minFirst != null)
+					contours.add(minFirst);
+			} else {
+				for (int i = 0; i < contours.size(); i++) {
+					double[] contour = contours.get(i);
+					if (contour == minFirst || contour == minSecond)
+						continue;
+					double xDiff0 = minFirst[0] - contour[0];
+					double yDiff0 = minFirst[1] - contour[1];
+					double distance0 = Math.sqrt(xDiff0 * xDiff0 + yDiff0 * yDiff0);
+					double xDiff1 = minSecond[0] - contour[0];
+					double yDiff1 = minSecond[1] - contour[1];
+					double distance1 = Math.sqrt(xDiff1 * xDiff1 + yDiff1 * yDiff1);
+					if ((distance0 > minDistance * MAX_DISTANCE_RATIO &&
+							distance1 > minDistance * MAX_DISTANCE_RATIO) ||
+						(distance0 > MAX_DISTANCE && distance1 > MAX_DISTANCE)) {
+						contours.remove(i);
+						i--;
+					}
+				}
+			}
+		}
+
+		if (contours.size() > 0) {
 			double x;
 			double y;
-			if (table.getEntry("ta2").getDouble(0) != 0) {
-				double x0 = table.getEntry("tx0").getDouble(0);
-				double y0 = table.getEntry("ty0").getDouble(0);
-				double x1 = table.getEntry("tx1").getDouble(0);
-				double y1 = table.getEntry("ty1").getDouble(0);
-				double x2 = table.getEntry("tx2").getDouble(0);
-				double y2 = table.getEntry("ty2").getDouble(0);
+			if (contours.size() >= 3) {
+				double x0 = contours.get(0)[0];
+				double y0 = contours.get(0)[1];
+				double x1 = contours.get(1)[0];
+				double y1 = contours.get(1)[1];
+				double x2 = contours.get(2)[0];
+				double y2 = contours.get(2)[1];
 
 				double d = (x0 - x1) * (x0 - x2) * (x1 - x2);
 				double a = (x2 * (y1 - y0) + x1 * (y0 - y2) + x0 * (y2 - y1)) / d;
 				double b = (x2 * x2 * (y0 - y1) + x1 * x1 * (y2 - y0) + x0 * x0 * (y1 - y2)) / d;
-				double c = (x1 * x2 * (x1 - x2) * y0 + x2 * (x2 - x0) * y1 + x0 * x1 * (x0 - x1) * y2) / d;
+				double c = (x1 * x2 * (x1 - x2) * y0 + x2 * x0 * (x2 - x0) * y1 + x0 * x1 * (x0 - x1) * y2) / d;
 
 				x = -b / (2 * a);
 				y = c - b * b / (4 * a);
@@ -102,17 +185,17 @@ public class ShooterVision implements Subsystem {
 					x = (x0 + x1) / 2;
 					y = (y0 + y1) / 2;
 				}
-			} else if (table.getEntry("ta1").getDouble(0) != 0) {
-				double x0 = table.getEntry("tx0").getDouble(0);
-				double y0 = table.getEntry("ty0").getDouble(0);
-				double x1 = table.getEntry("tx1").getDouble(0);
-				double y1 = table.getEntry("ty1").getDouble(0);
+			} else if (contours.size() == 2) {
+				double x0 = contours.get(0)[0];
+				double y0 = contours.get(0)[1];
+				double x1 = contours.get(1)[0];
+				double y1 = contours.get(1)[1];
 
 				x = (x0 + x1) / 2;
 				y = (y0 + y1) / 2;
 			} else {
-				x = table.getEntry("tx0").getDouble(0);
-				y = table.getEntry("ty0").getDouble(0);
+				x = contours.get(0)[0];
+				y = contours.get(0)[1];
 			}
 
 			hasTarget = true;
