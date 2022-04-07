@@ -15,6 +15,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double lastYaw;
 	private double gyroFactor;
 
+	private final RobotPose pose;
+
 	private double moduleX;
 	private double moduleY;
 	private double moduleUnitX;
@@ -33,11 +35,10 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double currentTargetLinearSpeed = 0;
 	private double currentTargetRotate = 0;
 
-	private RobotPose pose;
-
 	public FourCornerSwerveDrive(ISwerveModule frontLeft, ISwerveModule frontRight,
 									ISwerveModule backLeft, ISwerveModule backRight,
-									int pigeonChannel, SwerveDriveConfig config) {
+									int pigeonChannel, RobotPose pose,
+									SwerveDriveConfig config) {
 		if (frontLeft == null)
 			throw new IllegalArgumentException("frontLeft is null");
 		if (frontRight == null)
@@ -46,6 +47,8 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			throw new IllegalArgumentException("backLeft is null");
 		if (backRight == null)
 			throw new IllegalArgumentException("backRight is null");
+		if (pose == null)
+			throw new IllegalArgumentException("pose is null");
 
 		this.frontLeft = frontLeft;
 		this.frontRight = frontRight;
@@ -53,7 +56,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		this.backRight = backRight;
 		pigeon = new Pigeon2(pigeonChannel);
 
-		pose = new RobotPose();
+		this.pose = pose;
 
 		configureDrive(config);
 	}
@@ -138,11 +141,6 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	@Override
 	public double getTargetRotate() {
 		return targetRotate;
-	}
-
-	@Override
-	public RobotPose getPose() {
-		return pose;
 	}
 
 	@Override

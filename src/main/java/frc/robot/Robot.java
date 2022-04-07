@@ -46,6 +46,7 @@ import frc.robot.shooter.ShooterVision;
 import frc.robot.swerve.FourCornerSwerveDrive;
 import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
+import frc.robot.swerve.RobotPose;
 import frc.robot.swerve.SDSMk4FXModule;
 
 public class Robot extends TimedRobot {
@@ -97,6 +98,8 @@ public class Robot extends TimedRobot {
 	public static final int INDICATOR_LIGHTS_PORT = 0;
 	public static final int INDICATOR_LIGHTS_COUNT = 120;
 	public static final int INDICATOR_LIGHTS_ENDGAME_TIME = 40;
+
+	private RobotPose pose;
 
 	private ControlProfile[] driverProfiles;
 	private ControlProfile activeDriverProfile;
@@ -153,6 +156,8 @@ public class Robot extends TimedRobot {
 			System.err.println(e);
 		}
 
+		pose = new RobotPose();
+
 		TalonSRX talon1 = new TalonSRX(SWERVE_FRONT_LEFT_ENCODER);
 		TalonSRX talon2 = new TalonSRX(SWERVE_FRONT_RIGHT_ENCODER);
 		TalonSRX talon3 = new TalonSRX(SWERVE_BACK_LEFT_ENCODER);
@@ -177,7 +182,7 @@ public class Robot extends TimedRobot {
 															SWERVE_BACK_RIGHT_ENCODER, table.getEntry("index3").getDouble(0),
 															swerveDriveConfig.moduleConfig);
 			swerveDrive = new FourCornerSwerveDrive(frontLeft, frontRight, backLeft, backRight,
-													SWERVE_PIGEON, swerveDriveConfig);
+													SWERVE_PIGEON, pose, swerveDriveConfig);
 		}
 
 		intake = new BallPickup(PCM_CHANNEL, INTAKE_SOLENOID_DEPLOY, INTAKE_SOLENOID_STANDBY, INTAKE_MOTOR, intakeConfig);
@@ -198,7 +203,7 @@ public class Robot extends TimedRobot {
 
 		driverProfiles = new ControlProfile[] {
 			new DefaultDriverProfile(driverController, operatorController,
-										swerveDrive.getPose(), absoluteSteeringConfig),
+										pose, absoluteSteeringConfig),
 			new TestDriverProfile(driverController)
 		};
 		activeDriverProfile = driverProfiles[0];
@@ -208,7 +213,7 @@ public class Robot extends TimedRobot {
 		autonProfiles = new ControlProfile[] {
 			new BasicDualBallAutonProfile(PERIOD),
 			new BasicSingleBallAutonProfile(PERIOD),
-			new AdvancedQuintAutonProfile(PERIOD, swerveDrive.getPose(), quintAutonPlan)
+			new AdvancedQuintAutonProfile(PERIOD, pose, quintAutonPlan)
 		};
 		activeAutonProfile = autonProfiles[0];
 		autonSelector.setDefaultOption("Basic 2-Ball", 0);
@@ -335,9 +340,9 @@ public class Robot extends TimedRobot {
 
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("/swerve");
-			table.getEntry("x").setDouble(swerveDrive.getPose().x);
-			table.getEntry("y").setDouble(swerveDrive.getPose().y);
-			table.getEntry("angle").setDouble(swerveDrive.getPose().angle * 360);
+			table.getEntry("x").setDouble(pose.x);
+			table.getEntry("y").setDouble(pose.y);
+			table.getEntry("angle").setDouble(pose.angle * 360);
 		}
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("/shooter");
@@ -446,7 +451,7 @@ public class Robot extends TimedRobot {
 			climber.setTargetPosition(0);
 
 		if (profile.getOrientRobot())
-			swerveDrive.getPose().angle = 0;
+			pose.angle = 0;
 	}
 
 	private void loadConfigs() throws PersistentException {

@@ -17,6 +17,4 @@ public interface ISwerveDrive extends Subsystem {
 	public double getTargetLinearAngle();
 	public double getTargetLinearSpeed();
 	public double getTargetRotate();
-
-	public RobotPose getPose();
 }
