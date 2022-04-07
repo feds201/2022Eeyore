@@ -30,6 +30,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private double targetLinearAngle = 0;
 	private double targetLinearSpeed = 0;
 	private double targetRotate = 0;
+	private SwerveMode mode = SwerveMode.NORMAL;
 
 	private double currentTargetLinearAngleAbsolute = 0;
 	private double currentTargetLinearSpeed = 0;
@@ -67,6 +68,13 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		targetLinearAngle = (linearAngle % 1 + 1) % 1;
 		targetLinearSpeed = linearSpeed;
 		targetRotate = rotate;
+	}
+
+	@Override
+	public void setMode(SwerveMode mode) {
+		if (mode == null)
+			throw new IllegalArgumentException("mode is null");
+		this.mode = mode;
 	}
 
 	@Override
@@ -144,6 +152,11 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	}
 
 	@Override
+	public SwerveMode getMode() {
+		return mode;
+	}
+
+	@Override
 	public void tick() {
 		long currentTime = System.currentTimeMillis();
 		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
@@ -192,21 +205,67 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 																	moduleUnitX, -moduleUnitY);
 
 			// A motor can only go at 100% speed so we have to reduce them if one goes faster.
-			double maxSpeed = 0;
-			if (Math.abs(frontLeftVelocity[1]) > maxSpeed)
-				maxSpeed = Math.abs(frontLeftVelocity[1]);
-			if (Math.abs(frontRightVelocity[1]) > maxSpeed)
-				maxSpeed = Math.abs(frontRightVelocity[1]);
-			if (Math.abs(backLeftVelocity[1]) > maxSpeed)
-				maxSpeed = Math.abs(backLeftVelocity[1]);
-			if (Math.abs(backRightVelocity[1]) > maxSpeed)
-				maxSpeed = Math.abs(backRightVelocity[1]);
+			if (mode == SwerveMode.NORMAL) {
+				double maxSpeed = 0;
+				if (frontLeftVelocity[1] > maxSpeed)
+					maxSpeed = frontLeftVelocity[1];
+				if (frontRightVelocity[1] > maxSpeed)
+					maxSpeed = frontRightVelocity[1];
+				if (backLeftVelocity[1] > maxSpeed)
+					maxSpeed = backLeftVelocity[1];
+				if (backRightVelocity[1] > maxSpeed)
+					maxSpeed = backRightVelocity[1];
 
-			if (maxSpeed > 1) {
-				frontLeftVelocity[1] /= maxSpeed;
-				frontRightVelocity[1] /= maxSpeed;
-				backLeftVelocity[1] /= maxSpeed;
-				backRightVelocity[1] /= maxSpeed;
+				if (maxSpeed > 1) {
+					frontLeftVelocity[1] /= maxSpeed;
+					frontRightVelocity[1] /= maxSpeed;
+					backLeftVelocity[1] /= maxSpeed;
+					backRightVelocity[1] /= maxSpeed;
+				}
+			} else if (mode == SwerveMode.ABSOLUTE_LINEAR) {
+				double maxRotate = Double.POSITIVE_INFINITY;
+				if (Math.abs(frontLeftVelocity[3]) < maxRotate)
+					maxRotate = frontLeftVelocity[3];
+				if (Math.abs(frontRightVelocity[3]) < maxRotate)
+					maxRotate = frontRightVelocity[3];
+				if (Math.abs(backLeftVelocity[3]) < maxRotate)
+					maxRotate = backLeftVelocity[3];
+				if (Math.abs(backRightVelocity[3]) < maxRotate)
+					maxRotate = backRightVelocity[3];
+
+				if (Math.abs(effectiveRotate) > Math.abs(maxRotate))
+					effectiveRotate = Math.copySign(maxRotate, effectiveRotate);
+
+				frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																-moduleUnitX, moduleUnitY);
+				frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																moduleUnitX, moduleUnitY);
+				backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																-moduleUnitX, -moduleUnitY);
+				backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																moduleUnitX, -moduleUnitY);
+			} else if (mode == SwerveMode.ABSOLUTE_ROTATE) {
+				double maxLinearSpeed = Double.POSITIVE_INFINITY;
+				if (frontLeftVelocity[2] < maxLinearSpeed)
+					maxLinearSpeed = frontLeftVelocity[2];
+				if (frontRightVelocity[2] < maxLinearSpeed)
+					maxLinearSpeed = frontRightVelocity[2];
+				if (backLeftVelocity[2] < maxLinearSpeed)
+					maxLinearSpeed = backLeftVelocity[2];
+				if (backRightVelocity[2] < maxLinearSpeed)
+					maxLinearSpeed = backRightVelocity[2];
+
+				if (effectiveLinearSpeed > maxLinearSpeed)
+					effectiveLinearSpeed = maxLinearSpeed;
+
+				frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																-moduleUnitX, moduleUnitY);
+				frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																moduleUnitX, moduleUnitY);
+				backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																-moduleUnitX, -moduleUnitY);
+				backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+																moduleUnitX, -moduleUnitY);
 			}
 
 			frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
@@ -356,7 +415,7 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	private static double[] calculateModuleVelocity(double linearAngle, double linearSpeed, double rotate,
 													double x, double y) {
 		if (linearSpeed == 0 && rotate == 0)
-			return new double[] { 0, 0 };
+			return new double[] { 0, 0, 0, 0 };
 
 		// What we consider 0 degrees is actually 90 so the arctan args are actually
 		// reversed.
@@ -369,8 +428,29 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 		targetAngle = (targetAngle % 1 + 1) % 1;
 		double targetSpeed = Math.sqrt(x1 * x1 + y1 * y1);
 
+		double maxLinearSpeed;
+		double maxRotate;
+		{
+			double sina = Math.sin(linearAngle * Math.PI * 2);
+			double cosa = Math.cos(linearAngle * Math.PI * 2);
+			double sinb = Math.sin(turnAngle * Math.PI * 2);
+			double cosb = Math.cos(turnAngle * Math.PI * 2);
+
+			double s2 = linearSpeed * linearSpeed;
+			double t2 = rotate * rotate;
+
+			{
+				double b = 2 * rotate * (sina * sinb + cosa * cosb);
+				maxLinearSpeed = (-b + Math.sqrt(b * b - 4 * (t2 - 1))) / 2;
+			}
+			{
+				double b = 2 * linearSpeed * (sina * sinb + cosa * cosb);
+				maxRotate = (-b + Math.sqrt(b * b - 4 * (s2 - 1))) / 2;
+			}
+		}
+
 		// I don't like boxing so I use an array versus a Tuple.
-		return new double[] { targetAngle, targetSpeed };
+		return new double[] { targetAngle, targetSpeed, maxLinearSpeed, maxRotate };
 	}
 
 	private static double[] calculateZeroVelocityCenter(ISwerveModule module1, double x1, double y1,
