@@ -42,6 +42,7 @@ public class DefaultDriverProfile extends ControlProfile {
 
 	@Override
 	public void update() {
+		orientRobot = driver.getXButton();
 		if (driver.getAButton()) {
 			fieldRelative = false;
 			absoluteSteering = false;

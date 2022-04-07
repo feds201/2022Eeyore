@@ -438,6 +438,9 @@ public class Robot extends TimedRobot {
 			climber.setTargetPosition(2);
 		else
 			climber.setTargetPosition(0);
+
+		if (profile.getOrientRobot())
+			swerveDrive.getPose().angle = 0;
 	}
 
 	private void loadConfigs() throws PersistentException {
