@@ -16,6 +16,7 @@ public class Shooter implements Subsystem {
 
 	private ShooterMode mode = ShooterMode.HIGH_GOAL_VISION;
 	private boolean spin = false;
+	private boolean fire = false;
 
 	public Shooter(ShooterHardware hardware, ShooterVision vision,
 					ShooterConfig config) {
@@ -52,11 +53,14 @@ public class Shooter implements Subsystem {
 	}
 
 	public boolean isReady() {
-		return hardware.isReady();
+		if (mode == ShooterMode.HIGH_GOAL_VISION)
+			return hardware.isReady() && vision.isAligned();
+		else
+			return hardware.isReady();
 	}
 
 	public void setFire(boolean fire) {
-		hardware.setFire(fire);
+		this.fire = fire;
 	}
 
 	public boolean isFiring() {
@@ -75,8 +79,16 @@ public class Shooter implements Subsystem {
 		return vision.hasTarget();
 	}
 
+	public double[] getTarget() {
+		return vision.getTarget();
+	}
+
 	public double getYawCorrection() {
 		return vision.getYawCorrection();
+	}
+
+	public boolean isAligned() {
+		return vision.isAligned();
 	}
 
 	@Override
@@ -96,6 +108,10 @@ public class Shooter implements Subsystem {
 		} else {
 			hardware.setSpeed(0, 0);
 		}
+		if (mode == ShooterMode.HIGH_GOAL_VISION && !vision.isAligned())
+			hardware.setFire(false);
+		else
+			hardware.setFire(fire);
 
 		hardware.tick();
 	}
