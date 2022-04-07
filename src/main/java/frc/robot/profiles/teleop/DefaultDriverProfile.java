@@ -193,5 +193,7 @@ public class DefaultDriverProfile extends ControlProfile {
 	public void reset() {
 		super.reset();
 		shooterToggleTripped = false;
+		fieldRelative = false;
+		absoluteSteering = false;
 	}
 }
