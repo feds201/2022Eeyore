@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -130,6 +132,7 @@ public class Robot extends TimedRobot {
 
 	private SendableChooser<Integer> driverSelector = new SendableChooser<>();
 	private SendableChooser<Integer> autonSelector = new SendableChooser<>();
+	private Field2d field = new Field2d();
 
 	public Robot() {
 		super(PERIOD);
@@ -229,6 +232,7 @@ public class Robot extends TimedRobot {
 
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);
+		SmartDashboard.putData(field);
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
@@ -361,6 +365,9 @@ public class Robot extends TimedRobot {
 			table.getEntry("x").setDouble(pose.x);
 			table.getEntry("y").setDouble(pose.y);
 			table.getEntry("angle").setDouble(pose.angle * 360);
+			final double INCHES_TO_METERS = 0.0254;
+			field.setRobotPose(8.2296 + pose.y * INCHES_TO_METERS, 4.1148 - pose.x * INCHES_TO_METERS,
+								new Rotation2d(-pose.angle * Math.PI * 2));
 		}
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("/shooter");
