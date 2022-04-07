@@ -48,6 +48,7 @@ import frc.robot.swerve.ISwerveDrive;
 import frc.robot.swerve.ISwerveModule;
 import frc.robot.swerve.RobotPose;
 import frc.robot.swerve.SDSMk4FXModule;
+import frc.robot.swerve.SwerveMode;
 
 public class Robot extends TimedRobot {
 
@@ -429,8 +430,12 @@ public class Robot extends TimedRobot {
 		shooter.setSpin(profile.getShooterSpin());
 		double swerveRotate = profile.getSwerveRotate();
 		if (shooter.getSpin() && shooter.hasTarget() &&
-			shooter.getMode() == ShooterMode.HIGH_GOAL_VISION)
+			shooter.getMode() == ShooterMode.HIGH_GOAL_VISION) {
 			swerveRotate = shooter.getYawCorrection();
+			swerveDrive.setMode(SwerveMode.ABSOLUTE_ROTATE);
+		} else {
+			swerveDrive.setMode(SwerveMode.NORMAL);
+		}
 		shooter.setFire(profile.getShooterFire());
 		shooter.setUnjam(profile.getShooterUnjam());
 
