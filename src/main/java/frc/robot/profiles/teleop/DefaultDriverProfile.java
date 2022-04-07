@@ -50,7 +50,8 @@ public class DefaultDriverProfile extends ControlProfile {
 			absoluteSteering = false;
 		} else if (driver.getYButton()) {
 			fieldRelative = true;
-			absoluteSteering = true;
+			absoluteSteering = false;
+			//absoluteSteering = true;
 		}
 
 		double forward = -driver.getLeftY();
