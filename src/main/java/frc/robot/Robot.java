@@ -428,7 +428,8 @@ public class Robot extends TimedRobot {
 
 		if (activeDriverProfile.getSwerveAlign()) {
 			swerveDrive.align();
-			double[] alignments = swerveDrive.getAlignments();
+			double[] alignments = ArrayPool.reserve(4);
+			swerveDrive.getAlignments(alignments);
 			try {
 				NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
 				table.getEntry("index0").setDouble(alignments[0]);
@@ -441,6 +442,7 @@ public class Robot extends TimedRobot {
 				System.err.println("Error saving swerve drive alignment");
 				System.err.println(e);
 			}
+			ArrayPool.release(alignments);
 		}
 		driverController.setRumble(RumbleType.kLeftRumble, activeDriverProfile.getSwerveAlignRumble() ? 1 : 0);
 

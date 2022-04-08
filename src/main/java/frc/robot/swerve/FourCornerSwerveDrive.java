@@ -2,6 +2,7 @@ package frc.robot.swerve;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 
+import frc.robot.ArrayPool;
 import frc.robot.config.SwerveDriveConfig;
 
 public class FourCornerSwerveDrive implements ISwerveDrive {
@@ -78,9 +79,11 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	}
 
 	@Override
-	public double[] getAlignments() {
-		return new double[] { frontLeft.getAngleOffset(), frontRight.getAngleOffset(),
-								backLeft.getAngleOffset(), backRight.getAngleOffset() };
+	public void getAlignments(double[] output) {
+		output[0] = frontLeft.getAngleOffset();
+		output[1] = frontRight.getAngleOffset();
+		output[2] = backLeft.getAngleOffset();
+		output[3] = backRight.getAngleOffset();
 	}
 
 	@Override
@@ -195,14 +198,19 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			if (effectiveRotate == 0 && effectiveLinearSpeed != 0)
 				effectiveRotate = -yawDiff * 360 * gyroFactor;
 
-			double[] frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																	-moduleUnitX, moduleUnitY);
-			double[] frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																	moduleUnitX, moduleUnitY);
-			double[] backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																	-moduleUnitX, -moduleUnitY);
-			double[] backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																	moduleUnitX, -moduleUnitY);
+			double[] frontLeftVelocity = ArrayPool.reserve(4);
+			double[] frontRightVelocity = ArrayPool.reserve(4);
+			double[] backLeftVelocity = ArrayPool.reserve(4);
+			double[] backRightVelocity = ArrayPool.reserve(4);
+
+			calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+									-moduleUnitX, moduleUnitY, frontLeftVelocity);
+			calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+									moduleUnitX, moduleUnitY, frontRightVelocity);
+			calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+									-moduleUnitX, -moduleUnitY, backLeftVelocity);
+			calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+									moduleUnitX, -moduleUnitY, backRightVelocity);
 
 			// A motor can only go at 100% speed so we have to reduce them if one goes faster.
 			if (mode == SwerveMode.NORMAL) {
@@ -236,14 +244,14 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 				if (Math.abs(effectiveRotate) > Math.abs(maxRotate))
 					effectiveRotate = Math.copySign(maxRotate, effectiveRotate);
 
-				frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																-moduleUnitX, moduleUnitY);
-				frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																moduleUnitX, moduleUnitY);
-				backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																-moduleUnitX, -moduleUnitY);
-				backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																moduleUnitX, -moduleUnitY);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										-moduleUnitX, moduleUnitY, frontLeftVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										moduleUnitX, moduleUnitY, frontRightVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										-moduleUnitX, -moduleUnitY, backLeftVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										moduleUnitX, -moduleUnitY, backRightVelocity);
 			} else if (mode == SwerveMode.ABSOLUTE_ROTATE) {
 				double maxLinearSpeed = Double.POSITIVE_INFINITY;
 				if (frontLeftVelocity[2] < maxLinearSpeed)
@@ -258,20 +266,25 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 				if (effectiveLinearSpeed > maxLinearSpeed)
 					effectiveLinearSpeed = maxLinearSpeed;
 
-				frontLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																-moduleUnitX, moduleUnitY);
-				frontRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																moduleUnitX, moduleUnitY);
-				backLeftVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																-moduleUnitX, -moduleUnitY);
-				backRightVelocity = calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
-																moduleUnitX, -moduleUnitY);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										-moduleUnitX, moduleUnitY, frontLeftVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										moduleUnitX, moduleUnitY, frontRightVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										-moduleUnitX, -moduleUnitY, backLeftVelocity);
+				calculateModuleVelocity(effectiveLinearAngle, effectiveLinearSpeed, effectiveRotate,
+										moduleUnitX, -moduleUnitY, backRightVelocity);
 			}
 
 			frontLeft.setTargetVelocity(frontLeftVelocity[0], frontLeftVelocity[1]);
 			frontRight.setTargetVelocity(frontRightVelocity[0], frontRightVelocity[1]);
 			backLeft.setTargetVelocity(backLeftVelocity[0], backLeftVelocity[1]);
 			backRight.setTargetVelocity(backRightVelocity[0], backRightVelocity[1]);
+
+			ArrayPool.release(frontLeftVelocity);
+			ArrayPool.release(frontRightVelocity);
+			ArrayPool.release(backLeftVelocity);
+			ArrayPool.release(backRightVelocity);
 		}
 
 		frontLeft.tick();
@@ -286,50 +299,51 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			double ySum = 0;
 			boolean ccw = false;
 			int points = 0;
-			double[] center;
 
-			center = calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, frontRight, moduleX, moduleY);
+			double[] center = ArrayPool.reserve(6);
+			calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, frontRight, moduleX, moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
-			center = calculateZeroVelocityCenter(backRight, moduleX, -moduleY, frontRight, moduleX, moduleY);
+			calculateZeroVelocityCenter(backRight, moduleX, -moduleY, frontRight, moduleX, moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
-			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, backRight, moduleX, -moduleY);
+			calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, backRight, moduleX, -moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
-			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontLeft, -moduleX, moduleY);
+			calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontLeft, -moduleX, moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
-			center = calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, backRight, moduleX, -moduleY);
+			calculateZeroVelocityCenter(frontLeft, -moduleX, moduleY, backRight, moduleX, -moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
-			center = calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontRight, moduleX, moduleY);
+			calculateZeroVelocityCenter(backLeft, -moduleX, -moduleY, frontRight, moduleX, moduleY, center);
 			if (center[2] > eps && center[3] > eps && center[4] > eps) {
 				xSum += center[0];
 				ySum += center[1];
 				ccw = center[5] == 1;
 				points++;
 			}
+			ArrayPool.release(center);
 
 			double xDiff = 0;
 			double yDiff = 0;
@@ -412,10 +426,14 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 	}
 
 	// Written by Michael Kaatz (2022)
-	private static double[] calculateModuleVelocity(double linearAngle, double linearSpeed, double rotate,
-													double x, double y) {
-		if (linearSpeed == 0 && rotate == 0)
-			return new double[] { 0, 0, 0, 0 };
+	private static void calculateModuleVelocity(double linearAngle, double linearSpeed, double rotate,
+												double x, double y, double[] output) {
+		if (linearSpeed == 0 && rotate == 0) {
+			output[0] = 0;
+			output[1] = 0;
+			output[2] = 0;
+			output[3] = 0;
+		}
 
 		// What we consider 0 degrees is actually 90 so the arctan args are actually
 		// reversed.
@@ -449,12 +467,15 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			}
 		}
 
-		// I don't like boxing so I use an array versus a Tuple.
-		return new double[] { targetAngle, targetSpeed, maxLinearSpeed, maxRotate };
+		output[0] = targetAngle;
+		output[1] = targetSpeed;
+		output[2] = maxLinearSpeed;
+		output[3] = maxRotate;
 	}
 
-	private static double[] calculateZeroVelocityCenter(ISwerveModule module1, double x1, double y1,
-														ISwerveModule module2, double x2, double y2) {
+	private static void calculateZeroVelocityCenter(ISwerveModule module1, double x1, double y1,
+													ISwerveModule module2, double x2, double y2,
+													double[] output) {
 		double yDiff = y2 - y1;
 		double xDiff = x2 - x1;
 
@@ -504,6 +525,11 @@ public class FourCornerSwerveDrive implements ISwerveDrive {
 			y = Math.cos((module1Angle - 0.25) * Math.PI * 2) * radius1 - y1;
 		}
 
-		return new double[] { -x, -y, angle1, angle2, angle3, ccw ? 1 : 0 };
+		output[0] = -x;
+		output[1] = -y;
+		output[2] = angle1;
+		output[3] = angle2;
+		output[4] = angle3;
+		output[5] = ccw ? 1 : 0;
 	}
 }

@@ -8,7 +8,7 @@ public interface ISwerveDrive extends Subsystem {
 	public void setTargetVelocity(double linearAngle, double linearSpeed, double rotate);
 	public void setMode(SwerveMode mode);
 
-	public double[] getAlignments();
+	public void getAlignments(double[] output);
 	public void setAlignmentsAbsolute(double[] alignments);
 	public void setAlignmentsRelative(double[] alignments);
 	public void align();
