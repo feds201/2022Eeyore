@@ -24,7 +24,7 @@ public class ShooterVision implements Subsystem {
 	public static final double MAX_DISTANCE_RATIO = 3.0;
 
 	public static final double LIMELIGHT_FOV = 59.6 / 2 / 360;
-	public static final double TARGET_SIZE = 4.5 / 2;
+	public static final double TARGET_SIZE = 4.5 / 1.5;
 
 	private final NetworkTable table;
 
