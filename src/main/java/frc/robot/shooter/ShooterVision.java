@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.SlotConfiguration;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.ArrayPool;
 import frc.robot.Subsystem;
 import frc.robot.config.ShooterVisionConfig;
 import frc.robot.config.ShooterVisionConfig.ShooterVisionPoint;
@@ -108,12 +109,15 @@ public class ShooterVision implements Subsystem {
 		else
 			possibleContours = 1;
 
-		contours.clear();
 		for (int i = 0; i < possibleContours; i++) {
 			double x = table.getEntry("tx" + i).getDouble(0);
 			double y = table.getEntry("ty" + i).getDouble(0);
-			if (x >= MIN_X && x <= MAX_X && y >= MIN_Y && y <= MAX_Y)
-				contours.add(new double[] { x, y });
+			if (x >= MIN_X && x <= MAX_X && y >= MIN_Y && y <= MAX_Y) {
+				double[] array = ArrayPool.reserve(2);
+				array[0] = x;
+				array[1] = y;
+				contours.add(array);
+			}
 		}
 
 		if (contours.size() >= 2)
@@ -137,6 +141,11 @@ public class ShooterVision implements Subsystem {
 			}
 
 			if (minDistance > MAX_DISTANCE) {
+				for (int i = 0; i < contours.size(); i++) {
+					double[] array = contours.get(i);
+					if (array != minFirst)
+						ArrayPool.release(array);
+				}
 				contours.clear();
 				if (minFirst != null)
 					contours.add(minFirst);
@@ -155,6 +164,7 @@ public class ShooterVision implements Subsystem {
 							distance1 > minDistance * MAX_DISTANCE_RATIO) ||
 						(distance0 > MAX_DISTANCE && distance1 > MAX_DISTANCE)) {
 						contours.remove(i);
+						ArrayPool.release(contour);
 						i--;
 					}
 				}
@@ -197,6 +207,10 @@ public class ShooterVision implements Subsystem {
 				x = contours.get(0)[0];
 				y = contours.get(0)[1];
 			}
+
+			for (int i = 0; i < contours.size(); i++)
+				ArrayPool.release(contours.get(i));
+			contours.clear();
 
 			hasTarget = true;
 			target[0] = x;
