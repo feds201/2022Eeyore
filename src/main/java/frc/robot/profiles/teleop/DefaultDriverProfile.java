@@ -46,9 +46,11 @@ public class DefaultDriverProfile extends ControlProfile {
 		if (driver.getAButton()) {
 			fieldRelative = false;
 			absoluteSteering = false;
+			rainbow = false;
 		} else if (driver.getBButton()) {
 			fieldRelative = true;
 			absoluteSteering = false;
+			rainbow = true;
 		} else if (driver.getYButton()) {
 			fieldRelative = true;
 			absoluteSteering = false;

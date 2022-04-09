@@ -306,26 +306,37 @@ public class Robot extends TimedRobot {
 				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
 				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			} else {
-				Alliance alliance = DriverStation.getAlliance();
-				if (alliance == Alliance.Red)
-					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
-				else if (alliance == Alliance.Blue)
-					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kBlue);
-				else
-					indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
-				if (DriverStation.getMatchTime() > 0 &&
-					DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
-					!DriverStation.isAutonomousEnabled()) {
-					indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
-				} else {
+				if (activeDriverProfile.getRainbow()) {
+					indicatorLights.set(LEDZone.BASE, LEDPattern.RAINBOW, null);
 					indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
+				} else {
+					Alliance alliance = DriverStation.getAlliance();
+					if (alliance == Alliance.Red)
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kRed);
+					else if (alliance == Alliance.Blue)
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kBlue);
+					else
+						indicatorLights.set(LEDZone.BASE, LEDPattern.SOLID, Color.kGray);
+					if (DriverStation.getMatchTime() > 0 &&
+						DriverStation.getMatchTime() <= INDICATOR_LIGHTS_ENDGAME_TIME &&
+						!DriverStation.isAutonomousEnabled()) {
+						indicatorLights.set(LEDZone.ACCENT, LEDPattern.BLINK, Color.kOrange);
+					} else {
+						indicatorLights.set(LEDZone.ACCENT, LEDPattern.PASS, null);
+					}
+					indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
+					indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 				}
-				indicatorLights.set(LEDZone.LEFT, LEDPattern.PASS, null);
-				indicatorLights.set(LEDZone.RIGHT, LEDPattern.PASS, null);
-				indicatorLights.set(LEDZone.TIPS, LEDPattern.PASS, null);
-				indicatorLights.set(LEDZone.TOP, LEDPattern.PASS, null);
-				indicatorLights.set(LEDZone.BOTTOM, LEDPattern.PASS, null);
-				indicatorLights.set(LEDZone.CENTER, LEDPattern.PASS, null);
 			}
 		} else {
 			Alliance alliance = DriverStation.getAlliance();

@@ -8,15 +8,12 @@ import edu.wpi.first.wpilibj.util.Color;
 
 public class IndicatorLights implements Subsystem {
 
-	public static final int PERIOD = 10;
-
 	private final int count;
 	private final AddressableLED strip;
 	private final AddressableLEDBuffer buffer;
 	private final HashMap<LEDZone, ZoneController> zones;
 
 	private int position = 0;
-	private int time = 0;
 
 	public IndicatorLights(int port, int count) {
 		this.count = count;
@@ -45,11 +42,7 @@ public class IndicatorLights implements Subsystem {
 
 	@Override
 	public void tick() {
-		time--;
-		if (time <= 0) {
-			position++;
-			time = PERIOD;
-		}
+		position++;
 
 		for (LEDZone zone : LEDZone.values())
 			zones.get(zone).tick();
@@ -114,7 +107,7 @@ public class IndicatorLights implements Subsystem {
 	}
 
 	public static enum LEDPattern {
-		PASS, SOLID, BLINK, FORWARD, REVERSE
+		PASS, SOLID, BLINK, FORWARD, REVERSE, RAINBOW
 	}
 
 	public static enum LEDZone {
@@ -154,7 +147,7 @@ public class IndicatorLights implements Subsystem {
 					buffer[i] = color;
 				break;
 			case BLINK:
-				if (position % 2 == 0) {
+				if ((position / 10) % 2 == 0) {
 					for (int i = 0; i < buffer.length; i++)
 						buffer[i] = color;
 				} else {
@@ -164,7 +157,7 @@ public class IndicatorLights implements Subsystem {
 				break;
 			case FORWARD:
 				for (int i = 0; i < buffer.length; i++) {
-					if ((i + position) % 4 == 0)
+					if ((i + position / 10) % 4 == 0)
 						buffer[i] = color;
 					else
 						buffer[i] = Color.kBlack;
@@ -172,10 +165,28 @@ public class IndicatorLights implements Subsystem {
 				break;
 			case REVERSE:
 				for (int i = 0; i < buffer.length; i++) {
-					if ((i - position) % 4 == 0)
+					if ((i - position / 10) % 4 == 0)
 						buffer[i] = color;
 					else
 						buffer[i] = Color.kBlack;
+				}
+				break;
+			case RAINBOW:
+				for (int i = 0; i < buffer.length; i++) {
+					if ((i + position) % 14 <= 1)
+						buffer[i] = Color.kRed;
+					else if ((i + position) % 14 <= 3)
+						buffer[i] = Color.kOrange;
+					else if ((i + position) % 14 <= 5)
+						buffer[i] = Color.kYellow;
+					else if ((i + position) % 14 <= 7)
+						buffer[i] = Color.kGreen;
+					else if ((i + position) % 14 <= 9)
+						buffer[i] = Color.kBlue;
+					else if ((i + position) % 14 <= 11)
+						buffer[i] = Color.kBlueViolet;
+					else
+						buffer[i] = Color.kViolet;
 				}
 				break;
 			}
