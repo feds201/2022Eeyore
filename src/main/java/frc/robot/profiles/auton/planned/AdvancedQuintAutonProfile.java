@@ -122,7 +122,7 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 			super.update();
 			if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
 				step++;
-				time = 0.5;
+				time = 1;
 			}
 		} else if (step == 14) {
 			super.update();

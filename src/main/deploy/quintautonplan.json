@@ -2,7 +2,7 @@
 	"start": {
 		"x": 48.462,
 		"y": -18.603,
-		"angle": 0.3055
+		"angle": 0.3083
 	},
 	"points": [
 		{
@@ -45,20 +45,20 @@
 			"x": 90,
 			"y": -253.2,
 			"angle": 0.3785,
-			"linearcruise": 0.65,
-			"rotatecruise": 0.3,
+			"linearcruise": 0.8,
+			"rotatecruise": 0.4,
 			"linearramp": 35,
-			"rotateramp": 0.25
+			"rotateramp": 0.125
 		},
 		{
 
-			"x": 101.2,
-			"y": -264.8,
+			"x": 106.2,
+			"y": -270.8,
 			"angle": 0.3785,
-			"linearcruise": 0.2,
-			"rotatecruise": 0.3,
+			"linearcruise": 0.3,
+			"rotatecruise": 0,
 			"linearramp": 10,
-			"rotateramp": 0.25
+			"rotateramp": 0
 		},
 		{
 			"x": 85.2,
