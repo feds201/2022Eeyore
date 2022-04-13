@@ -64,7 +64,7 @@ public class SDSMk4FXModule implements ISwerveModule {
 		if (initialized) {
 			realCurrentAngle = steer.getSelectedSensorPosition() / STEER_MOTOR_ENCODER_COUNTS;
 			effectiveCurrentAngle = ((realCurrentAngle - angleOffset) % 1 + (reversed ? 0.5 : 0) + 1) % 1;
-			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10;
+			currentSpeed = drive.getSelectedSensorVelocity() / DRIVE_ENCODER_COUNTS * 10 * (reversed ? -1 : 1);
 
 			// We don't want to move the wheels if we don't have to.
 			if (targetSpeed != 0) {
@@ -82,13 +82,12 @@ public class SDSMk4FXModule implements ISwerveModule {
 				// In some cases it is better to reverse the direction of the drive wheel rather than spinning all the way around.
 				if (Math.abs(targetError) > reverseThreshold) {
 					reversed = !reversed;
-					drive.setInverted(!reversed);
 					// Quick way to recalculate the offset of the new angle from the target.
 					targetError = -Math.signum(targetError) * (0.5 - Math.abs(targetError));
 				}
 
 				steer.set(ControlMode.Position, (realCurrentAngle + targetError) * STEER_MOTOR_ENCODER_COUNTS);
-				drive.set(ControlMode.PercentOutput, targetSpeed);
+				drive.set(ControlMode.PercentOutput, targetSpeed * (reversed ? -1 : 1));
 			} else {
 				steer.neutralOutput();
 				drive.neutralOutput();
