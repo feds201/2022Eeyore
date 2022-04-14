@@ -46,40 +46,20 @@ public class TestDriverProfile extends ControlProfile {
 
 		shooterUnjam = controller.getXButton();
 
-		if (controller.getPOV() == -1) {
-			if (!shooterToggleTripped && controller.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterSpin = !shooterSpin;
-				shooterToggleTripped = true;
-			} else if (shooterToggleTripped && controller.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
-				shooterToggleTripped = false;
-			shooterFire = controller.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
-
-			climberUp = false;
-			climberDown = false;
-			climberHigh = false;
-		} else {
-			shooterSpin = false;
-			shooterFire = false;
+		if (!shooterToggleTripped && controller.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
+			shooterSpin = !shooterSpin;
+			shooterToggleTripped = true;
+		} else if (shooterToggleTripped && controller.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 			shooterToggleTripped = false;
+		shooterFire = controller.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
 
-			if (controller.getPOV() == 0) {
-				climberUp = true;
-				climberDown = false;
-				climberHigh = false;
-			} else if (controller.getPOV() == 180) {
-				climberUp = false;
-				climberDown = true;
-				climberHigh = false;
-			} else if (controller.getPOV() == 90 || controller.getPOV() == 270) {
-				climberUp = false;
-				climberDown = false;
-				climberHigh = true;
-			} else {
-				climberUp = false;
-				climberDown = false;
-				climberHigh = false;
-			}
-		}
+		if (controller.getPOV() == 0)
+			climber = 1;
+		else if (controller.getPOV() == 180)
+			climber = -1;
+		else
+			climber = 0;
+		climberHigh = controller.getPOV() == 90 || controller.getPOV() == 270;
 
 		decreaseShooterDistance = controller.getLeftStickButtonPressed();
 		increaseShooterDistance = controller.getRightStickButtonPressed();

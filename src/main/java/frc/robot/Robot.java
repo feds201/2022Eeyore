@@ -475,14 +475,8 @@ public class Robot extends TimedRobot {
 		intake.setDeployed(profile.getIntakeDeploy());
 		intake.setActive(profile.getIntakeActive());
 
-		if (profile.getClimberUp())
-			climber.setTargetPosition(1);
-		else if (profile.getClimberDown())
-			climber.setTargetPosition(-1);
-		else if (profile.getClimberHigh())
-			climber.setTargetPosition(2);
-		else
-			climber.setTargetPosition(0);
+		climber.setVelocity(profile.getClimber());
+		climber.setHigh(profile.getClimberHigh());
 
 		if (profile.getOrientRobot())
 			pose.angle = 0;

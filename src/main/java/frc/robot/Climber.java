@@ -25,7 +25,8 @@ public class Climber implements Subsystem {
 	private double highEncoderCountsLow;
 	private double highEncoderCountsHigh;
 
-	private int position = 0;
+	private double velocity = 0;
+	private boolean high = false;
 
 	public Climber(int leftChannel, int rightChannel, int limitChannel, ClimberConfig config) {
 		leftMotor = new TalonFX(leftChannel);
@@ -35,17 +36,17 @@ public class Climber implements Subsystem {
 		configure(config);
 	}
 
-	public void setTargetPosition(int position) {
-		this.position = position;
+	public void setVelocity(double velocity) {
+		this.velocity = velocity;
+	}
+
+	public void setHigh(boolean high) {
+		this.high = high;
 	}
 
 	@Override
 	public void tick() {
-		if (position == 1)
-			leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
-		else if (position == -1 && !limitSwitch.get())
-			leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
-		else if (position == 2) {
+		if (high) {
 			if (leftMotor.getSelectedSensorPosition() < highEncoderCountsLow)
 				leftMotor.set(ControlMode.PercentOutput, forwardSpeed);
 			else if (leftMotor.getSelectedSensorPosition() > highEncoderCountsHigh &&
@@ -53,8 +54,14 @@ public class Climber implements Subsystem {
 				leftMotor.set(ControlMode.PercentOutput, reverseSpeed);
 			else
 				leftMotor.set(ControlMode.PercentOutput, 0);
-		} else
-			leftMotor.set(ControlMode.PercentOutput, 0);
+		} else {
+			if (velocity > 0)
+				leftMotor.set(ControlMode.PercentOutput, forwardSpeed * velocity);
+			else if (velocity < 0 && !limitSwitch.get())
+				leftMotor.set(ControlMode.PercentOutput, reverseSpeed * -velocity);
+			else
+				leftMotor.set(ControlMode.PercentOutput, 0);
+		}
 	}
 
 	public void configure(ClimberConfig config) {

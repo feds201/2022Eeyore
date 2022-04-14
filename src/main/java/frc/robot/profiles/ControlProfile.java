@@ -20,8 +20,7 @@ public abstract class ControlProfile {
 	protected boolean decreaseShooterDistance = false;
 	protected boolean increaseShooterDistance = false;
 
-	protected boolean climberUp = false;
-	protected boolean climberDown = false;
+	protected double climber = 0;
 	protected boolean climberHigh = false;
 
 	protected boolean orientRobot = false;
@@ -55,8 +54,7 @@ public abstract class ControlProfile {
 		decreaseShooterDistance = false;
 		increaseShooterDistance = false;
 
-		climberUp = false;
-		climberDown = false;
+		climber = 0;
 		climberHigh = false;
 
 		orientRobot = false;
@@ -118,12 +116,8 @@ public abstract class ControlProfile {
 		return increaseShooterDistance;
 	}
 
-	public boolean getClimberUp() {
-		return climberUp;
-	}
-
-	public boolean getClimberDown() {
-		return climberDown;
+	public double getClimber() {
+		return climber;
 	}
 
 	public boolean getClimberHigh() {

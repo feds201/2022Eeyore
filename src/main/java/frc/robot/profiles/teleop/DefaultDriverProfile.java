@@ -14,6 +14,7 @@ public class DefaultDriverProfile extends ControlProfile {
 	public static final double ABSOLUTE_STEERING_THRESHOLD = 0.2;
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
 	public static final double SHOOTER_STOP_THRESHOLD = 0.4;
+	public static final double CLIMBER_THRESHOLD = 0.15;
 
 	private final XboxController driver;
 	private final XboxController operator;
@@ -132,40 +133,15 @@ public class DefaultDriverProfile extends ControlProfile {
 
 		shooterUnjam = operator.getXButton();
 
-		if (operator.getPOV() == -1) {
-			if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
-				shooterSpin = !shooterSpin;
-				shooterToggleTripped = true;
-			} else if (shooterToggleTripped && operator.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
-				shooterToggleTripped = false;
-			shooterFire = operator.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
-
-			climberUp = false;
-			climberDown = false;
-			climberHigh = false;
-		} else {
-			shooterSpin = false;
-			shooterFire = false;
+		if (!shooterToggleTripped && operator.getLeftTriggerAxis() > SHOOTER_START_THRESHOLD) {
+			shooterSpin = !shooterSpin;
+			shooterToggleTripped = true;
+		} else if (shooterToggleTripped && operator.getLeftTriggerAxis() < SHOOTER_STOP_THRESHOLD)
 			shooterToggleTripped = false;
+		shooterFire = operator.getRightTriggerAxis() > SHOOTER_START_THRESHOLD;
 
-			if (operator.getPOV() == 0) {
-				climberUp = true;
-				climberDown = false;
-				climberHigh = false;
-			} else if (operator.getPOV() == 180) {
-				climberUp = false;
-				climberDown = true;
-				climberHigh = false;
-			} else if (operator.getPOV() == 90 || operator.getPOV() == 270) {
-				climberUp = false;
-				climberDown = false;
-				climberHigh = true;
-			} else {
-				climberUp = false;
-				climberDown = false;
-				climberHigh = false;
-			}
-		}
+		climber = -deadzone(operator.getRightY(), CLIMBER_THRESHOLD);
+		climberHigh = operator.getPOV() == 90 || operator.getPOV() == 270;
 
 		decreaseShooterDistance = operator.getLeftBumperPressed();
 		increaseShooterDistance = operator.getRightBumperPressed();
