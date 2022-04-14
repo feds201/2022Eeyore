@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PersistentException;
+import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -233,6 +234,10 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putData(driverSelector);
 		SmartDashboard.putData(autonSelector);
 		SmartDashboard.putData(field);
+
+		PortForwarder.add(5800, "limelight.local", 5800);
+		PortForwarder.add(5801, "limelight.local", 5801);
+		PortForwarder.add(5805, "limelight.local", 5805);
 	}
 
 	private static void configEncoderTalon(TalonSRX talon) {
