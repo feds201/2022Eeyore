@@ -111,9 +111,9 @@ public class AdvancedQuintAutonProfile extends PlannedAutonProfile {
 			step++;
 		} else if (step == 11) {
 			super.update();
-			if (Math.abs(getAngleError()) < 0.125) {
+			if (Math.abs(getAngleError()) < 0.25) {
 				intakeDeploy = true;
-				if (getPositionError() < 2) {
+				if (Math.abs(getAngleError()) < 0.125 && getPositionError() < 2) {
 					step++;
 				}
 			}
