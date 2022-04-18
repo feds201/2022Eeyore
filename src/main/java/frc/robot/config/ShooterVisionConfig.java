@@ -11,7 +11,7 @@ public class ShooterVisionConfig {
 	public double b;
 	public double c;
 	public double d;
-	public double distanceOffset;
+	public double speedFactor;
 
 	public static class ShooterVisionPoint {
 

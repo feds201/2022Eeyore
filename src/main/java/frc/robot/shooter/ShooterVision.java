@@ -35,7 +35,7 @@ public class ShooterVision implements Subsystem {
 	private double b;
 	private double c;
 	private double d;
-	private double distanceOffset;
+	private double speedFactor;
 
 	private List<double[]> contours = new ArrayList<>(7);
 	private boolean hasTarget = false;
@@ -60,8 +60,8 @@ public class ShooterVision implements Subsystem {
 		table.getEntry("ledMode").setDouble(active ? 3 : 0);
 	}
 
-	public void adjustDistance(int offsetDelta) {
-		distanceOffset += offsetDelta;
+	public void adjustSpeedFactor(double factorDelta) {
+		speedFactor += factorDelta;
 	}
 
 	public boolean hasTarget() {
@@ -201,7 +201,7 @@ public class ShooterVision implements Subsystem {
 			hasTarget = true;
 			target[0] = x;
 			target[1] = y;
-			distance = a * y * y * y + b * y * y + c * y + d + distanceOffset;
+			distance = a * y * y * y + b * y * y + c * y + d;
 			aligned = distance * Math.tan(Math.abs(x) * LIMELIGHT_FOV * Math.PI * 2) < TARGET_SIZE;
 
 			ShooterVisionPoint lowPoint = points[0];
@@ -217,8 +217,8 @@ public class ShooterVision implements Subsystem {
 			double bottomSlope = (highPoint.bottomSpeed - lowPoint.bottomSpeed) / (highPoint.distance - lowPoint.distance);
 			double topIntercept = highPoint.topSpeed - topSlope * highPoint.distance;
 			double bottomIntercept = highPoint.bottomSpeed - bottomSlope * highPoint.distance;
-			speeds[0] = topSlope * distance + topIntercept;
-			speeds[1] = bottomSlope * distance + bottomIntercept;
+			speeds[0] = (topSlope * distance + topIntercept) * speedFactor;
+			speeds[1] = (bottomSlope * distance + bottomIntercept) * speedFactor;
 		} else {
 			hasTarget = false;
 			target[0] = 0;
@@ -249,7 +249,7 @@ public class ShooterVision implements Subsystem {
 		b = config.b;
 		c = config.c;
 		d = config.d;
-		distanceOffset = config.distanceOffset;
+		speedFactor = config.speedFactor;
 
 		lastTime = System.currentTimeMillis();
 		iacc = 0;

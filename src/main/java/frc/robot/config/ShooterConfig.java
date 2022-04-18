@@ -88,7 +88,7 @@ public class ShooterConfig {
 			config.visionConfig.b = table.getEntry("vision.distancefunc.b").getDouble(0);
 			config.visionConfig.c = table.getEntry("vision.distancefunc.c").getDouble(0);
 			config.visionConfig.d = table.getEntry("vision.distancefunc.d").getDouble(0);
-			config.visionConfig.distanceOffset = table.getEntry("vision.distanceoffset").getDouble(0);
+			config.visionConfig.speedFactor = table.getEntry("vision.speedfactor").getDouble(1);
 
 			JsonNode speeds = new ObjectMapper().readTree(new File(pointsFile)).get("speeds");
 			config.visionConfig.points = new ShooterVisionPoint[speeds.size()];
