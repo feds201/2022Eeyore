@@ -6,7 +6,7 @@
 	},
 	"points": [
 		{
-			"x": 128,
+			"x": 133,
 			"y": -24.7,
 			"angle": 0.2569,
 			"linearcruise": 0.5,
@@ -15,7 +15,7 @@
 			"rotateramp": 0.125
 		},
 		{
-			"x": 128,
+			"x": 133,
 			"y": -24.7,
 			"angle": 0.7639,
 			"linearcruise": 0,
@@ -27,7 +27,7 @@
 			"x": 78,
 			"y": -146.1,
 			"angle": 0.5558,
-			"linearcruise": 0.6,
+			"linearcruise": 0.7,
 			"rotatecruise": 0.35,
 			"linearramp": 40,
 			"rotateramp": 0.25
@@ -64,9 +64,9 @@
 			"x": 85.2,
 			"y": -174.3,
 			"angle": 0.9255,
-			"linearcruise": 0.6,
+			"linearcruise": 1,
 			"rotatecruise": 0.25,
-			"linearramp": 35,
+			"linearramp": 40,
 			"rotateramp": 0.125
 		}
 	]
