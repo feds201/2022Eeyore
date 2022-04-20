@@ -10,7 +10,7 @@ import frc.robot.swerve.RobotPose;
 
 public class DefaultDriverProfile extends ControlProfile {
 
-	public static final double THRESHOLD = 0.025;
+	public static final double THRESHOLD = 0.1;
 	public static final double ABSOLUTE_STEERING_THRESHOLD = 0.2;
 	public static final double SHOOTER_START_THRESHOLD = 0.6;
 	public static final double SHOOTER_STOP_THRESHOLD = 0.4;
