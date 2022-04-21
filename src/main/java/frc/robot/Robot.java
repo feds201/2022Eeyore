@@ -22,6 +22,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.PneumaticsControlModule;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -74,6 +77,7 @@ public class Robot extends TimedRobot {
 	public static final String QUINT_AUTON_PLAN_FILE = "quintautonplan.json";
 	public static final String TRI_AUTON_PLAN_FILE = "triautonplan.json";
 
+	public static final int PDP_CHANNEL = 1;
 	public static final int PCM_CHANNEL = 8;
 
 	public static final int SWERVE_FRONT_LEFT_STEER = 21;
@@ -119,6 +123,9 @@ public class Robot extends TimedRobot {
 
 	private XboxController driverController;
 	private XboxController operatorController;
+
+	private PowerDistribution pdp;
+	private PneumaticsControlModule pcm;
 
 	private ISwerveDrive swerveDrive;
 	private BallPickup intake;
@@ -182,6 +189,11 @@ public class Robot extends TimedRobot {
 		configEncoderTalon(talon2);
 		configEncoderTalon(talon3);
 		configEncoderTalon(talon4);
+
+		pdp = new PowerDistribution(PDP_CHANNEL, ModuleType.kCTRE);
+		pdp.clearStickyFaults();
+		pcm = new PneumaticsControlModule(PCM_CHANNEL);
+		pcm.clearAllStickyFaults();
 
 		{
 			NetworkTable table = NetworkTableInstance.getDefault().getTable("swervealignment");
@@ -390,6 +402,16 @@ public class Robot extends TimedRobot {
 			double[] target = shooter.getTarget();
 			table.getEntry("x").setDouble(target[0]);
 			table.getEntry("y").setDouble(target[1]);
+		}
+		{
+			NetworkTable table = NetworkTableInstance.getDefault().getTable("/faults");
+			table.getEntry("pcm_currlow").setBoolean(pcm.getCompressorNotConnectedFault() ||
+														pcm.getCompressorNotConnectedStickyFault());
+			table.getEntry("pcm_currhigh").setBoolean(pcm.getCompressorCurrentTooHighFault() ||
+														pcm.getCompressorCurrentTooHighStickyFault());
+			table.getEntry("pcm_short").setBoolean(pcm.getCompressorShortedFault() ||
+													pcm.getCompressorShortedStickyFault());
+			table.getEntry("ll_fault").setBoolean(!shooter.isVisionConnected());
 		}
 	}
 

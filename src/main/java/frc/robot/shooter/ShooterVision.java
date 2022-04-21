@@ -14,6 +14,8 @@ import frc.robot.config.ShooterVisionConfig.ShooterVisionPoint;
 
 public class ShooterVision implements Subsystem {
 
+	public static final int TIMEOUT = 100;
+
 	public static final double MAX_VERTEX_X = 1.5;
 	public static final double MAX_VERTEX_Y = 1.5;
 	public static final double MIN_X = -1.0;
@@ -37,6 +39,10 @@ public class ShooterVision implements Subsystem {
 	private double c;
 	private double d;
 	private double speedFactor;
+
+	private boolean isConnected = false;
+	private int timeout = TIMEOUT;
+	private double lastLatency = 0;
 
 	private List<double[]> contours = new ArrayList<>(7);
 	private boolean hasTarget = false;
@@ -65,6 +71,10 @@ public class ShooterVision implements Subsystem {
 		speedFactor += factorDelta;
 	}
 
+	public boolean isConnected() {
+		return isConnected;
+	}
+
 	public boolean hasTarget() {
 		return hasTarget;
 	}
@@ -90,6 +100,16 @@ public class ShooterVision implements Subsystem {
 		long currentTime = System.currentTimeMillis();
 		double timeDeltaSeconds = (currentTime - lastTime) / 1000d;
 		lastTime = currentTime;
+
+		{
+			double latency = table.getEntry("tl").getDouble(0);
+			if (latency == lastLatency)
+				timeout++;
+			else
+				timeout = 0;
+			isConnected = timeout < TIMEOUT;
+			lastLatency = latency;
+		}
 
 		int possibleContours;
 		if (table.getEntry("tv").getDouble(0) != 1)

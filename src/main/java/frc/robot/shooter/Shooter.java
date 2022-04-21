@@ -75,6 +75,10 @@ public class Shooter implements Subsystem {
 		vision.adjustSpeedFactor(factorDelta);
 	}
 
+	public boolean isVisionConnected() {
+		return vision.isConnected();
+	}
+
 	public boolean hasTarget() {
 		return vision.hasTarget();
 	}
